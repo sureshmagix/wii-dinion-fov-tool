@@ -3,310 +3,2606 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Bosch DINION 7100i IR - FOV Visualizer</title>
+  <title>Universal Camera FOV & 2D/3D Planning Tool</title>
+  
+  <!-- Three.js & OrbitControls from CDN for high-performance 3D visualization -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+
   <style>
     :root {
-      --bg-dark: #121418;
-      --card-bg: #1e222b;
-      --accent: #00e5ff;
-      --text: #e0e6ed;
+      --bg-dark: #0f1218;
+      --bg-card: #171b23;
+      --bg-input: #1f2530;
+      --bg-input-focus: #28303f;
+      --border-color: #2c3545;
+      --border-hover: #3d4a60;
+      --accent: #00d2ff;
+      --accent-hover: #38dcff;
+      --accent-dim: rgba(0, 210, 255, 0.15);
+      --text: #e2e8f0;
+      --text-muted: #8c9cb0;
+      --text-bright: #ffffff;
+      
+      /* DORI Standard EN 62676-4 Colors */
+      --dori-ident: #8b5cf6;    /* >=250 PPM */
+      --dori-recog: #10b981;    /* >=125 PPM */
+      --dori-observe: #f59e0b;  /* >=63 PPM */
+      --dori-detect: #ef4444;   /* >=25 PPM */
+      --dori-monitor: #64748b;  /* <25 PPM */
     }
-    body {
+
+    * {
+      box-sizing: border-box;
       margin: 0;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
       background: var(--bg-dark);
       color: var(--text);
+      min-height: 100vh;
       display: flex;
       flex-direction: column;
-      min-height: 100vh;
+      overflow-x: hidden;
     }
+
     header {
-      padding: 1rem 2rem;
-      background: #0d0f12;
-      border-bottom: 1px solid #2d333f;
-    }
-    h1 { margin: 0; font-size: 1.3rem; color: #fff; }
-    .container {
-      display: grid;
-      grid-template-columns: 340px 1fr;
-      flex: 1;
+      background: #090c10;
+      border-bottom: 1px solid var(--border-color);
+      padding: 0.75rem 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
       gap: 1rem;
-      padding: 1rem;
+      z-index: 10;
     }
-    .panel {
-      background: var(--card-bg);
-      border-radius: 8px;
-      padding: 1.2rem;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.3);
-      overflow-y: auto;
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
     }
-    .form-group { margin-bottom: 1.1rem; }
-    label { display: block; font-size: 0.82rem; color: #9bb0c1; margin-bottom: 0.35rem; }
-    input, select {
-      width: 100%;
-      box-sizing: border-box;
-      padding: 0.5rem;
-      background: #15181e;
-      border: 1px solid #363d4e;
-      border-radius: 4px;
+
+    .logo-badge {
+      background: linear-gradient(135deg, #0077ff, #00d2ff);
+      color: #fff;
+      font-weight: 800;
+      font-size: 0.9rem;
+      padding: 0.35rem 0.65rem;
+      border-radius: 6px;
+      letter-spacing: 0.5px;
+      box-shadow: 0 2px 10px rgba(0, 210, 255, 0.3);
+    }
+
+    h1 {
+      font-size: 1.15rem;
+      font-weight: 600;
+      color: var(--text-bright);
+      margin: 0;
+    }
+
+    .header-subtitle {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      background: var(--bg-input);
+      color: var(--text-bright);
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      padding: 0.45rem 0.85rem;
+      font-size: 0.82rem;
+      font-weight: 500;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      transition: all 0.2s ease;
+      text-decoration: none;
+    }
+
+    .btn:hover {
+      background: var(--bg-input-focus);
+      border-color: var(--accent);
       color: #fff;
     }
-    .canvas-container {
+
+    .btn-primary {
+      background: #0284c7;
+      border-color: #0284c7;
+      color: #fff;
+    }
+    .btn-primary:hover {
+      background: #0369a1;
+      border-color: #0369a1;
+    }
+
+    .btn-accent {
+      background: var(--accent-dim);
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+    .btn-accent:hover {
+      background: var(--accent);
+      color: #000;
+    }
+
+    .btn-sm {
+      padding: 0.25rem 0.55rem;
+      font-size: 0.75rem;
+    }
+
+    /* Main Layout */
+    .app-layout {
+      display: grid;
+      grid-template-columns: 360px 1fr;
+      flex: 1;
+      min-height: calc(100vh - 65px);
+      background: var(--bg-dark);
+    }
+
+    @media (max-width: 1024px) {
+      .app-layout {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Sidebar Controls */
+    .sidebar {
+      background: var(--bg-card);
+      border-right: 1px solid var(--border-color);
+      padding: 1rem;
+      overflow-y: auto;
+      max-height: calc(100vh - 65px);
+      display: flex;
+      flex-direction: column;
+      gap: 1.2rem;
+    }
+
+    .control-section {
+      background: rgba(15, 18, 24, 0.6);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 0.9rem;
+    }
+
+    .section-title {
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      color: var(--accent);
+      margin-bottom: 0.75rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .form-group {
+      margin-bottom: 0.85rem;
+    }
+    .form-group:last-child {
+      margin-bottom: 0;
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.6rem;
+    }
+
+    .form-row-3 {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 0.5rem;
+    }
+
+    label {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      margin-bottom: 0.3rem;
+    }
+
+    label .val-badge {
+      font-weight: 600;
+      color: var(--text-bright);
+      background: var(--bg-input);
+      padding: 0.1rem 0.4rem;
+      border-radius: 4px;
+      font-family: monospace;
+      font-size: 0.78rem;
+    }
+
+    input[type="text"],
+    input[type="number"],
+    select {
+      width: 100%;
+      padding: 0.45rem 0.6rem;
+      background: var(--bg-input);
+      border: 1px solid var(--border-color);
+      border-radius: 5px;
+      color: var(--text-bright);
+      font-size: 0.82rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    input[type="text"]:focus,
+    input[type="number"]:focus,
+    select:focus {
+      border-color: var(--accent);
+      background: var(--bg-input-focus);
+    }
+
+    input[type="range"] {
+      width: 100%;
+      height: 5px;
+      background: #2a3342;
+      border-radius: 3px;
+      outline: none;
+      -webkit-appearance: none;
+      margin: 0.5rem 0 0.2rem;
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 15px;
+      height: 15px;
+      border-radius: 50%;
+      background: var(--accent);
+      cursor: pointer;
+      box-shadow: 0 0 6px rgba(0, 210, 255, 0.6);
+      transition: transform 0.15s;
+    }
+    input[type="range"]::-webkit-slider-thumb:hover {
+      transform: scale(1.2);
+    }
+
+    /* Main Content Area */
+    .main-viewport {
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      background: #0b0e14;
+    }
+
+    /* Stats Overview Bar */
+    .stats-bar {
+      background: #12161f;
+      border-bottom: 1px solid var(--border-color);
+      padding: 0.75rem 1.25rem;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 0.75rem;
+    }
+
+    .stat-chip {
+      background: rgba(23, 27, 35, 0.85);
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      padding: 0.45rem 0.7rem;
+      border-left: 3px solid var(--accent);
+      display: flex;
+      flex-direction: column;
+      gap: 0.15rem;
+    }
+
+    .stat-chip.ident { border-left-color: var(--dori-ident); }
+    .stat-chip.recog { border-left-color: var(--dori-recog); }
+    .stat-chip.observe { border-left-color: var(--dori-observe); }
+    .stat-chip.detect { border-left-color: var(--dori-detect); }
+    .stat-chip.monitor { border-left-color: var(--dori-monitor); }
+
+    .stat-label {
+      font-size: 0.68rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .stat-value {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--text-bright);
+      font-family: 'SF Mono', Consolas, Monaco, monospace;
+    }
+
+    .stat-sub {
+      font-size: 0.68rem;
+      color: #94a3b8;
+    }
+
+    /* View Tabs */
+    .view-toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.5rem 1.25rem;
+      background: #0e121a;
+      border-bottom: 1px solid var(--border-color);
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .tab-group {
+      display: flex;
+      gap: 0.35rem;
+      background: #161b24;
+      padding: 3px;
+      border-radius: 6px;
+      border: 1px solid var(--border-color);
+    }
+
+    .tab-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      padding: 0.4rem 0.85rem;
+      font-size: 0.78rem;
+      font-weight: 600;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .tab-btn:hover {
+      color: #fff;
+    }
+
+    .tab-btn.active {
+      background: #232b3a;
+      color: var(--accent);
+      box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+    }
+
+    .view-controls {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    /* View Panels Area */
+    .views-display {
+      flex: 1;
+      padding: 1rem;
+      overflow-y: auto;
       display: flex;
       flex-direction: column;
       gap: 1rem;
     }
+
+    .view-container {
+      display: none;
+      width: 100%;
+      height: 100%;
+      min-height: 520px;
+    }
+
+    .view-container.active {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    /* Multi-View Grid */
+    .grid-multiview {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: 320px 280px;
+      gap: 1rem;
+      height: auto;
+      min-height: 620px;
+    }
+
+    @media (max-width: 1280px) {
+      .grid-multiview {
+        grid-template-columns: 1fr;
+        grid-template-rows: repeat(4, 320px);
+      }
+    }
+
+    .card-canvas {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+
+    .card-canvas-header {
+      padding: 0.5rem 0.8rem;
+      background: rgba(18, 22, 30, 0.95);
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--text-bright);
+      z-index: 2;
+    }
+
+    .card-canvas-header span.tag {
+      font-size: 0.68rem;
+      background: #222a38;
+      padding: 0.15rem 0.45rem;
+      border-radius: 4px;
+      color: var(--accent);
+    }
+
+    .canvas-wrapper {
+      flex: 1;
+      position: relative;
+      width: 100%;
+      height: 100%;
+      min-height: 240px;
+      background: #090c10;
+    }
+
     canvas {
       width: 100%;
-      height: 380px;
-      background: #161920;
+      height: 100%;
+      display: block;
+    }
+
+    /* 3D Viewport Full */
+    .viewport-3d-full {
+      width: 100%;
+      height: 100%;
+      min-height: 580px;
       border-radius: 8px;
-      border: 1px solid #2a313d;
+      overflow: hidden;
+      border: 1px solid var(--border-color);
+      position: relative;
+      background: #090c10;
     }
-    .stats {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 0.8rem;
-      margin-top: 1rem;
-    }
-    .stat-card {
-      background: #15181f;
-      padding: 0.6rem 0.8rem;
+
+    .viewport-3d-overlay {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      z-index: 5;
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+      background: rgba(15, 18, 25, 0.85);
+      backdrop-filter: blur(8px);
+      padding: 0.5rem;
       border-radius: 6px;
-      border-left: 3px solid var(--accent);
+      border: 1px solid var(--border-color);
     }
-    .stat-title { font-size: 0.72rem; color: #8899a6; }
-    .stat-val { font-size: 1.1rem; font-weight: bold; color: #fff; }
+
+    .viewport-3d-info {
+      position: absolute;
+      bottom: 12px;
+      left: 12px;
+      z-index: 5;
+      background: rgba(15, 18, 25, 0.85);
+      backdrop-filter: blur(8px);
+      padding: 0.5rem 0.8rem;
+      border-radius: 6px;
+      border: 1px solid var(--border-color);
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      pointer-events: none;
+    }
+
+    /* DORI Legend */
+    .dori-legend {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-size: 0.72rem;
+      flex-wrap: wrap;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+
+    .legend-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 2px;
+    }
+
+    /* Camera Viewfinder Overlay */
+    .viewfinder-crosshair {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 24px;
+      height: 24px;
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+    }
+    .viewfinder-crosshair::before,
+    .viewfinder-crosshair::after {
+      content: '';
+      position: absolute;
+      background: rgba(0, 210, 255, 0.4);
+    }
+    .viewfinder-crosshair::before {
+      top: 11px;
+      left: 0;
+      width: 24px;
+      height: 2px;
+    }
+    .viewfinder-crosshair::after {
+      top: 0;
+      left: 11px;
+      width: 2px;
+      height: 24px;
+    }
+
+    /* Modal / Drag & Drop overlay */
+    .drop-zone-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0, 210, 255, 0.15);
+      backdrop-filter: blur(4px);
+      border: 4px dashed var(--accent);
+      z-index: 999;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #fff;
+      pointer-events: none;
+    }
+    .drop-zone-overlay.active {
+      display: flex;
+    }
+
+    /* Notification toast */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: #1a2230;
+      border: 1px solid var(--accent);
+      color: #fff;
+      padding: 0.75rem 1.25rem;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+      z-index: 1000;
+      transform: translateY(100px);
+      opacity: 0;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+    .toast.show {
+      transform: translateY(0);
+      opacity: 1;
+    }
+
+    /* Table for DORI Summary */
+    .dori-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.75rem;
+      margin-top: 0.5rem;
+    }
+    .dori-table th, .dori-table td {
+      padding: 0.35rem 0.5rem;
+      text-align: left;
+      border-bottom: 1px solid #232b38;
+    }
+    .dori-table th {
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+    .dori-table td:last-child {
+      font-family: monospace;
+      text-align: right;
+    }
+
+    /* Hidden file input */
+    #jsonFileInput {
+      display: none;
+    }
   </style>
 </head>
 <body>
+
+  <!-- Drag and drop JSON file overlay -->
+  <div class="drop-zone-overlay" id="dropZone">
+    Drop Camera Settings JSON here to Import
+  </div>
+
+  <!-- Notification Toast -->
+  <div class="toast" id="toast">Configuration imported successfully!</div>
+
+  <!-- Top Navigation Header -->
   <header>
-    <h1>Bosch DINION 7100i IR (2MP) — Field of View Planner</h1>
+    <div class="header-left">
+      <div class="logo-badge">WII OPTICS</div>
+      <div>
+        <h1>Universal Camera FOV & 2D/3D Planning Tool</h1>
+        <div class="header-subtitle">Comprehensive Optical Engineering • EN 62676-4 DORI • Multi-Angle & 3D Frustum</div>
+      </div>
+    </div>
+
+    <div class="header-actions">
+      <!-- Unit switch -->
+      <button class="btn btn-sm" id="btnUnitToggle" title="Toggle Metric (m) / Imperial (ft)">
+        Unit: <strong id="unitLabel">Metric (m)</strong>
+      </button>
+
+      <!-- Presets dropdown -->
+      <select id="savedConfigsSelect" style="width: auto; padding: 0.35rem 0.6rem; font-size: 0.8rem;">
+        <option value="">-- Saved Browser Presets --</option>
+      </select>
+      <button class="btn btn-sm" id="btnSaveBrowser" title="Save current config to browser">Save</button>
+      <button class="btn btn-sm" id="btnDeleteBrowser" title="Delete current saved config">Delete</button>
+
+      <!-- Export / Import JSON buttons -->
+      <button class="btn btn-accent btn-sm" id="btnExportJson" title="Download configuration as JSON file">
+        ⬇ Export JSON
+      </button>
+      <button class="btn btn-primary btn-sm" id="btnImportJson" title="Import configuration from JSON file">
+        ⬆ Import JSON
+      </button>
+      <input type="file" id="jsonFileInput" accept=".json,application/json" />
+    </div>
   </header>
 
-  <div class="container">
-    <div class="panel">
-      <div class="form-group">
-        <label>Lens Variant</label>
-        <select id="lensVariant">
-          <option value="wide">Standard 4.7-10mm (103° - 49°)</option>
-          <option value="tele">Telephoto 10.5-47mm (41.6° - 9.3°)</option>
-        </select>
-      </div>
+  <!-- Main Workspace -->
+  <div class="app-layout">
+    
+    <!-- Left Sidebar: Parameters & Controls -->
+    <aside class="sidebar">
 
-      <div class="form-group">
-        <label>Zoom Level (HFOV: <span id="hfovVal">70</span>°)</label>
-        <input type="range" id="hfovSlider" min="49" max="103" step="0.5" value="70" />
-      </div>
-
-      <div class="form-group">
-        <label>Mount Height: <span id="heightVal">4.0</span> m</label>
-        <input type="range" id="mountHeight" min="1.5" max="15" step="0.5" value="4.0" />
-      </div>
-
-      <div class="form-group">
-        <label>Downward Tilt: <span id="tiltVal">15</span>°</label>
-        <input type="range" id="tiltAngle" min="0" max="60" step="1" value="15" />
-      </div>
-
-      <div class="form-group">
-        <label>Target Object Distance: <span id="distVal">25</span> m</label>
-        <input type="range" id="targetDist" min="2" max="120" step="1" value="25" />
-      </div>
-
-      <div class="stats">
-        <div class="stat-card">
-          <div class="stat-title">Ground Width</div>
-          <div class="stat-val" id="statWidth">-- m</div>
+      <!-- Section 1: Camera & Sensor Specification -->
+      <div class="control-section">
+        <div class="section-title">
+          <span>Camera & Sensor</span>
+          <span class="val-badge" id="badgeAspect">16:9</span>
         </div>
-        <div class="stat-card">
-          <div class="stat-title">PPM @ Target</div>
-          <div class="stat-val" id="statPPM">-- px/m</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-title">Near Blind Spot</div>
-          <div class="stat-val" id="statBlind">-- m</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-title">EN DORI Standard</div>
-          <div class="stat-val" id="statDORI">--</div>
-        </div>
-      </div>
-    </div>
 
-    <div class="canvas-container">
-      <div>
-        <label>Top-Down 2D Projection (Azimuth Footprint)</label>
-        <canvas id="topViewCanvas"></canvas>
+        <div class="form-group">
+          <label for="cameraPreset">Camera Profile / Preset</label>
+          <select id="cameraPreset">
+            <option value="bosch-7100i-wide" selected>Bosch DINION 7100i IR - Standard (4.7-10mm, 1/1.8")</option>
+            <option value="bosch-7100i-tele">Bosch DINION 7100i IR - Telephoto (10.5-47mm, 1/1.8")</option>
+            <option value="generic-1080p-28">Generic 1080p Fixed Dome (2.8mm, 1/2.8")</option>
+            <option value="generic-1080p-40">Generic 1080p Fixed Bullet (4.0mm, 1/2.8")</option>
+            <option value="generic-4mp-vf">Generic 4MP Varifocal (2.8-12mm, 1/2.7")</option>
+            <option value="generic-4k-uhd">Generic 4K / 8MP Ultra HD (4.0mm, 1/1.8")</option>
+            <option value="generic-4k-tele">Generic 4K / 8MP Long-Range (8-32mm, 1/1.8")</option>
+            <option value="custom">Custom Camera Specification</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="cameraName">Camera Label / Tag</label>
+          <input type="text" id="cameraName" value="CAM-01 DINION 7100i" placeholder="e.g. Entrance Gate 1" />
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="sensorFormat">Sensor Format</label>
+            <select id="sensorFormat">
+              <option value="1/1.8">1/1.8" (7.18 x 5.32 mm)</option>
+              <option value="1/2.8">1/2.8" (5.18 x 3.89 mm)</option>
+              <option value="1/2.7">1/2.7" (5.37 x 4.04 mm)</option>
+              <option value="1/2.5">1/2.5" (5.76 x 4.29 mm)</option>
+              <option value="1/2">1/2" (6.40 x 4.80 mm)</option>
+              <option value="1/3">1/3" (4.80 x 3.60 mm)</option>
+              <option value="2/3">2/3" (8.80 x 6.60 mm)</option>
+              <option value="1">1" (13.2 x 8.80 mm)</option>
+              <option value="custom">Custom Dimensions</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="resolutionPreset">Resolution</label>
+            <select id="resolutionPreset">
+              <option value="1920x1080" selected>1080p (1920×1080)</option>
+              <option value="2560x1440">4MP (2560×1440)</option>
+              <option value="2592x1944">5MP (2592×1944)</option>
+              <option value="3840x2160">4K / 8MP (3840×2160)</option>
+              <option value="4000x3000">12MP (4000×3000)</option>
+              <option value="1280x720">720p (1280×720)</option>
+              <option value="custom">Custom Resolution</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Custom Sensor mm Inputs (conditionally visible or editable) -->
+        <div class="form-row" id="customSensorRow" style="display: none;">
+          <div class="form-group">
+            <label>Sensor W <span class="val-badge">mm</span></label>
+            <input type="number" id="sensorWidthMm" value="7.18" step="0.01" min="1" max="50" />
+          </div>
+          <div class="form-group">
+            <label>Sensor H <span class="val-badge">mm</span></label>
+            <input type="number" id="sensorHeightMm" value="5.32" step="0.01" min="1" max="50" />
+          </div>
+        </div>
+
+        <!-- Custom Pixels Inputs -->
+        <div class="form-row" id="customResRow" style="display: none;">
+          <div class="form-group">
+            <label>Frame Width <span class="val-badge">px</span></label>
+            <input type="number" id="resWidthPx" value="1920" step="1" min="320" max="10000" />
+          </div>
+          <div class="form-group">
+            <label>Frame Height <span class="val-badge">px</span></label>
+            <input type="number" id="resHeightPx" value="1080" step="1" min="240" max="10000" />
+          </div>
+        </div>
       </div>
-      <div>
-        <label>Side Profile Elevation (Tilt & Blind Spot)</label>
-        <canvas id="sideViewCanvas"></canvas>
+
+      <!-- Section 2: Optics & Focal Length / FOV -->
+      <div class="control-section">
+        <div class="section-title">
+          <span>Optics & Focal Length</span>
+          <span class="val-badge" id="badgeFovMode">Auto Sync</span>
+        </div>
+
+        <div class="form-group">
+          <label>
+            <span>Focal Length (f):</span>
+            <span class="val-badge" id="focalVal">4.7 mm</span>
+          </label>
+          <input type="range" id="focalSlider" min="2.0" max="50" step="0.1" value="4.7" />
+        </div>
+
+        <div class="form-group">
+          <label>
+            <span>Horizontal FOV (HFOV):</span>
+            <span class="val-badge" id="hfovVal">75.0°</span>
+          </label>
+          <input type="range" id="hfovSlider" min="5" max="130" step="0.5" value="75.0" />
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Vertical FOV (VFOV)</label>
+            <input type="text" id="vfovVal" value="45.0°" readonly style="background: #161b24; color: #94a3b8;" />
+          </div>
+          <div class="form-group">
+            <label>Diagonal FOV (DFOV)</label>
+            <input type="text" id="dfovVal" value="85.0°" readonly style="background: #161b24; color: #94a3b8;" />
+          </div>
+        </div>
       </div>
-    </div>
+
+      <!-- Section 3: Mount Position & Spatial Angles -->
+      <div class="control-section">
+        <div class="section-title">
+          <span>Mounting & 3D Orientation</span>
+          <span class="val-badge" id="badgeTiltStatus">Downward</span>
+        </div>
+
+        <div class="form-group">
+          <label>
+            <span>Mount Height (h):</span>
+            <span class="val-badge" id="heightVal">4.0 m</span>
+          </label>
+          <input type="range" id="mountHeight" min="1.0" max="30.0" step="0.5" value="4.0" />
+        </div>
+
+        <div class="form-group">
+          <label>
+            <span>Downward Tilt Angle (α):</span>
+            <span class="val-badge" id="tiltVal">15°</span>
+          </label>
+          <input type="range" id="tiltAngle" min="-10" max="85" step="1" value="15" />
+        </div>
+
+        <div class="form-group">
+          <label>
+            <span>Pan / Azimuth Heading (φ):</span>
+            <span class="val-badge" id="panVal">0° (Forward)</span>
+          </label>
+          <input type="range" id="panAngle" min="-180" max="180" step="1" value="0" />
+        </div>
+      </div>
+
+      <!-- Section 4: Target Object & Distance -->
+      <div class="control-section">
+        <div class="section-title">
+          <span>Target Object & Inspection</span>
+          <span class="val-badge" id="badgeTargetPpm">55 px/m</span>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="targetType">Target Object Preset</label>
+            <select id="targetType">
+              <option value="human" selected>Standing Person (1.70m)</option>
+              <option value="seated">Seated Person (1.30m)</option>
+              <option value="car">Sedan Car (1.48m)</option>
+              <option value="suv">SUV / Van (1.80m)</option>
+              <option value="truck">Truck / Bus (3.20m)</option>
+              <option value="plate">License Plate (0.15m)</option>
+              <option value="custom">Custom Height</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>Object Height</label>
+            <input type="number" id="targetHeightM" value="1.70" step="0.05" min="0.1" max="10.0" />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>
+            <span>Target Ground Distance (D):</span>
+            <span class="val-badge" id="distVal">25.0 m</span>
+          </label>
+          <input type="range" id="targetDist" min="1" max="150" step="1" value="25" />
+        </div>
+
+        <div class="form-group">
+          <label>
+            <span>Target Lateral Offset (X):</span>
+            <span class="val-badge" id="offsetVal">0.0 m</span>
+          </label>
+          <input type="range" id="targetOffset" min="-30" max="30" step="0.5" value="0" />
+        </div>
+      </div>
+
+      <!-- Section 5: EN 62676-4 DORI Reference Breakdown -->
+      <div class="control-section">
+        <div class="section-title">
+          <span>EN 62676-4 DORI Standards</span>
+        </div>
+        <table class="dori-table">
+          <thead>
+            <tr>
+              <th>Level</th>
+              <th>Required</th>
+              <th>Max Range</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span style="color: var(--dori-ident);">● Identification</span></td>
+              <td>≥ 250 px/m</td>
+              <td id="rangeIdent">-- m</td>
+            </tr>
+            <tr>
+              <td><span style="color: var(--dori-recog);">● Recognition</span></td>
+              <td>≥ 125 px/m</td>
+              <td id="rangeRecog">-- m</td>
+            </tr>
+            <tr>
+              <td><span style="color: var(--dori-observe);">● Observation</span></td>
+              <td>≥ 63 px/m</td>
+              <td id="rangeObserve">-- m</td>
+            </tr>
+            <tr>
+              <td><span style="color: var(--dori-detect);">● Detection</span></td>
+              <td>≥ 25 px/m</td>
+              <td id="rangeDetect">-- m</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+    </aside>
+
+    <!-- Right Area: Visualizations & Statistics -->
+    <main class="main-viewport">
+
+      <!-- Real-time Stats Chips Bar -->
+      <div class="stats-bar">
+        <div class="stat-chip" id="chipDori">
+          <div class="stat-label">EN DORI Rating</div>
+          <div class="stat-value" id="statDoriLevel">Observe</div>
+          <div class="stat-sub" id="statDoriPpm">55 px/m @ target</div>
+        </div>
+
+        <div class="stat-chip">
+          <div class="stat-label">Field Width @ Target</div>
+          <div class="stat-value" id="statFieldWidth">35.0 m</div>
+          <div class="stat-sub" id="statFieldHeight">Field H: 19.7 m</div>
+        </div>
+
+        <div class="stat-chip">
+          <div class="stat-label">Blind Spot / Near Cutoff</div>
+          <div class="stat-value" id="statBlindSpot">5.1 m</div>
+          <div class="stat-sub" id="statFarCutoff">Far: 74.2 m</div>
+        </div>
+
+        <div class="stat-chip">
+          <div class="stat-label">Line of Sight (LOS)</div>
+          <div class="stat-value" id="statLosDist">25.3 m</div>
+          <div class="stat-sub" id="statTargetPix">Target: 93 px high</div>
+        </div>
+      </div>
+
+      <!-- Navigation / View Tabs -->
+      <div class="view-toolbar">
+        <div class="tab-group">
+          <button class="tab-btn active" data-tab="tab-multiview">Combined Multi-View</button>
+          <button class="tab-btn" data-tab="tab-3d">3D Interactive Frustum</button>
+          <button class="tab-btn" data-tab="tab-2d">2D Top & Side Views</button>
+          <button class="tab-btn" data-tab="tab-camview">Simulated Camera POV</button>
+        </div>
+
+        <div class="dori-legend">
+          <div class="legend-item"><div class="legend-dot" style="background: var(--dori-ident);"></div>Ident (≥250)</div>
+          <div class="legend-item"><div class="legend-dot" style="background: var(--dori-recog);"></div>Recog (≥125)</div>
+          <div class="legend-item"><div class="legend-dot" style="background: var(--dori-observe);"></div>Observe (≥63)</div>
+          <div class="legend-item"><div class="legend-dot" style="background: var(--dori-detect);"></div>Detect (≥25)</div>
+        </div>
+      </div>
+
+      <!-- View Containers -->
+      <div class="views-display">
+
+        <!-- TAB 1: Combined Multi-View (All synchronized) -->
+        <div class="view-container active" id="tab-multiview">
+          <div class="grid-multiview">
+            
+            <!-- 3D Scene Card -->
+            <div class="card-canvas">
+              <div class="card-canvas-header">
+                <span>3D Spatial Frustum & Ground Footprint</span>
+                <span class="tag">WebGL 3D (Drag to Orbit / Scroll to Zoom)</span>
+              </div>
+              <div class="canvas-wrapper" id="wrapper3dMulti"></div>
+            </div>
+
+            <!-- Simulated Camera POV -->
+            <div class="card-canvas">
+              <div class="card-canvas-header">
+                <span>Simulated Camera Sensor Viewport</span>
+                <span class="tag" id="tagCamRes">1920 × 1080</span>
+              </div>
+              <div class="canvas-wrapper">
+                <canvas id="camPovCanvasMulti"></canvas>
+                <div class="viewfinder-crosshair"></div>
+              </div>
+            </div>
+
+            <!-- 2D Top View Plan -->
+            <div class="card-canvas">
+              <div class="card-canvas-header">
+                <span>2D Plan View (Top-Down Azimuth Footprint)</span>
+                <span class="tag">Ground Plane</span>
+              </div>
+              <div class="canvas-wrapper">
+                <canvas id="topViewCanvasMulti"></canvas>
+              </div>
+            </div>
+
+            <!-- 2D Side Profile Elevation -->
+            <div class="card-canvas">
+              <div class="card-canvas-header">
+                <span>2D Elevation Profile (Side Tilt & Blind Spot)</span>
+                <span class="tag">Vertical Plane</span>
+              </div>
+              <div class="canvas-wrapper">
+                <canvas id="sideViewCanvasMulti"></canvas>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- TAB 2: Full 3D Interactive Frustum -->
+        <div class="view-container" id="tab-3d">
+          <div class="viewport-3d-full" id="wrapper3dFull">
+            <div class="viewport-3d-overlay">
+              <button class="btn btn-sm" id="btnViewIso">3D Isometric</button>
+              <button class="btn btn-sm" id="btnViewTop">Top View</button>
+              <button class="btn btn-sm" id="btnViewSide">Side View</button>
+              <button class="btn btn-sm" id="btnViewCamPov">Camera POV</button>
+              <button class="btn btn-sm" id="btnReset3d">Reset View</button>
+            </div>
+            <div class="viewport-3d-info">
+              Left Click + Drag: Orbit & Rotate • Right Click + Drag: Pan • Scroll: Zoom In/Out
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB 3: Full 2D Top & Side Views -->
+        <div class="view-container" id="tab-2d">
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; min-height: 550px;">
+            <div class="card-canvas">
+              <div class="card-canvas-header">
+                <span>Top-Down 2D Projection (Azimuth Footprint & DORI Zones)</span>
+                <span class="tag">Bird's Eye</span>
+              </div>
+              <div class="canvas-wrapper">
+                <canvas id="topViewCanvasFull"></canvas>
+              </div>
+            </div>
+
+            <div class="card-canvas">
+              <div class="card-canvas-header">
+                <span>Side Profile 2D (Mount Height, Tilt & Blind Spot)</span>
+                <span class="tag">Elevation</span>
+              </div>
+              <div class="canvas-wrapper">
+                <canvas id="sideViewCanvasFull"></canvas>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB 4: Full Simulated Camera POV -->
+        <div class="view-container" id="tab-camview">
+          <div class="card-canvas" style="min-height: 550px;">
+            <div class="card-canvas-header">
+              <span>Simulated Camera Sensor View (Synthesized Viewport & Target Bounding Box)</span>
+              <span class="tag" id="tagCamResFull">1920 × 1080</span>
+            </div>
+            <div class="canvas-wrapper">
+              <canvas id="camPovCanvasFull"></canvas>
+              <div class="viewfinder-crosshair"></div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </main>
+
   </div>
 
   <script>
-    const lensSelect = document.getElementById("lensVariant");
-    const hfovSlider = document.getElementById("hfovSlider");
-    const mountSlider = document.getElementById("mountHeight");
-    const tiltSlider = document.getElementById("tiltAngle");
-    const distSlider = document.getElementById("targetDist");
+    /* ==========================================================================
+       1. DATA STRUCTURES & PRESETS
+       ========================================================================== */
+    const SENSOR_SIZES = {
+      "1/1.8": { w: 7.18, h: 5.32, name: '1/1.8"' },
+      "1/2.8": { w: 5.18, h: 3.89, name: '1/2.8"' },
+      "1/2.7": { w: 5.37, h: 4.04, name: '1/2.7"' },
+      "1/2.5": { w: 5.76, h: 4.29, name: '1/2.5"' },
+      "1/2":   { w: 6.40, h: 4.80, name: '1/2"' },
+      "1/3":   { w: 4.80, h: 3.60, name: '1/3"' },
+      "2/3":   { w: 8.80, h: 6.60, name: '2/3"' },
+      "1":     { w: 13.20, h: 8.80, name: '1"' },
+      "custom":{ w: 7.18, h: 5.32, name: "Custom" }
+    };
 
-    const topCanvas = document.getElementById("topViewCanvas");
-    const sideCanvas = document.getElementById("sideViewCanvas");
-    const ctxTop = topCanvas.getContext("2d");
-    const ctxSide = sideCanvas.getContext("2d");
+    const RESOLUTIONS = {
+      "1920x1080": { w: 1920, h: 1080, name: "1080p (1920×1080)" },
+      "2560x1440": { w: 2560, h: 1440, name: "4MP (2560×1440)" },
+      "2592x1944": { w: 2592, h: 1944, name: "5MP (2592×1944)" },
+      "3840x2160": { w: 3840, h: 2160, name: "4K / 8MP (3840×2160)" },
+      "4000x3000": { w: 4000, h: 3000, name: "12MP (4000×3000)" },
+      "1280x720":  { w: 1280, h: 720,  name: "720p (1280×720)" },
+      "custom":    { w: 1920, h: 1080, name: "Custom" }
+    };
 
-    function resizeCanvases() {
-      topCanvas.width = topCanvas.clientWidth;
-      topCanvas.height = topCanvas.clientHeight;
-      sideCanvas.width = sideCanvas.clientWidth;
-      sideCanvas.height = sideCanvas.clientHeight;
-    }
-    window.addEventListener("resize", () => { resizeCanvases(); render(); });
-    resizeCanvases();
-
-    lensSelect.addEventListener("change", () => {
-      if (lensSelect.value === "wide") {
-        hfovSlider.min = 49; hfovSlider.max = 103; hfovSlider.value = 75;
-      } else {
-        hfovSlider.min = 9.3; hfovSlider.max = 41.6; hfovSlider.value = 25;
+    const CAMERA_PRESETS = {
+      "bosch-7100i-wide": {
+        name: "CAM-01 DINION 7100i (Standard)",
+        sensorFormat: "1/1.8",
+        sensorW: 7.18, sensorH: 5.32,
+        resKey: "1920x1080",
+        resW: 1920, resH: 1080,
+        focalMm: 4.7,
+        focalMin: 4.7, focalMax: 10.0,
+        hfov: 75.0,
+        mountH: 4.0, tilt: 15, pan: 0,
+        targetDist: 25, targetHeight: 1.70
+      },
+      "bosch-7100i-tele": {
+        name: "CAM-02 DINION 7100i (Telephoto)",
+        sensorFormat: "1/1.8",
+        sensorW: 7.18, sensorH: 5.32,
+        resKey: "1920x1080",
+        resW: 1920, resH: 1080,
+        focalMm: 15.0,
+        focalMin: 10.5, focalMax: 47.0,
+        hfov: 27.0,
+        mountH: 4.5, tilt: 8, pan: 0,
+        targetDist: 45, targetHeight: 1.70
+      },
+      "generic-1080p-28": {
+        name: "Generic 1080p Fixed Dome 2.8mm",
+        sensorFormat: "1/2.8",
+        sensorW: 5.18, sensorH: 3.89,
+        resKey: "1920x1080",
+        resW: 1920, resH: 1080,
+        focalMm: 2.8,
+        focalMin: 2.8, focalMax: 2.8,
+        hfov: 95.0,
+        mountH: 3.0, tilt: 20, pan: 0,
+        targetDist: 15, targetHeight: 1.70
+      },
+      "generic-1080p-40": {
+        name: "Generic 1080p Fixed Bullet 4.0mm",
+        sensorFormat: "1/2.8",
+        sensorW: 5.18, sensorH: 3.89,
+        resKey: "1920x1080",
+        resW: 1920, resH: 1080,
+        focalMm: 4.0,
+        focalMin: 4.0, focalMax: 4.0,
+        hfov: 66.0,
+        mountH: 3.5, tilt: 15, pan: 0,
+        targetDist: 20, targetHeight: 1.70
+      },
+      "generic-4mp-vf": {
+        name: "Generic 4MP Varifocal 2.8-12mm",
+        sensorFormat: "1/2.7",
+        sensorW: 5.37, sensorH: 4.04,
+        resKey: "2560x1440",
+        resW: 2560, resH: 1440,
+        focalMm: 6.0,
+        focalMin: 2.8, focalMax: 12.0,
+        hfov: 48.0,
+        mountH: 4.0, tilt: 12, pan: 0,
+        targetDist: 30, targetHeight: 1.70
+      },
+      "generic-4k-uhd": {
+        name: "Generic 4K Ultra HD Bullet 4.0mm",
+        sensorFormat: "1/1.8",
+        sensorW: 7.18, sensorH: 5.32,
+        resKey: "3840x2160",
+        resW: 3840, resH: 2160,
+        focalMm: 4.0,
+        focalMin: 4.0, focalMax: 12.0,
+        hfov: 84.0,
+        mountH: 5.0, tilt: 15, pan: 0,
+        targetDist: 35, targetHeight: 1.70
+      },
+      "generic-4k-tele": {
+        name: "Generic 4K Long-Range 8-32mm",
+        sensorFormat: "1/1.8",
+        sensorW: 7.18, sensorH: 5.32,
+        resKey: "3840x2160",
+        resW: 3840, resH: 2160,
+        focalMm: 16.0,
+        focalMin: 8.0, focalMax: 32.0,
+        hfov: 25.0,
+        mountH: 6.0, tilt: 10, pan: 0,
+        targetDist: 60, targetHeight: 1.70
       }
-      render();
-    });
+    };
 
-    [hfovSlider, mountSlider, tiltSlider, distSlider].forEach(el => {
-      el.addEventListener("input", render);
-    });
+    const TARGET_PRESETS = {
+      human:  { height: 1.70, name: "Standing Person" },
+      seated: { height: 1.30, name: "Seated Person" },
+      car:    { height: 1.48, name: "Sedan Car" },
+      suv:    { height: 1.80, name: "SUV / Van" },
+      truck:  { height: 3.20, name: "Truck / Bus" },
+      plate:  { height: 0.15, name: "License Plate" }
+    };
 
-    function render() {
-      const hfov = parseFloat(hfovSlider.value);
-      const vfov = hfov * (9 / 16); // 16:9 aspect ratio standard
-      const height = parseFloat(mountSlider.value);
-      const tilt = parseFloat(tiltSlider.value);
-      const targetDist = parseFloat(distSlider.value);
+    /* State Management */
+    const state = {
+      unit: "m", // 'm' or 'ft'
+      cameraName: "CAM-01 DINION 7100i",
+      preset: "bosch-7100i-wide",
+      sensorFormat: "1/1.8",
+      sensorW: 7.18,
+      sensorH: 5.32,
+      resPreset: "1920x1080",
+      resW: 1920,
+      resH: 1080,
+      focalMm: 4.7,
+      hfov: 75.0,
+      vfov: 45.0,
+      dfov: 85.0,
+      mountH: 4.0,
+      tilt: 15.0,
+      pan: 0.0,
+      targetType: "human",
+      targetHeight: 1.70,
+      targetDist: 25.0,
+      targetOffset: 0.0,
+      
+      // Computed Metrics
+      targetWidth: 0,
+      targetHeightScene: 0,
+      ppm: 0,
+      blindSpot: 0,
+      farCutoff: 0,
+      losDist: 0,
+      targetPixH: 0,
+      doriLevel: "Observe",
+      doriRanges: { ident: 0, recog: 0, observe: 0, detect: 0 }
+    };
 
-      document.getElementById("hfovVal").textContent = hfov.toFixed(1);
-      document.getElementById("heightVal").textContent = height.toFixed(1);
-      document.getElementById("tiltVal").textContent = tilt;
-      document.getElementById("distVal").textContent = targetDist;
+    /* ==========================================================================
+       2. DOM REFERENCES
+       ========================================================================== */
+    const els = {
+      unitToggle: document.getElementById("btnUnitToggle"),
+      unitLabel: document.getElementById("unitLabel"),
+      savedConfigsSelect: document.getElementById("savedConfigsSelect"),
+      btnSaveBrowser: document.getElementById("btnSaveBrowser"),
+      btnDeleteBrowser: document.getElementById("btnDeleteBrowser"),
+      btnExportJson: document.getElementById("btnExportJson"),
+      btnImportJson: document.getElementById("btnImportJson"),
+      jsonFileInput: document.getElementById("jsonFileInput"),
+      dropZone: document.getElementById("dropZone"),
+      toast: document.getElementById("toast"),
 
-      // Metrics calculation
-      const radH = (hfov * Math.PI) / 360;
-      const targetWidth = 2 * targetDist * Math.tan(radH);
-      const ppm = 1920 / targetWidth; // DINION 2MP width is 1920px
+      cameraPreset: document.getElementById("cameraPreset"),
+      cameraName: document.getElementById("cameraName"),
+      sensorFormat: document.getElementById("sensorFormat"),
+      resolutionPreset: document.getElementById("resolutionPreset"),
+      sensorWidthMm: document.getElementById("sensorWidthMm"),
+      sensorHeightMm: document.getElementById("sensorHeightMm"),
+      customSensorRow: document.getElementById("customSensorRow"),
+      resWidthPx: document.getElementById("resWidthPx"),
+      resHeightPx: document.getElementById("resHeightPx"),
+      customResRow: document.getElementById("customResRow"),
+      badgeAspect: document.getElementById("badgeAspect"),
 
-      const tiltRad = (tilt * Math.PI) / 180;
-      const vfovHalfRad = ((vfov / 2) * Math.PI) / 180;
-      const bottomAngle = tiltRad + vfovHalfRad;
-      const nearBlind = bottomAngle < Math.PI / 2 ? (height / Math.tan(bottomAngle)).toFixed(1) : "0.0";
+      focalSlider: document.getElementById("focalSlider"),
+      focalVal: document.getElementById("focalVal"),
+      hfovSlider: document.getElementById("hfovSlider"),
+      hfovVal: document.getElementById("hfovVal"),
+      vfovVal: document.getElementById("vfovVal"),
+      dfovVal: document.getElementById("dfovVal"),
 
-      let dori = "Monitor";
-      if (ppm >= 250) dori = "Ident (>=250)";
-      else if (ppm >= 125) dori = "Recog (>=125)";
-      else if (ppm >= 63) dori = "Observe (>=63)";
-      else if (ppm >= 25) dori = "Detect (>=25)";
+      mountHeight: document.getElementById("mountHeight"),
+      heightVal: document.getElementById("heightVal"),
+      tiltAngle: document.getElementById("tiltAngle"),
+      tiltVal: document.getElementById("tiltVal"),
+      panAngle: document.getElementById("panAngle"),
+      panVal: document.getElementById("panVal"),
 
-      document.getElementById("statWidth").textContent = `${targetWidth.toFixed(1)} m`;
-      document.getElementById("statPPM").textContent = `${Math.round(ppm)} px/m`;
-      document.getElementById("statBlind").textContent = `${nearBlind} m`;
-      document.getElementById("statDORI").textContent = dori;
+      targetType: document.getElementById("targetType"),
+      targetHeightM: document.getElementById("targetHeightM"),
+      targetDist: document.getElementById("targetDist"),
+      distVal: document.getElementById("distVal"),
+      targetOffset: document.getElementById("targetOffset"),
+      offsetVal: document.getElementById("offsetVal"),
 
-      drawTopView(hfov, targetDist);
-      drawSideView(height, tilt, vfov, targetDist);
+      // Stats
+      statDoriLevel: document.getElementById("statDoriLevel"),
+      statDoriPpm: document.getElementById("statDoriPpm"),
+      statFieldWidth: document.getElementById("statFieldWidth"),
+      statFieldHeight: document.getElementById("statFieldHeight"),
+      statBlindSpot: document.getElementById("statBlindSpot"),
+      statFarCutoff: document.getElementById("statFarCutoff"),
+      statLosDist: document.getElementById("statLosDist"),
+      statTargetPix: document.getElementById("statTargetPix"),
+      badgeTargetPpm: document.getElementById("badgeTargetPpm"),
+      chipDori: document.getElementById("chipDori"),
+
+      rangeIdent: document.getElementById("rangeIdent"),
+      rangeRecog: document.getElementById("rangeRecog"),
+      rangeObserve: document.getElementById("rangeObserve"),
+      rangeDetect: document.getElementById("rangeDetect"),
+
+      // Canvases
+      topMulti: document.getElementById("topViewCanvasMulti"),
+      sideMulti: document.getElementById("sideViewCanvasMulti"),
+      camMulti: document.getElementById("camPovCanvasMulti"),
+      topFull: document.getElementById("topViewCanvasFull"),
+      sideFull: document.getElementById("sideViewCanvasFull"),
+      camFull: document.getElementById("camPovCanvasFull"),
+      tagCamRes: document.getElementById("tagCamRes"),
+      tagCamResFull: document.getElementById("tagCamResFull"),
+
+      wrapper3dMulti: document.getElementById("wrapper3dMulti"),
+      wrapper3dFull: document.getElementById("wrapper3dFull")
+    };
+
+    /* ==========================================================================
+       3. MATHEMATICAL COMPUTATIONS & FOV FORMULAS
+       ========================================================================== */
+    function radToDeg(r) { return r * (180 / Math.PI); }
+    function degToRad(d) { return d * (Math.PI / 180); }
+
+    // Computes FOV angles from focal length and sensor dimensions
+    function computeFovFromFocal(focalMm, sensorW, sensorH) {
+      const hfov = 2 * Math.atan(sensorW / (2 * focalMm));
+      const vfov = 2 * Math.atan(sensorH / (2 * focalMm));
+      const diag = Math.hypot(sensorW, sensorH);
+      const dfov = 2 * Math.atan(diag / (2 * focalMm));
+      return {
+        hfov: radToDeg(hfov),
+        vfov: radToDeg(vfov),
+        dfov: radToDeg(dfov)
+      };
     }
 
-    function drawTopView(hfov, targetDist) {
-      const w = topCanvas.width, h = topCanvas.height;
-      ctxTop.clearRect(0, 0, w, h);
-
-      const originX = 50, originY = h / 2;
-      const scale = (w - 100) / 120; // 120m full range
-      const radH = (hfov * Math.PI) / 360;
-
-      // Draw FOV Wedge
-      const farX = originX + 110 * scale;
-      const halfWidth = 110 * Math.tan(radH) * scale;
-
-      ctxTop.fillStyle = "rgba(0, 229, 255, 0.15)";
-      ctxTop.strokeStyle = "#00e5ff";
-      ctxTop.beginPath();
-      ctxTop.moveTo(originX, originY);
-      ctxTop.lineTo(farX, originY - halfWidth);
-      ctxTop.lineTo(farX, originY + halfWidth);
-      ctxTop.closePath();
-      ctxTop.fill();
-      ctxTop.stroke();
-
-      // Target distance line
-      const tX = originX + targetDist * scale;
-      const tHalfW = targetDist * Math.tan(radH) * scale;
-      ctxTop.strokeStyle = "#ff9100";
-      ctxTop.lineWidth = 2;
-      ctxTop.beginPath();
-      ctxTop.moveTo(tX, originY - tHalfW);
-      ctxTop.lineTo(tX, originY + tHalfW);
-      ctxTop.stroke();
-
-      // Camera Icon
-      ctxTop.fillStyle = "#fff";
-      ctxTop.beginPath();
-      ctxTop.arc(originX, originY, 6, 0, Math.PI * 2);
-      ctxTop.fill();
-      ctxTop.fillText("DINION 7100i", originX - 35, originY - 12);
+    // Computes focal length from HFOV and sensor width
+    function computeFocalFromHfov(hfovDeg, sensorW) {
+      const rad = degToRad(hfovDeg / 2);
+      return sensorW / (2 * Math.tan(rad));
     }
 
-    function drawSideView(height, tilt, vfov, targetDist) {
-      const w = sideCanvas.width, h = sideCanvas.height;
-      ctxSide.clearRect(0, 0, w, h);
+    function calculateMetrics() {
+      const {
+        sensorW, sensorH, resW, resH,
+        hfov, vfov, mountH, tilt, targetDist, targetHeight, targetOffset
+      } = state;
 
-      const groundY = h - 40;
+      // Aspect Ratio
+      const gcd = (a, b) => b ? gcd(b, a % b) : a;
+      const d = gcd(resW, resH);
+      const aspectStr = `${resW / d}:${resH / d}`;
+      els.badgeAspect.textContent = aspectStr;
+      els.tagCamRes.textContent = `${resW} × ${resH}`;
+      if (els.tagCamResFull) els.tagCamResFull.textContent = `${resW} × ${resH}`;
+
+      // Ground Footprint & Line of Sight at optical center line
+      const radH = degToRad(hfov / 2);
+      const radV = degToRad(vfov / 2);
+      state.targetWidth = 2 * targetDist * Math.tan(radH);
+      state.targetHeightScene = 2 * targetDist * Math.tan(radV);
+
+      // PPM (Pixels Per Meter)
+      state.ppm = state.targetWidth > 0 ? (resW / state.targetWidth) : 0;
+      state.losDist = Math.hypot(targetDist, mountH, targetOffset);
+
+      // Target pixel height in sensor via pinhole triangle similarity
+      // f_px = (resW / 2) / tan(HFOV/2)
+      const f_px = (resW / 2) / Math.tan(radH);
+      state.targetPixH = (targetHeight * f_px) / state.losDist;
+
+      // Blind spot & Near / Far cutoffs on ground plane
+      const tiltRad = degToRad(tilt);
+      const bottomAngle = tiltRad + radV;
+      const topAngle = tiltRad - radV;
+
+      // Near ground cutoff (dead zone directly under pole)
+      if (bottomAngle > 0 && bottomAngle < Math.PI / 2) {
+        state.blindSpot = mountH / Math.tan(bottomAngle);
+      } else if (bottomAngle >= Math.PI / 2) {
+        state.blindSpot = 0;
+      } else {
+        state.blindSpot = Infinity;
+      }
+
+      // Far ground cutoff (optical ray touches ground)
+      if (topAngle > 0.001) {
+        state.farCutoff = mountH / Math.tan(topAngle);
+      } else {
+        state.farCutoff = Infinity; // Looking at or above horizon
+      }
+
+      // DORI Classification
+      if (state.ppm >= 250) {
+        state.doriLevel = "Identification";
+        els.chipDori.className = "stat-chip ident";
+      } else if (state.ppm >= 125) {
+        state.doriLevel = "Recognition";
+        els.chipDori.className = "stat-chip recog";
+      } else if (state.ppm >= 63) {
+        state.doriLevel = "Observation";
+        els.chipDori.className = "stat-chip observe";
+      } else if (state.ppm >= 25) {
+        state.doriLevel = "Detection";
+        els.chipDori.className = "stat-chip detect";
+      } else {
+        state.doriLevel = "Monitoring";
+        els.chipDori.className = "stat-chip monitor";
+      }
+
+      // DORI Max Range Limits: D_max = resW / (2 * PPM_req * tan(HFOV/2))
+      const tanHalfH = Math.tan(radH);
+      state.doriRanges.ident = (resW / (2 * 250 * tanHalfH));
+      state.doriRanges.recog = (resW / (2 * 125 * tanHalfH));
+      state.doriRanges.observe = (resW / (2 * 63 * tanHalfH));
+      state.doriRanges.detect = (resW / (2 * 25 * tanHalfH));
+
+      updateStatsUI();
+    }
+
+    function formatDist(meters) {
+      if (!isFinite(meters) || meters < 0) return "∞ (Horizon)";
+      if (state.unit === "ft") {
+        return `${(meters * 3.28084).toFixed(1)} ft`;
+      }
+      return `${meters.toFixed(1)} m`;
+    }
+
+    function updateStatsUI() {
+      const u = state.unit === "ft" ? "px/ft" : "px/m";
+      const ppmDisp = state.unit === "ft" ? (state.ppm / 3.28084) : state.ppm;
+
+      els.statDoriLevel.textContent = state.doriLevel;
+      els.statDoriPpm.textContent = `${Math.round(ppmDisp)} ${u} @ target`;
+      els.badgeTargetPpm.textContent = `${Math.round(ppmDisp)} ${u}`;
+
+      els.statFieldWidth.textContent = formatDist(state.targetWidth);
+      els.statFieldHeight.textContent = `Field H: ${formatDist(state.targetHeightScene)}`;
+
+      els.statBlindSpot.textContent = formatDist(state.blindSpot);
+      els.statFarCutoff.textContent = `Far: ${formatDist(state.farCutoff)}`;
+
+      els.statLosDist.textContent = formatDist(state.losDist);
+      els.statTargetPix.textContent = `Target: ${Math.round(state.targetPixH)} px high`;
+
+      // DORI Table
+      els.rangeIdent.textContent = formatDist(state.doriRanges.ident);
+      els.rangeRecog.textContent = formatDist(state.doriRanges.recog);
+      els.rangeObserve.textContent = formatDist(state.doriRanges.observe);
+      els.rangeDetect.textContent = formatDist(state.doriRanges.detect);
+    }
+
+    /* ==========================================================================
+       4. 2D CANVAS VISUALIZERS (Top-Down & Side Profile)
+       ========================================================================== */
+    function drawTopViewOnCanvas(canvas) {
+      if (!canvas) return;
+      const ctx = canvas.getContext("2d");
+      const w = (canvas.width = canvas.clientWidth * window.devicePixelRatio || 600);
+      const h = (canvas.height = canvas.clientHeight * window.devicePixelRatio || 340);
+      ctx.scale(window.devicePixelRatio || 1, window.devicePixelRatio || 1);
+
+      const cw = canvas.clientWidth;
+      const ch = canvas.clientHeight;
+      ctx.clearRect(0, 0, cw, ch);
+
       const originX = 50;
-      const scaleX = (w - 100) / 120;
-      const scaleY = 15; // Vertical scaling
+      const originY = ch / 2;
+      const maxRangeMeters = Math.max(80, state.targetDist * 1.5, state.doriRanges.detect * 1.1);
+      const scale = (cw - 80) / maxRangeMeters;
 
-      const camY = groundY - height * scaleY;
+      // Metric / distance circular grid arcs
+      ctx.lineWidth = 1;
+      const stepM = maxRangeMeters > 150 ? 50 : (maxRangeMeters > 60 ? 20 : 10);
+      for (let r = stepM; r <= maxRangeMeters; r += stepM) {
+        const radiusPx = r * scale;
+        ctx.strokeStyle = "#1f2937";
+        ctx.beginPath();
+        ctx.arc(originX, originY, radiusPx, -Math.PI / 2, Math.PI / 2);
+        ctx.stroke();
+
+        ctx.fillStyle = "#64748b";
+        ctx.font = "10px monospace";
+        ctx.fillText(formatDist(r), originX + radiusPx + 2, originY - 4);
+      }
+
+      // Optical Center Axis
+      const panRad = degToRad(state.pan);
+      const radH = degToRad(state.hfov / 2);
+
+      // Draw DORI zones in reverse order: Detect -> Observe -> Recog -> Ident
+      const doriBands = [
+        { r: state.doriRanges.detect,  color: "rgba(239, 68, 68, 0.12)", stroke: "rgba(239, 68, 68, 0.3)" },
+        { r: state.doriRanges.observe, color: "rgba(245, 158, 11, 0.16)", stroke: "rgba(245, 158, 11, 0.4)" },
+        { r: state.doriRanges.recog,   color: "rgba(16, 185, 129, 0.20)", stroke: "rgba(16, 185, 129, 0.5)" },
+        { r: state.doriRanges.ident,   color: "rgba(139, 92, 246, 0.25)", stroke: "rgba(139, 92, 246, 0.6)" }
+      ];
+
+      const drawFovSector = (distanceM, fillStyle, strokeStyle) => {
+        if (!isFinite(distanceM) || distanceM <= 0) return;
+        const dPx = Math.min(distanceM * scale, (cw - originX) * 1.2);
+        ctx.beginPath();
+        ctx.moveTo(originX, originY);
+        ctx.arc(originX, originY, dPx, panRad - radH, panRad + radH);
+        ctx.closePath();
+        if (fillStyle) {
+          ctx.fillStyle = fillStyle;
+          ctx.fill();
+        }
+        if (strokeStyle) {
+          ctx.strokeStyle = strokeStyle;
+          ctx.stroke();
+        }
+      };
+
+      doriBands.forEach(b => drawFovSector(b.r, b.color, b.stroke));
+
+      // Main Outer FOV Cone
+      const coneRange = Math.min(maxRangeMeters, (cw - originX - 20) / scale);
+      drawFovSector(coneRange, "rgba(0, 210, 255, 0.08)", "#00d2ff");
+
+      // Target Object Marker
+      const tX = originX + (state.targetDist * Math.cos(panRad) - state.targetOffset * Math.sin(panRad)) * scale;
+      const tY = originY + (state.targetDist * Math.sin(panRad) + state.targetOffset * Math.cos(panRad)) * scale;
+
+      // Target lateral line (field width at target)
+      const tHalfW = state.targetDist * Math.tan(radH) * scale;
+      const normalAngle = panRad + Math.PI / 2;
+      ctx.strokeStyle = "#ff9900";
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(
+        originX + state.targetDist * Math.cos(panRad) * scale - Math.cos(normalAngle) * tHalfW,
+        originY + state.targetDist * Math.sin(panRad) * scale - Math.sin(normalAngle) * tHalfW
+      );
+      ctx.lineTo(
+        originX + state.targetDist * Math.cos(panRad) * scale + Math.cos(normalAngle) * tHalfW,
+        originY + state.targetDist * Math.sin(panRad) * scale + Math.sin(normalAngle) * tHalfW
+      );
+      ctx.stroke();
+
+      // Target point
+      ctx.fillStyle = "#ffaa00";
+      ctx.beginPath();
+      ctx.arc(tX, tY, 5, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = "#ffffff";
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+
+      // Target label
+      ctx.fillStyle = "#ffffff";
+      ctx.font = "bold 11px sans-serif";
+      ctx.fillText(`Target (${formatDist(state.targetDist)})`, tX + 8, tY - 6);
+
+      // Camera Pole Base Marker
+      ctx.fillStyle = "#00d2ff";
+      ctx.beginPath();
+      ctx.arc(originX, originY, 7, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = "#ffffff";
+      ctx.lineWidth = 2;
+      ctx.stroke();
+
+      ctx.fillStyle = "#ffffff";
+      ctx.font = "bold 11px sans-serif";
+      ctx.fillText(state.cameraName || "Camera", originX - 25, originY - 14);
+    }
+
+    function drawSideViewOnCanvas(canvas) {
+      if (!canvas) return;
+      const ctx = canvas.getContext("2d");
+      const w = (canvas.width = canvas.clientWidth * window.devicePixelRatio || 600);
+      const h = (canvas.height = canvas.clientHeight * window.devicePixelRatio || 340);
+      ctx.scale(window.devicePixelRatio || 1, window.devicePixelRatio || 1);
+
+      const cw = canvas.clientWidth;
+      const ch = canvas.clientHeight;
+      ctx.clearRect(0, 0, cw, ch);
+
+      const originX = 50;
+      const groundY = ch - 45;
+      const maxDistance = Math.max(80, state.targetDist * 1.5, state.doriRanges.detect * 1.1);
+      const scaleX = (cw - 80) / maxDistance;
+      const maxHeight = Math.max(12, state.mountH * 1.8);
+      const scaleY = (groundY - 30) / maxHeight;
+
+      // Ground Line
+      ctx.strokeStyle = "#374151";
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(10, groundY);
+      ctx.lineTo(cw - 10, groundY);
+      ctx.stroke();
+
+      // Ground Distance Tick Marks
+      ctx.font = "10px monospace";
+      ctx.fillStyle = "#64748b";
+      const stepM = maxDistance > 150 ? 50 : (maxDistance > 60 ? 20 : 10);
+      for (let d = stepM; d <= maxDistance; d += stepM) {
+        const x = originX + d * scaleX;
+        ctx.strokeStyle = "#1f2937";
+        ctx.beginPath();
+        ctx.moveTo(x, groundY - 4);
+        ctx.lineTo(x, groundY + 4);
+        ctx.stroke();
+        ctx.fillText(formatDist(d), x - 12, groundY + 18);
+      }
+
+      // Camera Pole
+      const camY = groundY - state.mountH * scaleY;
+      ctx.strokeStyle = "#94a3b8";
+      ctx.lineWidth = 4;
+      ctx.beginPath();
+      ctx.moveTo(originX, groundY);
+      ctx.lineTo(originX, camY);
+      ctx.stroke();
+
+      // Camera Head
+      ctx.fillStyle = "#00d2ff";
+      ctx.beginPath();
+      ctx.arc(originX, camY, 6, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Rays: Top Ray, Optical Axis, Bottom Ray
+      const tiltRad = degToRad(state.tilt);
+      const vRad = degToRad(state.vfov / 2);
+      const topAngle = tiltRad - vRad;
+      const btmAngle = tiltRad + vRad;
+      const rayMaxLen = (cw - originX) / Math.cos(Math.max(-0.5, Math.min(0.5, tiltRad)));
+
+      const xTopEnd = originX + Math.cos(topAngle) * rayMaxLen;
+      const yTopEnd = camY + Math.sin(topAngle) * rayMaxLen;
+      const xBtmEnd = originX + Math.cos(btmAngle) * rayMaxLen;
+      const yBtmEnd = camY + Math.sin(btmAngle) * rayMaxLen;
+
+      // Projected FOV Volume
+      ctx.fillStyle = "rgba(0, 210, 255, 0.12)";
+      ctx.strokeStyle = "#00d2ff";
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(originX, camY);
+      ctx.lineTo(xTopEnd, yTopEnd);
+      ctx.lineTo(xBtmEnd, yBtmEnd);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+
+      // Blind Spot (Near Cutoff) Indicator under pole
+      if (state.blindSpot > 0 && isFinite(state.blindSpot)) {
+        const blindX = originX + state.blindSpot * scaleX;
+        ctx.fillStyle = "rgba(239, 68, 68, 0.25)";
+        ctx.fillRect(originX, groundY - 8, (blindX - originX), 8);
+
+        ctx.strokeStyle = "#ef4444";
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(blindX, groundY - 12);
+        ctx.lineTo(blindX, groundY + 8);
+        ctx.stroke();
+
+        ctx.fillStyle = "#ef4444";
+        ctx.font = "bold 10px sans-serif";
+        ctx.fillText(`Blind Spot: ${formatDist(state.blindSpot)}`, originX + 5, groundY - 14);
+      }
+
+      // Target Object Silhouette
+      const tX = originX + state.targetDist * scaleX;
+      const tHeightPx = state.targetHeight * scaleY;
+      ctx.fillStyle = "#ffaa00";
+      ctx.fillRect(tX - 3, groundY - tHeightPx, 6, tHeightPx);
+
+      // Target Head circle if person
+      if (state.targetHeight >= 1.2) {
+        ctx.beginPath();
+        ctx.arc(tX, groundY - tHeightPx - 3, 3, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      ctx.fillStyle = "#ffaa00";
+      ctx.font = "bold 10px sans-serif";
+      ctx.fillText(`${formatDist(state.targetDist)}`, tX - 10, groundY - tHeightPx - 10);
+    }
+
+    /* ==========================================================================
+       5. SIMULATED CAMERA VIEWPORT (Pinhole Sensor Projection)
+       ========================================================================== */
+    function drawCamViewOnCanvas(canvas) {
+      if (!canvas) return;
+      const ctx = canvas.getContext("2d");
+      const cw = (canvas.width = canvas.clientWidth * window.devicePixelRatio || 640);
+      const ch = (canvas.height = canvas.clientHeight * window.devicePixelRatio || 360);
+      ctx.scale(window.devicePixelRatio || 1, window.devicePixelRatio || 1);
+
+      const width = canvas.clientWidth;
+      const height = canvas.clientHeight;
+      ctx.clearRect(0, 0, width, height);
+
+      // Camera aspect ratio letterbox/pillarbox
+      const camAspect = state.resW / state.resH;
+      let frameW = width;
+      let frameH = width / camAspect;
+      if (frameH > height) {
+        frameH = height;
+        frameW = height * camAspect;
+      }
+      const offsetX = (width - frameW) / 2;
+      const offsetY = (height - frameH) / 2;
+
+      // Background Sky & Ground representation
+      ctx.save();
+      ctx.beginPath();
+      ctx.rect(offsetX, offsetY, frameW, frameH);
+      ctx.clip();
+
+      // Horizon line calculation based on camera tilt
+      // Tilt = 0 => horizon at center (0.5 * frameH)
+      // Tilt > 0 (looking down) => horizon moves UP
+      const vfovRad = degToRad(state.vfov);
+      const tiltRad = degToRad(state.tilt);
+      const horizonFraction = 0.5 - (Math.tan(tiltRad) / Math.tan(vfovRad / 2)) * 0.5;
+      const horizonY = offsetY + horizonFraction * frameH;
+
+      // Draw Sky
+      ctx.fillStyle = "#0c1524";
+      ctx.fillRect(offsetX, offsetY, frameW, Math.max(0, horizonY - offsetY));
 
       // Draw Ground
-      ctxSide.strokeStyle = "#404b5c";
-      ctxSide.beginPath();
-      ctxSide.moveTo(20, groundY);
-      ctxSide.lineTo(w - 20, groundY);
-      ctxSide.stroke();
+      ctx.fillStyle = "#161b22";
+      ctx.fillRect(offsetX, Math.max(offsetY, horizonY), frameW, frameH - Math.max(0, horizonY - offsetY));
 
-      // Draw Pole
-      ctxSide.strokeStyle = "#8899a6";
-      ctxSide.lineWidth = 3;
-      ctxSide.beginPath();
-      ctxSide.moveTo(originX, groundY);
-      ctxSide.lineTo(originX, camY);
-      ctxSide.stroke();
+      // Horizon Line
+      if (horizonY >= offsetY && horizonY <= offsetY + frameH) {
+        ctx.strokeStyle = "rgba(0, 210, 255, 0.4)";
+        ctx.lineWidth = 1;
+        ctx.setLineDash([4, 4]);
+        ctx.beginPath();
+        ctx.moveTo(offsetX, horizonY);
+        ctx.lineTo(offsetX + frameW, horizonY);
+        ctx.stroke();
+        ctx.setLineDash([]);
 
-      // Angles
-      const tRad = (tilt * Math.PI) / 180;
-      const vRad = ((vfov / 2) * Math.PI) / 180;
-      const rayLen = (w - 100) / Math.cos(tRad);
+        ctx.fillStyle = "rgba(0, 210, 255, 0.6)";
+        ctx.font = "9px monospace";
+        ctx.fillText("HORIZON", offsetX + 10, horizonY - 4);
+      }
 
-      // Top Ray & Bottom Ray
-      const topAngle = tRad - vRad;
-      const btmAngle = tRad + vRad;
+      // Perspective Ground Perspective Grid Lines
+      ctx.strokeStyle = "rgba(255,255,255,0.05)";
+      ctx.lineWidth = 1;
+      for (let x = -40; x <= 40; x += 10) {
+        // Perspective converging rays
+        const bottomX = offsetX + frameW / 2 + (x * frameW) / 40;
+        ctx.beginPath();
+        ctx.moveTo(offsetX + frameW / 2, Math.max(offsetY, horizonY));
+        ctx.lineTo(bottomX, offsetY + frameH);
+        ctx.stroke();
+      }
 
-      ctxSide.fillStyle = "rgba(0, 229, 255, 0.15)";
-      ctxSide.beginPath();
-      ctxSide.moveTo(originX, camY);
-      ctxSide.lineTo(originX + Math.cos(topAngle) * rayLen, camY + Math.sin(topAngle) * rayLen);
-      ctxSide.lineTo(originX + Math.cos(btmAngle) * rayLen, camY + Math.sin(btmAngle) * rayLen);
-      ctxSide.closePath();
-      ctxSide.fill();
+      // Target Object 2D Projection onto sensor plane
+      // Target position relative to camera optical center:
+      // Vertical angle to target:
+      const targetElevRad = Math.atan2(state.mountH, state.targetDist); // angle below horizontal
+      const targetAngleFromCenter = targetElevRad - tiltRad; // angle from camera optical center
+      const targetYFrac = 0.5 + (Math.tan(targetAngleFromCenter) / Math.tan(vfovRad / 2)) * 0.5;
 
-      // Target Person Marker
-      const tX = originX + targetDist * scaleX;
-      ctxSide.fillStyle = "#ff9100";
-      ctxSide.fillRect(tX - 2, groundY - (1.7 * scaleY), 4, 1.7 * scaleY); // 1.7m standard human height
+      // Lateral angle to target:
+      const hfovRad = degToRad(state.hfov);
+      const targetAzimRad = Math.atan2(state.targetOffset, state.targetDist) - degToRad(state.pan);
+      const targetXFrac = 0.5 + (Math.tan(targetAzimRad) / Math.tan(hfovRad / 2)) * 0.5;
+
+      const targetScreenX = offsetX + targetXFrac * frameW;
+      const targetScreenGroundY = offsetY + targetYFrac * frameH;
+
+      // Projected size in viewport
+      const targetPixHScreen = (state.targetPixH / state.resH) * frameH;
+      const targetPixWScreen = Math.max(6, targetPixHScreen * 0.4);
+
+      // Check if target is inside camera field of view
+      const isTargetInView =
+        targetScreenX >= offsetX - 20 &&
+        targetScreenX <= offsetX + frameW + 20 &&
+        targetScreenGroundY >= offsetY &&
+        targetScreenGroundY <= offsetY + frameH + 50;
+
+      if (isTargetInView) {
+        const topY = targetScreenGroundY - targetPixHScreen;
+        const leftX = targetScreenX - targetPixWScreen / 2;
+
+        // DORI Color Bounding Box
+        let boxColor = "#ef4444";
+        if (state.ppm >= 250) boxColor = "#8b5cf6";
+        else if (state.ppm >= 125) boxColor = "#10b981";
+        else if (state.ppm >= 63) boxColor = "#f59e0b";
+        else if (state.ppm >= 25) boxColor = "#ef4444";
+
+        // Target Box & Silhouette
+        ctx.strokeStyle = boxColor;
+        ctx.lineWidth = 1.8;
+        ctx.strokeRect(leftX, topY, targetPixWScreen, targetPixHScreen);
+
+        ctx.fillStyle = "rgba(255, 170, 0, 0.4)";
+        ctx.fillRect(leftX, topY, targetPixWScreen, targetPixHScreen);
+
+        // Target Head
+        ctx.fillStyle = "#ffaa00";
+        ctx.beginPath();
+        ctx.arc(targetScreenX, topY + targetPixWScreen / 2, Math.max(2, targetPixWScreen / 3), 0, Math.PI * 2);
+        ctx.fill();
+
+        // Overlay Badge
+        ctx.fillStyle = boxColor;
+        ctx.fillRect(leftX, Math.max(offsetY + 4, topY - 20), Math.max(90, targetPixWScreen), 16);
+
+        ctx.fillStyle = "#ffffff";
+        ctx.font = "bold 9px monospace";
+        ctx.fillText(
+          `${Math.round(state.ppm)} px/m • ${state.doriLevel.slice(0, 5)}`,
+          leftX + 4,
+          Math.max(offsetY + 15, topY - 8)
+        );
+      }
+
+      ctx.restore();
+
+      // Outer Viewport Frame Border
+      ctx.strokeStyle = "#2d3748";
+      ctx.lineWidth = 2;
+      ctx.strokeRect(offsetX, offsetY, frameW, frameH);
+
+      // Sensor Overlay Info
+      ctx.fillStyle = "#94a3b8";
+      ctx.font = "10px monospace";
+      ctx.fillText(
+        `FOV: ${state.hfov.toFixed(1)}°H × ${state.vfov.toFixed(1)}°V | f=${state.focalMm.toFixed(1)}mm | Tilt: ${state.tilt}°`,
+        offsetX + 10,
+        offsetY + frameH - 10
+      );
     }
 
-    render();
+    /* ==========================================================================
+       6. THREE.JS 3D INTERACTIVE SCENE & FRUSTUM VISUALIZER
+       ========================================================================= */
+    class Visualizer3D {
+      constructor(container) {
+        this.container = container;
+        this.scene = null;
+        this.camera = null;
+        this.renderer = null;
+        this.controls = null;
+        this.frustumGroup = null;
+        this.targetMesh = null;
+        this.poleMesh = null;
+        this.groundFootprintMesh = null;
+        this.initialized = false;
+        this.init();
+      }
+
+      init() {
+        if (!window.THREE) return;
+        const width = this.container.clientWidth || 600;
+        const height = this.container.clientHeight || 400;
+
+        // Scene
+        this.scene = new THREE.Scene();
+        this.scene.background = new THREE.Color(0x090c10);
+
+        // Camera
+        this.camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 1000);
+        this.camera.position.set(-30, 25, 45);
+
+        // Renderer
+        this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        this.renderer.setSize(width, height);
+        this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        this.container.appendChild(this.renderer.domElement);
+
+        // Controls
+        if (window.THREE.OrbitControls) {
+          this.controls = new THREE.OrbitControls(this.camera, this.renderer.domElement);
+          this.controls.enableDamping = true;
+          this.controls.dampingFactor = 0.08;
+          this.controls.target.set(0, 0, 20);
+        }
+
+        // Lighting
+        const ambient = new THREE.AmbientLight(0xffffff, 0.75);
+        this.scene.add(ambient);
+
+        const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
+        dirLight.position.set(20, 40, 20);
+        this.scene.add(dirLight);
+
+        // Ground Grid (Z is forward distance, X is lateral, Y is elevation)
+        const gridHelper = new THREE.GridHelper(200, 40, 0x00d2ff, 0x1f2937);
+        gridHelper.position.set(0, 0, 50);
+        this.scene.add(gridHelper);
+
+        // Groups
+        this.frustumGroup = new THREE.Group();
+        this.scene.add(this.frustumGroup);
+
+        this.initialized = true;
+        this.animate = this.animate.bind(this);
+        requestAnimationFrame(this.animate);
+      }
+
+      animate() {
+        requestAnimationFrame(this.animate);
+        if (this.controls) this.controls.update();
+        if (this.renderer && this.scene && this.camera) {
+          this.renderer.render(this.scene, this.camera);
+        }
+      }
+
+      resize() {
+        if (!this.initialized) return;
+        const width = this.container.clientWidth;
+        const height = this.container.clientHeight;
+        if (width === 0 || height === 0) return;
+        this.camera.aspect = width / height;
+        this.camera.updateProjectionMatrix();
+        this.renderer.setSize(width, height);
+      }
+
+      updateScene() {
+        if (!this.initialized) return;
+
+        // Clear previous dynamic meshes
+        while (this.frustumGroup.children.length > 0) {
+          const obj = this.frustumGroup.children[0];
+          this.frustumGroup.remove(obj);
+          if (obj.geometry) obj.geometry.dispose();
+          if (obj.material) {
+            if (Array.isArray(obj.material)) obj.material.forEach(m => m.dispose());
+            else obj.material.dispose();
+          }
+        }
+
+        const { mountH, tilt, pan, hfov, vfov, targetDist, targetHeight, targetOffset } = state;
+
+        // 1. Camera Pole & Housing
+        const poleGeo = new THREE.CylinderGeometry(0.15, 0.2, mountH, 16);
+        const poleMat = new THREE.MeshStandardMaterial({ color: 0x64748b, metalness: 0.5 });
+        const pole = new THREE.Mesh(poleGeo, poleMat);
+        pole.position.set(0, mountH / 2, 0);
+        this.frustumGroup.add(pole);
+
+        // Camera Head Box
+        const camBoxGeo = new THREE.BoxGeometry(0.6, 0.4, 1.0);
+        const camBoxMat = new THREE.MeshStandardMaterial({ color: 0x00d2ff });
+        const camHead = new THREE.Mesh(camBoxGeo, camBoxMat);
+        camHead.position.set(0, mountH, 0);
+        camHead.rotation.order = 'YXZ';
+        camHead.rotation.y = -degToRad(pan);
+        camHead.rotation.x = degToRad(tilt);
+        this.frustumGroup.add(camHead);
+
+        // 2. 3D Volumetric FOV Pyramid with DORI segments
+        const halfHRad = degToRad(hfov / 2);
+        const halfVRad = degToRad(vfov / 2);
+
+        // Build frustum wireframe / volume
+        const maxFrustDist = Math.min(Math.max(40, state.doriRanges.detect), 120);
+        const wAtDist = maxFrustDist * Math.tan(halfHRad);
+        const hAtDist = maxFrustDist * Math.tan(halfVRad);
+
+        // Local frustum corners in camera space:
+        // +Z is forward along optical axis, +Y is up, +X is right
+        const corners = [
+          new THREE.Vector3(-wAtDist,  hAtDist, maxFrustDist),
+          new THREE.Vector3( wAtDist,  hAtDist, maxFrustDist),
+          new THREE.Vector3( wAtDist, -hAtDist, maxFrustDist),
+          new THREE.Vector3(-wAtDist, -hAtDist, maxFrustDist)
+        ];
+
+        // Transform corners to World Coordinates using camera position and rotation
+        const camPos = new THREE.Vector3(0, mountH, 0);
+        const euler = new THREE.Euler(degToRad(tilt), -degToRad(pan), 0, 'YXZ');
+        const worldCorners = corners.map(c => c.clone().applyEuler(euler).add(camPos));
+
+        // Frustum Wireframe Lines
+        const lineMat = new THREE.LineBasicMaterial({ color: 0x00d2ff, opacity: 0.6, transparent: true });
+        const linePoints = [
+          // 4 rays from camera apex
+          camPos, worldCorners[0],
+          camPos, worldCorners[1],
+          camPos, worldCorners[2],
+          camPos, worldCorners[3],
+          // Outer rectangle
+          worldCorners[0], worldCorners[1],
+          worldCorners[1], worldCorners[2],
+          worldCorners[2], worldCorners[3],
+          worldCorners[3], worldCorners[0]
+        ];
+        const lineGeo = new THREE.BufferGeometry().setFromPoints(linePoints);
+        const lines = new THREE.LineSegments(lineGeo, lineMat);
+        this.frustumGroup.add(lines);
+
+        // Translucent Frustum Volume
+        const volGeo = new THREE.BufferGeometry();
+        const vertices = [];
+        // 4 side faces
+        const faces = [
+          [camPos, worldCorners[0], worldCorners[1]],
+          [camPos, worldCorners[1], worldCorners[2]],
+          [camPos, worldCorners[2], worldCorners[3]],
+          [camPos, worldCorners[3], worldCorners[0]]
+        ];
+        faces.forEach(f => {
+          vertices.push(f[0].x, f[0].y, f[0].z);
+          vertices.push(f[1].x, f[1].y, f[1].z);
+          vertices.push(f[2].x, f[2].y, f[2].z);
+        });
+        volGeo.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
+        const volMat = new THREE.MeshBasicMaterial({
+          color: 0x00d2ff,
+          transparent: true,
+          opacity: 0.1,
+          side: THREE.DoubleSide
+        });
+        const volMesh = new THREE.Mesh(volGeo, volMat);
+        this.frustumGroup.add(volMesh);
+
+        // 3. 3D Target Object Marker
+        const tZ = targetDist * Math.cos(degToRad(pan)) + targetOffset * Math.sin(degToRad(pan));
+        const tX = targetDist * Math.sin(degToRad(pan)) + targetOffset * Math.cos(degToRad(pan));
+
+        const targetGroup = new THREE.Group();
+        targetGroup.position.set(tX, 0, tZ);
+
+        // Target Body Box / Cylinder
+        const bodyH = targetHeight * 0.75;
+        const bodyGeo = new THREE.CylinderGeometry(0.3, 0.35, bodyH, 12);
+        const bodyMat = new THREE.MeshStandardMaterial({ color: 0xffaa00, roughness: 0.3 });
+        const bodyMesh = new THREE.Mesh(bodyGeo, bodyMat);
+        bodyMesh.position.set(0, bodyH / 2, 0);
+        targetGroup.add(bodyMesh);
+
+        // Target Head Sphere
+        const headGeo = new THREE.SphereGeometry(0.25, 12, 12);
+        const headMesh = new THREE.Mesh(headGeo, bodyMat);
+        headMesh.position.set(0, bodyH + 0.25, 0);
+        targetGroup.add(headMesh);
+
+        // Target Ground Disc
+        const discGeo = new THREE.RingGeometry(0.1, 1.2, 24);
+        const discMat = new THREE.MeshBasicMaterial({ color: 0xffaa00, side: THREE.DoubleSide });
+        const discMesh = new THREE.Mesh(discGeo, discMat);
+        discMesh.rotation.x = -Math.PI / 2;
+        discMesh.position.y = 0.05;
+        targetGroup.add(discMesh);
+
+        this.frustumGroup.add(targetGroup);
+      }
+
+      setPresetView(type) {
+        if (!this.camera || !this.controls) return;
+        const targetZ = state.targetDist * 0.7;
+        this.controls.target.set(0, 0, targetZ);
+
+        if (type === "iso") {
+          this.camera.position.set(-30, 25, targetZ + 30);
+        } else if (type === "top") {
+          this.camera.position.set(0, 80, targetZ);
+        } else if (type === "side") {
+          this.camera.position.set(-70, state.mountH + 5, targetZ);
+        } else if (type === "cam") {
+          // Camera perspective POV
+          this.camera.position.set(0, state.mountH, 0.5);
+          const fwdZ = targetZ + 15;
+          this.controls.target.set(
+            fwdZ * Math.sin(degToRad(state.pan)),
+            state.mountH - fwdZ * Math.tan(degToRad(state.tilt)),
+            fwdZ * Math.cos(degToRad(state.pan))
+          );
+        }
+        this.controls.update();
+      }
+    }
+
+    let visualizer3dMulti = null;
+    let visualizer3dFull = null;
+
+    /* ==========================================================================
+       7. UI SYNCHRONIZATION & RENDER PIPELINE
+       ========================================================================== */
+    function syncInputsToState() {
+      state.cameraName = els.cameraName.value;
+      state.sensorFormat = els.sensorFormat.value;
+      state.sensorW = parseFloat(els.sensorWidthMm.value) || 7.18;
+      state.sensorH = parseFloat(els.sensorHeightMm.value) || 5.32;
+      state.resW = parseInt(els.resWidthPx.value, 10) || 1920;
+      state.resH = parseInt(els.resHeightPx.value, 10) || 1080;
+
+      state.focalMm = parseFloat(els.focalSlider.value) || 4.7;
+      state.hfov = parseFloat(els.hfovSlider.value) || 75.0;
+
+      state.mountH = parseFloat(els.mountHeight.value) || 4.0;
+      state.tilt = parseFloat(els.tiltAngle.value) || 15.0;
+      state.pan = parseFloat(els.panAngle.value) || 0.0;
+
+      state.targetType = els.targetType.value;
+      state.targetHeight = parseFloat(els.targetHeightM.value) || 1.70;
+      state.targetDist = parseFloat(els.targetDist.value) || 25.0;
+      state.targetOffset = parseFloat(els.targetOffset.value) || 0.0;
+    }
+
+    function renderAll() {
+      calculateMetrics();
+
+      // Update Slider Label Badges
+      els.focalVal.textContent = `${state.focalMm.toFixed(1)} mm`;
+      els.hfovVal.textContent = `${state.hfov.toFixed(1)}°`;
+      els.vfovVal.value = `${state.vfov.toFixed(1)}°`;
+      els.dfovVal.value = `${state.dfov.toFixed(1)}°`;
+
+      els.heightVal.textContent = formatDist(state.mountH);
+      els.tiltVal.textContent = `${state.tilt}°`;
+      els.panVal.textContent = `${state.pan}°`;
+      els.distVal.textContent = formatDist(state.targetDist);
+      els.offsetVal.textContent = formatDist(state.targetOffset);
+
+      // Render 2D Views
+      drawTopViewOnCanvas(els.topMulti);
+      drawTopViewOnCanvas(els.topFull);
+      drawSideViewOnCanvas(els.sideMulti);
+      drawSideViewOnCanvas(els.sideFull);
+
+      // Render Simulated Camera Viewports
+      drawCamViewOnCanvas(els.camMulti);
+      drawCamViewOnCanvas(els.camFull);
+
+      // Render 3D Scenes
+      if (visualizer3dMulti) visualizer3dMulti.updateScene();
+      if (visualizer3dFull) visualizer3dFull.updateScene();
+    }
+
+    /* ==========================================================================
+       8. EVENT HANDLERS & REACTIVE CONTROLS
+       ========================================================================== */
+
+    // Bidirectional Lens: When Focal Length Slider Moves
+    els.focalSlider.addEventListener("input", () => {
+      state.focalMm = parseFloat(els.focalSlider.value);
+      const angles = computeFovFromFocal(state.focalMm, state.sensorW, state.sensorH);
+      state.hfov = angles.hfov;
+      state.vfov = angles.vfov;
+      state.dfov = angles.dfov;
+      els.hfovSlider.value = state.hfov.toFixed(1);
+      renderAll();
+    });
+
+    // Bidirectional Lens: When HFOV Slider Moves
+    els.hfovSlider.addEventListener("input", () => {
+      state.hfov = parseFloat(els.hfovSlider.value);
+      state.focalMm = computeFocalFromHfov(state.hfov, state.sensorW);
+      const angles = computeFovFromFocal(state.focalMm, state.sensorW, state.sensorH);
+      state.vfov = angles.vfov;
+      state.dfov = angles.dfov;
+      els.focalSlider.value = state.focalMm.toFixed(1);
+      renderAll();
+    });
+
+    // Camera Preset Selector
+    els.cameraPreset.addEventListener("change", () => {
+      const key = els.cameraPreset.value;
+      if (CAMERA_PRESETS[key]) {
+        const p = CAMERA_PRESETS[key];
+        els.cameraName.value = p.name;
+        els.sensorFormat.value = p.sensorFormat;
+        els.sensorWidthMm.value = p.sensorW;
+        els.sensorHeightMm.value = p.sensorH;
+        els.resolutionPreset.value = p.resKey;
+        els.resWidthPx.value = p.resW;
+        els.resHeightPx.value = p.resH;
+
+        els.focalSlider.min = p.focalMin || 2.0;
+        els.focalSlider.max = p.focalMax || 50.0;
+        els.focalSlider.value = p.focalMm;
+
+        els.mountHeight.value = p.mountH;
+        els.tiltAngle.value = p.tilt;
+        els.panAngle.value = p.pan;
+        els.targetDist.value = p.targetDist;
+        els.targetHeightM.value = p.targetHeight;
+
+        syncInputsToState();
+        const angles = computeFovFromFocal(state.focalMm, state.sensorW, state.sensorH);
+        state.hfov = angles.hfov;
+        state.vfov = angles.vfov;
+        state.dfov = angles.dfov;
+        els.hfovSlider.value = state.hfov.toFixed(1);
+
+        els.customSensorRow.style.display = p.sensorFormat === "custom" ? "grid" : "none";
+        els.customResRow.style.display = p.resKey === "custom" ? "grid" : "none";
+        renderAll();
+      }
+    });
+
+    // Sensor Format Selector
+    els.sensorFormat.addEventListener("change", () => {
+      const format = els.sensorFormat.value;
+      if (SENSOR_SIZES[format] && format !== "custom") {
+        els.sensorWidthMm.value = SENSOR_SIZES[format].w;
+        els.sensorHeightMm.value = SENSOR_SIZES[format].h;
+        els.customSensorRow.style.display = "none";
+      } else {
+        els.customSensorRow.style.display = "grid";
+      }
+      syncInputsToState();
+      const angles = computeFovFromFocal(state.focalMm, state.sensorW, state.sensorH);
+      state.hfov = angles.hfov;
+      state.vfov = angles.vfov;
+      state.dfov = angles.dfov;
+      els.hfovSlider.value = state.hfov.toFixed(1);
+      renderAll();
+    });
+
+    // Sensor custom dimensions
+    [els.sensorWidthMm, els.sensorHeightMm].forEach(el => {
+      el.addEventListener("input", () => {
+        syncInputsToState();
+        const angles = computeFovFromFocal(state.focalMm, state.sensorW, state.sensorH);
+        state.hfov = angles.hfov;
+        state.vfov = angles.vfov;
+        state.dfov = angles.dfov;
+        els.hfovSlider.value = state.hfov.toFixed(1);
+        renderAll();
+      });
+    });
+
+    // Resolution Preset Selector
+    els.resolutionPreset.addEventListener("change", () => {
+      const res = els.resolutionPreset.value;
+      if (RESOLUTIONS[res] && res !== "custom") {
+        els.resWidthPx.value = RESOLUTIONS[res].w;
+        els.resHeightPx.value = RESOLUTIONS[res].h;
+        els.customResRow.style.display = "none";
+      } else {
+        els.customResRow.style.display = "grid";
+      }
+      syncInputsToState();
+      renderAll();
+    });
+
+    [els.resWidthPx, els.resHeightPx].forEach(el => {
+      el.addEventListener("input", () => {
+        syncInputsToState();
+        renderAll();
+      });
+    });
+
+    // Target Presets
+    els.targetType.addEventListener("change", () => {
+      const t = els.targetType.value;
+      if (TARGET_PRESETS[t]) {
+        els.targetHeightM.value = TARGET_PRESETS[t].height;
+      }
+      syncInputsToState();
+      renderAll();
+    });
+
+    // Standard Sliders
+    [
+      els.cameraName, els.mountHeight, els.tiltAngle, els.panAngle,
+      els.targetHeightM, els.targetDist, els.targetOffset
+    ].forEach(el => {
+      el.addEventListener("input", () => {
+        syncInputsToState();
+        renderAll();
+      });
+    });
+
+    // Unit Toggle (Metric / Imperial)
+    els.unitToggle.addEventListener("click", () => {
+      state.unit = state.unit === "m" ? "ft" : "m";
+      els.unitLabel.textContent = state.unit === "m" ? "Metric (m)" : "Imperial (ft)";
+      renderAll();
+    });
+
+    // Tabs switching
+    const tabBtns = document.querySelectorAll(".tab-btn");
+    const tabContainers = document.querySelectorAll(".view-container");
+    tabBtns.forEach(btn => {
+      btn.addEventListener("click", () => {
+        tabBtns.forEach(b => b.classList.remove("active"));
+        tabContainers.forEach(c => c.classList.remove("active"));
+
+        btn.classList.add("active");
+        const targetId = btn.getAttribute("data-tab");
+        const targetEl = document.getElementById(targetId);
+        if (targetEl) targetEl.classList.add("active");
+
+        // Trigger canvas & 3D resize after tab transition
+        setTimeout(() => {
+          if (visualizer3dMulti) visualizer3dMulti.resize();
+          if (visualizer3dFull) visualizer3dFull.resize();
+          renderAll();
+        }, 50);
+      });
+    });
+
+    // 3D View Preset Buttons
+    document.getElementById("btnViewIso").addEventListener("click", () => visualizer3dFull.setPresetView("iso"));
+    document.getElementById("btnViewTop").addEventListener("click", () => visualizer3dFull.setPresetView("top"));
+    document.getElementById("btnViewSide").addEventListener("click", () => visualizer3dFull.setPresetView("side"));
+    document.getElementById("btnViewCamPov").addEventListener("click", () => visualizer3dFull.setPresetView("cam"));
+    document.getElementById("btnReset3d").addEventListener("click", () => visualizer3dFull.setPresetView("iso"));
+
+    // Resize Handler
+    window.addEventListener("resize", () => {
+      if (visualizer3dMulti) visualizer3dMulti.resize();
+      if (visualizer3dFull) visualizer3dFull.resize();
+      renderAll();
+    });
+
+    /* ==========================================================================
+       9. JSON EXPORT & IMPORT ENGINE
+       ========================================================================== */
+    function showToast(msg) {
+      els.toast.textContent = msg;
+      els.toast.classList.add("show");
+      setTimeout(() => els.toast.classList.remove("show"), 3200);
+    }
+
+    function exportConfigurationJson() {
+      syncInputsToState();
+      const exportData = {
+        schema: "wii-cctv-fov-planner/v1",
+        exportedAt: new Date().toISOString(),
+        camera: {
+          label: state.cameraName,
+          preset: els.cameraPreset.value,
+          sensor: {
+            format: state.sensorFormat,
+            widthMm: state.sensorW,
+            heightMm: state.sensorH
+          },
+          resolution: {
+            preset: els.resolutionPreset.value,
+            widthPx: state.resW,
+            heightPx: state.resH,
+            aspectRatio: els.badgeAspect.textContent
+          },
+          optics: {
+            focalLengthMm: state.focalMm,
+            hfovDeg: state.hfov,
+            vfovDeg: state.vfov,
+            dfovDeg: state.dfov
+          }
+        },
+        mounting: {
+          heightM: state.mountH,
+          tiltAngleDeg: state.tilt,
+          panAzimuthDeg: state.pan
+        },
+        target: {
+          type: state.targetType,
+          heightM: state.targetHeight,
+          groundDistanceM: state.targetDist,
+          lateralOffsetM: state.targetOffset
+        },
+        metrics: {
+          pixelsPerMeter: Math.round(state.ppm),
+          doriClassification: state.doriLevel,
+          groundWidthM: parseFloat(state.targetWidth.toFixed(2)),
+          blindSpotNearCutoffM: isFinite(state.blindSpot) ? parseFloat(state.blindSpot.toFixed(2)) : null,
+          farCutoffM: isFinite(state.farCutoff) ? parseFloat(state.farCutoff.toFixed(2)) : null,
+          doriRangesM: {
+            identification: parseFloat(state.doriRanges.ident.toFixed(1)),
+            recognition: parseFloat(state.doriRanges.recog.toFixed(1)),
+            observation: parseFloat(state.doriRanges.observe.toFixed(1)),
+            detection: parseFloat(state.doriRanges.detect.toFixed(1))
+          }
+        }
+      };
+
+      const jsonStr = JSON.stringify(exportData, null, 2);
+      const blob = new Blob([jsonStr], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      const safeName = (state.cameraName || "camera").replace(/[^a-z0-9]/gi, "_").toLowerCase();
+      a.href = url;
+      a.download = `cctv-fov-${safeName}-${Date.now()}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      showToast("Configuration exported as JSON file!");
+    }
+
+    function importConfigurationJson(jsonText) {
+      try {
+        const data = typeof jsonText === "string" ? JSON.parse(jsonText) : jsonText;
+
+        if (data.camera) {
+          if (data.camera.label) els.cameraName.value = data.camera.label;
+          if (data.camera.preset && els.cameraPreset.querySelector(`option[value="${data.camera.preset}"]`)) {
+            els.cameraPreset.value = data.camera.preset;
+          } else {
+            els.cameraPreset.value = "custom";
+          }
+
+          if (data.camera.sensor) {
+            if (data.camera.sensor.format) els.sensorFormat.value = data.camera.sensor.format;
+            if (data.camera.sensor.widthMm) els.sensorWidthMm.value = data.camera.sensor.widthMm;
+            if (data.camera.sensor.heightMm) els.sensorHeightMm.value = data.camera.sensor.heightMm;
+          }
+
+          if (data.camera.resolution) {
+            if (data.camera.resolution.preset) els.resolutionPreset.value = data.camera.resolution.preset;
+            if (data.camera.resolution.widthPx) els.resWidthPx.value = data.camera.resolution.widthPx;
+            if (data.camera.resolution.heightPx) els.resHeightPx.value = data.camera.resolution.heightPx;
+          }
+
+          if (data.camera.optics) {
+            if (data.camera.optics.focalLengthMm !== undefined) {
+              els.focalSlider.value = data.camera.optics.focalLengthMm;
+            }
+            if (data.camera.optics.hfovDeg !== undefined) {
+              els.hfovSlider.value = data.camera.optics.hfovDeg;
+            }
+          }
+        }
+
+        if (data.mounting) {
+          if (data.mounting.heightM !== undefined) els.mountHeight.value = data.mounting.heightM;
+          if (data.mounting.tiltAngleDeg !== undefined) els.tiltAngle.value = data.mounting.tiltAngleDeg;
+          if (data.mounting.panAzimuthDeg !== undefined) els.panAngle.value = data.mounting.panAzimuthDeg;
+        }
+
+        if (data.target) {
+          if (data.target.type && els.targetType.querySelector(`option[value="${data.target.type}"]`)) {
+            els.targetType.value = data.target.type;
+          }
+          if (data.target.heightM !== undefined) els.targetHeightM.value = data.target.heightM;
+          if (data.target.groundDistanceM !== undefined) els.targetDist.value = data.target.groundDistanceM;
+          if (data.target.lateralOffsetM !== undefined) els.targetOffset.value = data.target.lateralOffsetM;
+        }
+
+        syncInputsToState();
+        renderAll();
+        showToast("JSON Configuration loaded successfully!");
+      } catch (err) {
+        alert("Failed to parse JSON file: " + err.message);
+      }
+    }
+
+    els.btnExportJson.addEventListener("click", exportConfigurationJson);
+
+    els.btnImportJson.addEventListener("click", () => els.jsonFileInput.click());
+
+    els.jsonFileInput.addEventListener("change", (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (ev) => importConfigurationJson(ev.target.result);
+      reader.readAsText(file);
+      els.jsonFileInput.value = "";
+    });
+
+    // Drag and Drop JSON onto window
+    window.addEventListener("dragover", (e) => {
+      e.preventDefault();
+      els.dropZone.classList.add("active");
+    });
+    window.addEventListener("dragleave", (e) => {
+      if (e.clientX <= 0 || e.clientY <= 0) {
+        els.dropZone.classList.remove("active");
+      }
+    });
+    window.addEventListener("drop", (e) => {
+      e.preventDefault();
+      els.dropZone.classList.remove("active");
+      const file = e.dataTransfer.files[0];
+      if (file && (file.type === "application/json" || file.name.endsWith(".json"))) {
+        const reader = new FileReader();
+        reader.onload = (ev) => importConfigurationJson(ev.target.result);
+        reader.readAsText(file);
+      }
+    });
+
+    /* ==========================================================================
+       10. LOCALSTORAGE SAVED PRESETS
+       ========================================================================== */
+    const STORAGE_KEY = "wii_cctv_saved_configs";
+
+    function refreshSavedPresetsDropdown() {
+      const select = els.savedConfigsSelect;
+      select.innerHTML = '<option value="">-- Saved Browser Presets --</option>';
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return;
+      try {
+        const map = JSON.parse(raw);
+        Object.keys(map).forEach(key => {
+          const opt = document.createElement("option");
+          opt.value = key;
+          opt.textContent = `${key} (${map[key].camera?.label || "Camera"})`;
+          select.appendChild(opt);
+        });
+      } catch (e) {}
+    }
+
+    els.btnSaveBrowser.addEventListener("click", () => {
+      const name = prompt("Enter a preset name for this configuration:", state.cameraName || "My Setup");
+      if (!name) return;
+      syncInputsToState();
+      const raw = localStorage.getItem(STORAGE_KEY);
+      const map = raw ? JSON.parse(raw) : {};
+      map[name] = {
+        name,
+        camera: {
+          label: state.cameraName,
+          preset: els.cameraPreset.value,
+          sensorFormat: state.sensorFormat,
+          sensorW: state.sensorW,
+          sensorH: state.sensorH,
+          resPreset: els.resolutionPreset.value,
+          resW: state.resW,
+          resH: state.resH,
+          focalMm: state.focalMm,
+          hfov: state.hfov
+        },
+        mounting: {
+          mountH: state.mountH,
+          tilt: state.tilt,
+          pan: state.pan
+        },
+        target: {
+          type: state.targetType,
+          height: state.targetHeight,
+          dist: state.targetDist,
+          offset: state.targetOffset
+        }
+      };
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(map));
+      refreshSavedPresetsDropdown();
+      els.savedConfigsSelect.value = name;
+      showToast(`Preset "${name}" saved in browser!`);
+    });
+
+    els.savedConfigsSelect.addEventListener("change", () => {
+      const name = els.savedConfigsSelect.value;
+      if (!name) return;
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return;
+      const map = JSON.parse(raw);
+      if (map[name]) {
+        const item = map[name];
+        if (item.camera) {
+          els.cameraName.value = item.camera.label || name;
+          if (item.camera.preset) els.cameraPreset.value = item.camera.preset;
+          if (item.camera.sensorFormat) els.sensorFormat.value = item.camera.sensorFormat;
+          if (item.camera.sensorW) els.sensorWidthMm.value = item.camera.sensorW;
+          if (item.camera.sensorH) els.sensorHeightMm.value = item.camera.sensorH;
+          if (item.camera.resPreset) els.resolutionPreset.value = item.camera.resPreset;
+          if (item.camera.resW) els.resWidthPx.value = item.camera.resW;
+          if (item.camera.resH) els.resHeightPx.value = item.camera.resH;
+          if (item.camera.focalMm) els.focalSlider.value = item.camera.focalMm;
+          if (item.camera.hfov) els.hfovSlider.value = item.camera.hfov;
+        }
+        if (item.mounting) {
+          if (item.mounting.mountH !== undefined) els.mountHeight.value = item.mounting.mountH;
+          if (item.mounting.tilt !== undefined) els.tiltAngle.value = item.mounting.tilt;
+          if (item.mounting.pan !== undefined) els.panAngle.value = item.mounting.pan;
+        }
+        if (item.target) {
+          if (item.target.type) els.targetType.value = item.target.type;
+          if (item.target.height !== undefined) els.targetHeightM.value = item.target.height;
+          if (item.target.dist !== undefined) els.targetDist.value = item.target.dist;
+          if (item.target.offset !== undefined) els.targetOffset.value = item.target.offset;
+        }
+        syncInputsToState();
+        renderAll();
+        showToast(`Preset "${name}" loaded!`);
+      }
+    });
+
+    els.btnDeleteBrowser.addEventListener("click", () => {
+      const name = els.savedConfigsSelect.value;
+      if (!name) return;
+      if (!confirm(`Delete saved preset "${name}"?`)) return;
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return;
+      const map = JSON.parse(raw);
+      delete map[name];
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(map));
+      refreshSavedPresetsDropdown();
+      showToast(`Preset "${name}" deleted.`);
+    });
+
+    /* ==========================================================================
+       11. INITIALIZATION ON PAGE LOAD
+       ========================================================================== */
+    window.addEventListener("DOMContentLoaded", () => {
+      // Initialize 3D Scenes
+      if (window.THREE) {
+        visualizer3dMulti = new Visualizer3D(els.wrapper3dMulti);
+        visualizer3dFull = new Visualizer3D(els.wrapper3dFull);
+      }
+      refreshSavedPresetsDropdown();
+      syncInputsToState();
+      
+      // Calculate initial angles & render
+      const angles = computeFovFromFocal(state.focalMm, state.sensorW, state.sensorH);
+      state.hfov = angles.hfov;
+      state.vfov = angles.vfov;
+      state.dfov = angles.dfov;
+      els.hfovSlider.value = state.hfov.toFixed(1);
+
+      renderAll();
+    });
   </script>
 </body>
 </html>

@@ -1,116 +1,177 @@
-# Bosch DINION 7100i IR (2MP / NBE-7702) Field of View & Distance Tool
+# Universal Camera Field of View (FOV) & 2D/3D Planning Tool
 
-Interactive client-side Field of View (FOV) and distance estimation engine for the **Bosch DINION 7100i IR (2MP / NBE-7702)** camera. Hosted natively via GitHub Pages at:
-`https://sureshmagix.github.io/wii-dinion-fov-tool/`
+An interactive, high-precision optical geometry, 2D plan, and 3D frustum visualization suite for CCTV, surveillance, and computer vision cameras.
 
----
-
-## Supported Camera Specifications
-
-The application models the native 1/1.8" CMOS sensor ($1920 \times 1080$, 16:9 aspect ratio) across both factory lens configurations:
-
-| Parameter | Standard Lens (NBE-7702-ALX) | Telephoto Lens (NBE-7702-ALXT) |
-| :--- | :--- | :--- |
-| **Focal Length** | 4.7 mm – 10 mm | 10.5 mm – 47 mm |
-| **Horizontal FOV (HFOV)** | $103^\circ \to 49^\circ$ | $41.6^\circ \to 9.3^\circ$ |
-| **Vertical FOV (VFOV)** | $53^\circ \to 27^\circ$ | $23.9^\circ \to 5.3^\circ$ |
-| **Native Resolution** | $1920 \times 1080$ | $1920 \times 1080$ |
+Hosted via GitHub Pages:
+**`https://sureshmagix.github.io/wii-dinion-fov-tool/`**
 
 ---
 
-## Core Mathematical Formulas
+## Key Features
 
-### 1. Optical Geometry & Ground Footprint
+- **Universal Camera & Sensor Support**:
+  - Pre-configured camera profiles: Bosch DINION 7100i IR (Standard ALX & Telephoto ALXT lenses), Generic 1080p Fixed Dome & Bullet, Generic 4MP Varifocal, Generic 4K/8MP Ultra HD, and Custom Camera specification.
+  - Sensor formats: 1/1.8", 1/2.8", 1/2.7", 1/2.5", 1/2", 1/3", 2/3", 1", and custom sensor width/height in millimeters.
+  - Resolutions: 1080p (1920×1080), 4MP (2560×1440), 5MP (2592×1944), 4K/8MP (3840×2160), 12MP (4000×3000), 720p, or custom pixel dimensions.
 
-* **Focal Length in Pixels ($f_{px}$):**
-  Derived from the field of view angles and frame dimensions ($W_{px} = 1920$, $H_{px} = 1080$):
-  $$f_x = \frac{W_{px} / 2}{\tan(\text{HFOV} / 2)}, \quad f_y = \frac{H_{px} / 2}{\tan(\text{VFOV} / 2)}$$
-  $$f_{px} = \frac{f_x + f_y}{2}$$
+- **Bidirectional Optical Synchronization**:
+  - Live reactive conversion between **Focal Length ($f$ in mm)** and **Field of View angles** (Horizontal HFOV, Vertical VFOV, and Diagonal DFOV).
 
-* **Horizontal Ground Footprint Width ($W_{scene}$):**
-  The lateral field coverage at target distance $D$ along the optical center line:
-  $$W_{scene} = 2 \times D \times \tan\left(\frac{\text{HFOV}}{2}\right)$$
+- **Multi-Angle & 3D Frustum Visualizations**:
+  - **Combined Multi-View**: Synchronized quad-panel view displaying 3D spatial frustum, simulated camera viewfinder, 2D top-down ground plan, and 2D side elevation profile simultaneously.
+  - **Interactive 3D Frustum (WebGL / Three.js)**: Orbit, pan, and zoom around a 3D metric scene with camera pole, tilted/panned camera body, translucent DORI volumetric FOV pyramid, metric ground grid, and 3D target models. One-click preset angles: 3D Isometric, Top View, Side View, and Camera POV.
+  - **2D Plan View (Top-Down Azimuth Footprint)**: Radial distance range rings, concentric DORI coverage zones, and target position with lateral offset.
+  - **2D Side Profile (Elevation & Blind Spot)**: Optical axis tilt angle, upper/lower ray trajectories, near ground cutoff / dead zone boundary directly under the pole, and target silhouette.
+  - **Simulated Camera Viewfinder**: Realistic sensor viewport with horizon line, crosshairs, and projected target bounding box with live pixel dimension readout and DORI badge.
 
-* **Vertical Ground Footprint Height ($H_{scene}$):**
-  $$H_{scene} = 2 \times D \times \tan\left(\frac{\text{VFOV}}{2}\right)$$
+- **EN 62676-4 / IEC 62676-4 DORI Compliance**:
+  - Live Pixels-Per-Meter ($\text{PPM}$) and Pixels-Per-Foot ($\text{PPF}$) density estimation at target distance.
+  - Automatic DORI classification:
+    - **Identification ($\ge 250\text{ PPM}$)**
+    - **Recognition ($\ge 125\text{ PPM}$)**
+    - **Observation ($\ge 63\text{ PPM}$)**
+    - **Detection ($\ge 25\text{ PPM}$)**
+    - **Monitoring ($< 25\text{ PPM}$)**
+  - Maximum effective range table for every DORI threshold.
+
+- **Configuration Import / Export (JSON)**:
+  - **Export JSON**: One-click download of `.json` configuration file containing all camera optics, sensor specs, mounting parameters, and target distances.
+  - **Import JSON**: File picker or instant drag-and-drop `.json` file anywhere onto the web page.
+  - **Browser Preset Storage**: Save, load, and delete custom named site setups directly in `localStorage`.
+  - **Metric & Imperial**: Seamless 1-click toggle between Meters ($\text{m}$) and Feet ($\text{ft}$).
 
 ---
 
-### 2. Mounting Height, Tilt & Blind Spot (Dead Zone)
+## Core Optical & Mathematical Formulations
 
-Given a mounting height $h_{mount}$ and a downward tilt angle $\alpha$:
+### 1. Sensor Geometry & Bidirectional FOV Calculation
+
+Given sensor physical dimensions ($W_{\text{sensor}}$ and $H_{\text{sensor}}$ in mm) and lens focal length ($f$ in mm):
+
+$$\text{HFOV} = 2 \times \arctan\left(\frac{W_{\text{sensor}}}{2f}\right) \times \left(\frac{180^\circ}{\pi}\right)$$
+
+$$\text{VFOV} = 2 \times \arctan\left(\frac{H_{\text{sensor}}}{2f}\right) \times \left(\frac{180^\circ}{\pi}\right)$$
+
+$$\text{DFOV} = 2 \times \arctan\left(\frac{\sqrt{W_{\text{sensor}}^2 + H_{\text{sensor}}^2}}{2f}\right) \times \left(\frac{180^\circ}{\pi}\right)$$
+
+Conversely, given a desired Horizontal FOV angle ($\text{HFOV}$):
+
+$$f = \frac{W_{\text{sensor}}}{2 \times \tan\left(\frac{\text{HFOV}}{2} \times \frac{\pi}{180^\circ}\right)}$$
+
+---
+
+### 2. Scene Coverage & Pixel Density (EN 62676-4 DORI)
+
+At ground distance $D$ along the optical center line:
+
+* **Horizontal Field Width ($W_{\text{scene}}$):**
+  $$W_{\text{scene}} = 2 \times D \times \tan\left(\frac{\text{HFOV}}{2}\right)$$
+
+* **Vertical Field Height ($H_{\text{scene}}$):**
+  $$H_{\text{scene}} = 2 \times D \times \tan\left(\frac{\text{VFOV}}{2}\right)$$
+
+* **Pixels-Per-Meter ($\text{PPM}$):**
+  $$\text{PPM} = \frac{W_{\text{px}}}{W_{\text{scene}}} = \frac{W_{\text{px}}}{2 \times D \times \tan\left(\frac{\text{HFOV}}{2}\right)}$$
+
+* **Maximum DORI Distance Range for Threshold $PPM_{\text{target}}$:**
+  $$D_{\text{max}} = \frac{W_{\text{px}}}{2 \times PPM_{\text{target}} \times \tan\left(\frac{\text{HFOV}}{2}\right)}$$
+
+---
+
+### 3. Mounting Height, Tilt & Ground Cutoffs (Blind Spot)
+
+Given a mounting height $h$ and a downward tilt angle $\alpha$:
 
 $$\theta_{\text{top}} = \alpha - \frac{\text{VFOV}}{2}, \quad \theta_{\text{bottom}} = \alpha + \frac{\text{VFOV}}{2}$$
 
-* **Near Ground Cutoff (Blind Zone Boundary under the pole):**
-  $$\text{Cutoff}_{\text{near}} = \frac{h_{mount}}{\tan(\theta_{\text{bottom}})}$$
+* **Near Blind Spot / Dead Zone Boundary (under pole):**
+  $$\text{Cutoff}_{\text{near}} = \frac{h}{\tan(\theta_{\text{bottom}})} \quad \left(0 < \theta_{\text{bottom}} < \frac{\pi}{2}\right)$$
 
 * **Far Ground Cutoff:**
-  $$\text{Cutoff}_{\text{far}} = \frac{h_{mount}}{\tan(\theta_{\text{top}})} \quad (\text{valid for } \theta_{\text{top}} > 0)$$
+  $$\text{Cutoff}_{\text{far}} = \frac{h}{\tan(\theta_{\text{top}})} \quad (\theta_{\text{top}} > 0)$$
+  *(When $\theta_{\text{top}} \le 0$, the camera's upper field of view extends to or above the horizon).*
 
 ---
 
-### 3. DORI & Pixel Density Standards (EN 62676-4)
-
-Pixels-Per-Meter ($\text{PPM}$) indicates the level of detail available at distance $D$ for a $1920 \times 1080$ sensor:
-
-$$\text{PPM} = \frac{W_{px}}{W_{scene}} = \frac{1920}{2 \times D \times \tan(\text{HFOV} / 2)}$$
-
-The industry DORI threshold criteria:
-* **Detection ($\ge 25\text{ PPM}$):** Verify whether a human or vehicle is present.
-* **Observation ($\ge 63\text{ PPM}$):** View characteristic details (clothing color, vehicle shape).
-* **Recognition ($\ge 125\text{ PPM}$):** Determine with certainty whether an individual has been seen before.
-* **Identification ($\ge 250\text{ PPM}$):** Enable identification of an individual beyond reasonable doubt.
-
----
-
-### 4. Real-Time Distance Estimation Methods
-
-#### Method A: Native Bosch IVA Calibrated 3D Coordinates
-When Bosch 3D Scene Calibration is active in camera firmware, the embedded ONVIF metadata stream outputs Cartesian ground-plane coordinates $(X, Y, Z)$ relative to the pole base:
-
-* **Ground Plane Distance:**
-  $$D_{\text{ground}} = \sqrt{X^2 + Y^2}$$
+### 4. 3D Spatial Coordinates & Line-of-Sight
 
 * **Direct Line-of-Sight (Euclidean) Distance:**
-  $$D_{\text{LOS}} = \sqrt{X^2 + Y^2 + Z^2}$$
+  $$D_{\text{LOS}} = \sqrt{D_{\text{ground}}^2 + h^2 + X_{\text{offset}}^2}$$
 
-* **Azimuth Angle ($\theta$):**
-  $$\theta = \arctan2(X, Y)$$
-
-#### Method B: Pinhole Triangle Similarity (Fallback / ROI Tracker)
-When evaluating custom bounding boxes using known target heights ($H_{\text{real}}$):
-
-* **Line-of-Sight Distance ($D_{\text{LOS}}$):**
-  $$D_{\text{LOS}} = \frac{H_{\text{real}} \times f_{px}}{h_{px}}$$
-  *(where $h_{px}$ is the vertical height of the bounding box in pixels and $f_{px}$ is effective focal length)*.
-
-* **Projected Ground Distance ($D_{\text{ground}}$):**
-  $$D_{\text{ground}} = \sqrt{\max\left(0, D_{\text{LOS}}^2 - h_{mount}^2\right)}$$
+* **Target Object Pixel Height in Sensor Frame ($h_{\text{px}}$):**
+  $$h_{\text{px}} = \frac{H_{\text{target}} \times f_{\text{px}}}{D_{\text{LOS}}}$$
+  where $f_{\text{px}} = \frac{W_{\text{px}} / 2}{\tan(\text{HFOV}/2)}$.
 
 ---
 
-## Object Reference Presets
+## JSON Configuration Schema
 
-For optical similarity estimations, standard height baselines ($H_{\text{real}}$) are mapped as follows:
+Exported configuration files adhere to the following schema:
 
-* **Standing Human:** $1.70\text{ m}$
-* **Seated Human:** $1.30\text{ m}$
-* **Sedan / Standard Car:** $1.48\text{ m}$
-* **SUV / Van:** $1.80\text{ m}$
-* **Truck / Bus:** $3.20\text{ m}$
-* **Bicycle & Rider:** $1.50\text{ m}$
-* **Standard Door Height:** $2.05\text{ m}$
+```json
+{
+  "schema": "wii-cctv-fov-planner/v1",
+  "exportedAt": "2026-09-15T10:00:00.000Z",
+  "camera": {
+    "label": "CAM-01 DINION 7100i",
+    "preset": "bosch-7100i-wide",
+    "sensor": {
+      "format": "1/1.8",
+      "widthMm": 7.18,
+      "heightMm": 5.32
+    },
+    "resolution": {
+      "preset": "1920x1080",
+      "widthPx": 1920,
+      "heightPx": 1080,
+      "aspectRatio": "16:9"
+    },
+    "optics": {
+      "focalLengthMm": 4.7,
+      "hfovDeg": 75.0,
+      "vfovDeg": 45.0,
+      "dfovDeg": 85.0
+    }
+  },
+  "mounting": {
+    "heightM": 4.0,
+    "tiltAngleDeg": 15.0,
+    "panAzimuthDeg": 0.0
+  },
+  "target": {
+    "type": "human",
+    "heightM": 1.70,
+    "groundDistanceM": 25.0,
+    "lateralOffsetM": 0.0
+  },
+  "metrics": {
+    "pixelsPerMeter": 55,
+    "doriClassification": "Observation",
+    "groundWidthM": 35.0,
+    "blindSpotNearCutoffM": 5.1,
+    "farCutoffM": 74.2,
+    "doriRangesM": {
+      "identification": 5.5,
+      "recognition": 11.0,
+      "observation": 21.8,
+      "detection": 54.9
+    }
+  }
+}
+```
 
 ---
 
-## Local Development & Deployment
+## Local Development & Usage
 
-Clone the repository and preview the visualizer locally:
+Clone the repository and open `index.html` in any modern web browser:
 
 ```bash
-git clone [https://github.com/sureshmagix/wii-dinion-fov-tool.git](https://github.com/sureshmagix/wii-dinion-fov-tool.git)
+git clone https://github.com/sureshmagix/wii-dinion-fov-tool.git
 cd wii-dinion-fov-tool
 
-# Open with any local web server or browser
+# Open directly in your browser
 open index.html
+```
+
+Deploying to GitHub Pages requires no build step—simply push `index.html` to the `main` branch.
