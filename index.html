@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bosch DINION 7100i IR - FOV Visualizer</title>
+  <style>
+    :root {
+      --bg-dark: #121418;
+      --card-bg: #1e222b;
+      --accent: #00e5ff;
+      --text: #e0e6ed;
+    }
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: var(--bg-dark);
+      color: var(--text);
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+    header {
+      padding: 1rem 2rem;
+      background: #0d0f12;
+      border-bottom: 1px solid #2d333f;
+    }
+    h1 { margin: 0; font-size: 1.3rem; color: #fff; }
+    .container {
+      display: grid;
+      grid-template-columns: 340px 1fr;
+      flex: 1;
+      gap: 1rem;
+      padding: 1rem;
+    }
+    .panel {
+      background: var(--card-bg);
+      border-radius: 8px;
+      padding: 1.2rem;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+      overflow-y: auto;
+    }
+    .form-group { margin-bottom: 1.1rem; }
+    label { display: block; font-size: 0.82rem; color: #9bb0c1; margin-bottom: 0.35rem; }
+    input, select {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 0.5rem;
+      background: #15181e;
+      border: 1px solid #363d4e;
+      border-radius: 4px;
+      color: #fff;
+    }
+    .canvas-container {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+    canvas {
+      width: 100%;
+      height: 380px;
+      background: #161920;
+      border-radius: 8px;
+      border: 1px solid #2a313d;
+    }
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 0.8rem;
+      margin-top: 1rem;
+    }
+    .stat-card {
+      background: #15181f;
+      padding: 0.6rem 0.8rem;
+      border-radius: 6px;
+      border-left: 3px solid var(--accent);
+    }
+    .stat-title { font-size: 0.72rem; color: #8899a6; }
+    .stat-val { font-size: 1.1rem; font-weight: bold; color: #fff; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Bosch DINION 7100i IR (2MP) — Field of View Planner</h1>
+  </header>
+
+  <div class="container">
+    <div class="panel">
+      <div class="form-group">
+        <label>Lens Variant</label>
+        <select id="lensVariant">
+          <option value="wide">Standard 4.7-10mm (103° - 49°)</option>
+          <option value="tele">Telephoto 10.5-47mm (41.6° - 9.3°)</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Zoom Level (HFOV: <span id="hfovVal">70</span>°)</label>
+        <input type="range" id="hfovSlider" min="49" max="103" step="0.5" value="70" />
+      </div>
+
+      <div class="form-group">
+        <label>Mount Height: <span id="heightVal">4.0</span> m</label>
+        <input type="range" id="mountHeight" min="1.5" max="15" step="0.5" value="4.0" />
+      </div>
+
+      <div class="form-group">
+        <label>Downward Tilt: <span id="tiltVal">15</span>°</label>
+        <input type="range" id="tiltAngle" min="0" max="60" step="1" value="15" />
+      </div>
+
+      <div class="form-group">
+        <label>Target Object Distance: <span id="distVal">25</span> m</label>
+        <input type="range" id="targetDist" min="2" max="120" step="1" value="25" />
+      </div>
+
+      <div class="stats">
+        <div class="stat-card">
+          <div class="stat-title">Ground Width</div>
+          <div class="stat-val" id="statWidth">-- m</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-title">PPM @ Target</div>
+          <div class="stat-val" id="statPPM">-- px/m</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-title">Near Blind Spot</div>
+          <div class="stat-val" id="statBlind">-- m</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-title">EN DORI Standard</div>
+          <div class="stat-val" id="statDORI">--</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="canvas-container">
+      <div>
+        <label>Top-Down 2D Projection (Azimuth Footprint)</label>
+        <canvas id="topViewCanvas"></canvas>
+      </div>
+      <div>
+        <label>Side Profile Elevation (Tilt & Blind Spot)</label>
+        <canvas id="sideViewCanvas"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const lensSelect = document.getElementById("lensVariant");
+    const hfovSlider = document.getElementById("hfovSlider");
+    const mountSlider = document.getElementById("mountHeight");
+    const tiltSlider = document.getElementById("tiltAngle");
+    const distSlider = document.getElementById("targetDist");
+
+    const topCanvas = document.getElementById("topViewCanvas");
+    const sideCanvas = document.getElementById("sideViewCanvas");
+    const ctxTop = topCanvas.getContext("2d");
+    const ctxSide = sideCanvas.getContext("2d");
+
+    function resizeCanvases() {
+      topCanvas.width = topCanvas.clientWidth;
+      topCanvas.height = topCanvas.clientHeight;
+      sideCanvas.width = sideCanvas.clientWidth;
+      sideCanvas.height = sideCanvas.clientHeight;
+    }
+    window.addEventListener("resize", () => { resizeCanvases(); render(); });
+    resizeCanvases();
+
+    lensSelect.addEventListener("change", () => {
+      if (lensSelect.value === "wide") {
+        hfovSlider.min = 49; hfovSlider.max = 103; hfovSlider.value = 75;
+      } else {
+        hfovSlider.min = 9.3; hfovSlider.max = 41.6; hfovSlider.value = 25;
+      }
+      render();
+    });
+
+    [hfovSlider, mountSlider, tiltSlider, distSlider].forEach(el => {
+      el.addEventListener("input", render);
+    });
+
+    function render() {
+      const hfov = parseFloat(hfovSlider.value);
+      const vfov = hfov * (9 / 16); // 16:9 aspect ratio standard
+      const height = parseFloat(mountSlider.value);
+      const tilt = parseFloat(tiltSlider.value);
+      const targetDist = parseFloat(distSlider.value);
+
+      document.getElementById("hfovVal").textContent = hfov.toFixed(1);
+      document.getElementById("heightVal").textContent = height.toFixed(1);
+      document.getElementById("tiltVal").textContent = tilt;
+      document.getElementById("distVal").textContent = targetDist;
+
+      // Metrics calculation
+      const radH = (hfov * Math.PI) / 360;
+      const targetWidth = 2 * targetDist * Math.tan(radH);
+      const ppm = 1920 / targetWidth; // DINION 2MP width is 1920px
+
+      const tiltRad = (tilt * Math.PI) / 180;
+      const vfovHalfRad = ((vfov / 2) * Math.PI) / 180;
+      const bottomAngle = tiltRad + vfovHalfRad;
+      const nearBlind = bottomAngle < Math.PI / 2 ? (height / Math.tan(bottomAngle)).toFixed(1) : "0.0";
+
+      let dori = "Monitor";
+      if (ppm >= 250) dori = "Ident (>=250)";
+      else if (ppm >= 125) dori = "Recog (>=125)";
+      else if (ppm >= 63) dori = "Observe (>=63)";
+      else if (ppm >= 25) dori = "Detect (>=25)";
+
+      document.getElementById("statWidth").textContent = `${targetWidth.toFixed(1)} m`;
+      document.getElementById("statPPM").textContent = `${Math.round(ppm)} px/m`;
+      document.getElementById("statBlind").textContent = `${nearBlind} m`;
+      document.getElementById("statDORI").textContent = dori;
+
+      drawTopView(hfov, targetDist);
+      drawSideView(height, tilt, vfov, targetDist);
+    }
+
+    function drawTopView(hfov, targetDist) {
+      const w = topCanvas.width, h = topCanvas.height;
+      ctxTop.clearRect(0, 0, w, h);
+
+      const originX = 50, originY = h / 2;
+      const scale = (w - 100) / 120; // 120m full range
+      const radH = (hfov * Math.PI) / 360;
+
+      // Draw FOV Wedge
+      const farX = originX + 110 * scale;
+      const halfWidth = 110 * Math.tan(radH) * scale;
+
+      ctxTop.fillStyle = "rgba(0, 229, 255, 0.15)";
+      ctxTop.strokeStyle = "#00e5ff";
+      ctxTop.beginPath();
+      ctxTop.moveTo(originX, originY);
+      ctxTop.lineTo(farX, originY - halfWidth);
+      ctxTop.lineTo(farX, originY + halfWidth);
+      ctxTop.closePath();
+      ctxTop.fill();
+      ctxTop.stroke();
+
+      // Target distance line
+      const tX = originX + targetDist * scale;
+      const tHalfW = targetDist * Math.tan(radH) * scale;
+      ctxTop.strokeStyle = "#ff9100";
+      ctxTop.lineWidth = 2;
+      ctxTop.beginPath();
+      ctxTop.moveTo(tX, originY - tHalfW);
+      ctxTop.lineTo(tX, originY + tHalfW);
+      ctxTop.stroke();
+
+      // Camera Icon
+      ctxTop.fillStyle = "#fff";
+      ctxTop.beginPath();
+      ctxTop.arc(originX, originY, 6, 0, Math.PI * 2);
+      ctxTop.fill();
+      ctxTop.fillText("DINION 7100i", originX - 35, originY - 12);
+    }
+
+    function drawSideView(height, tilt, vfov, targetDist) {
+      const w = sideCanvas.width, h = sideCanvas.height;
+      ctxSide.clearRect(0, 0, w, h);
+
+      const groundY = h - 40;
+      const originX = 50;
+      const scaleX = (w - 100) / 120;
+      const scaleY = 15; // Vertical scaling
+
+      const camY = groundY - height * scaleY;
+
+      // Draw Ground
+      ctxSide.strokeStyle = "#404b5c";
+      ctxSide.beginPath();
+      ctxSide.moveTo(20, groundY);
+      ctxSide.lineTo(w - 20, groundY);
+      ctxSide.stroke();
+
+      // Draw Pole
+      ctxSide.strokeStyle = "#8899a6";
+      ctxSide.lineWidth = 3;
+      ctxSide.beginPath();
+      ctxSide.moveTo(originX, groundY);
+      ctxSide.lineTo(originX, camY);
+      ctxSide.stroke();
+
+      // Angles
+      const tRad = (tilt * Math.PI) / 180;
+      const vRad = ((vfov / 2) * Math.PI) / 180;
+      const rayLen = (w - 100) / Math.cos(tRad);
+
+      // Top Ray & Bottom Ray
+      const topAngle = tRad - vRad;
+      const btmAngle = tRad + vRad;
+
+      ctxSide.fillStyle = "rgba(0, 229, 255, 0.15)";
+      ctxSide.beginPath();
+      ctxSide.moveTo(originX, camY);
+      ctxSide.lineTo(originX + Math.cos(topAngle) * rayLen, camY + Math.sin(topAngle) * rayLen);
+      ctxSide.lineTo(originX + Math.cos(btmAngle) * rayLen, camY + Math.sin(btmAngle) * rayLen);
+      ctxSide.closePath();
+      ctxSide.fill();
+
+      // Target Person Marker
+      const tX = originX + targetDist * scaleX;
+      ctxSide.fillStyle = "#ff9100";
+      ctxSide.fillRect(tX - 2, groundY - (1.7 * scaleY), 4, 1.7 * scaleY); // 1.7m standard human height
+    }
+
+    render();
+  </script>
+</body>
+</html>
