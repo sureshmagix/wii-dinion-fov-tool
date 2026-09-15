@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Universal Camera FOV & 2D/3D Planning Tool</title>
+  <title>Universal Camera FOV & 2D/3D Planning Tool | ANPR & Optical Engineering</title>
   
   <!-- Three.js & OrbitControls from CDN for high-performance 3D visualization -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -11,23 +11,23 @@
 
   <style>
     :root {
-      --bg-dark: #090c12;
-      --bg-panel: #0f141f;
-      --bg-card: #151b28;
-      --bg-card-header: #1a2232;
-      --bg-input: #1b2333;
-      --bg-input-focus: #242f45;
-      --border-color: #232d40;
-      --border-light: #32405a;
+      --bg-dark: #070a0f;
+      --bg-panel: #0d121c;
+      --bg-card: #131926;
+      --bg-card-header: #182132;
+      --bg-input: #1a2335;
+      --bg-input-focus: #222e47;
+      --border-color: #212c40;
+      --border-light: #314260;
       --border-glow: rgba(0, 210, 255, 0.4);
       --accent: #00d2ff;
       --accent-hover: #38dcff;
       --accent-dim: rgba(0, 210, 255, 0.12);
       --accent-secondary: #3b82f6;
       --text: #e2e8f0;
-      --text-muted: #8493a8;
+      --text-muted: #8494ab;
       --text-bright: #ffffff;
-      --text-dim: #5a6880;
+      --text-dim: #54647c;
       
       /* DORI Standard EN 62676-4 Colors */
       --dori-ident: #9333ea;    /* >=250 PPM - Identification */
@@ -35,6 +35,7 @@
       --dori-observe: #f59e0b;  /* >=63 PPM  - Observation */
       --dori-detect: #ef4444;   /* >=25 PPM  - Detection */
       --dori-monitor: #64748b;  /* <25 PPM   - Monitoring */
+      --anpr-green: #22c55e;
     }
 
     * {
@@ -56,14 +57,14 @@
 
     /* Top Navigation Header */
     header {
-      background: #080a0f;
+      background: #06090e;
       border-bottom: 1px solid var(--border-color);
-      padding: 0.65rem 1.4rem;
+      padding: 0.6rem 1.4rem;
       display: flex;
       align-items: center;
       justify-content: space-between;
       flex-wrap: wrap;
-      gap: 1rem;
+      gap: 0.8rem;
       z-index: 20;
     }
 
@@ -84,16 +85,16 @@
       box-shadow: 0 0 16px rgba(0, 210, 255, 0.4);
       display: flex;
       align-items: center;
-      gap: 0.35rem;
+      gap: 0.4rem;
     }
 
     .logo-badge svg {
-      width: 14px;
-      height: 14px;
+      width: 15px;
+      height: 15px;
     }
 
     h1 {
-      font-size: 1.1rem;
+      font-size: 1.08rem;
       font-weight: 700;
       color: var(--text-bright);
       margin: 0;
@@ -158,7 +159,18 @@
     .btn-accent:hover {
       background: var(--accent);
       color: #000;
-      box-shadow: 0 0 12px rgba(0, 210, 255, 0.5);
+      box-shadow: 0 0 14px rgba(0, 210, 255, 0.5);
+    }
+
+    .btn-help {
+      background: rgba(147, 51, 234, 0.18);
+      border-color: #9333ea;
+      color: #c084fc;
+    }
+    .btn-help:hover {
+      background: #9333ea;
+      color: #fff;
+      box-shadow: 0 0 14px rgba(147, 51, 234, 0.5);
     }
 
     .btn-sm {
@@ -194,13 +206,13 @@
     /* Main App Layout */
     .app-layout {
       display: grid;
-      grid-template-columns: 370px 1fr;
+      grid-template-columns: 375px 1fr;
       flex: 1;
       min-height: calc(100vh - 60px);
       background: var(--bg-dark);
     }
 
-    @media (max-width: 1100px) {
+    @media (max-width: 1150px) {
       .app-layout {
         grid-template-columns: 1fr;
       }
@@ -260,12 +272,6 @@
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 0.6rem;
-    }
-
-    .form-row-3 {
-      display: grid;
-      grid-template-columns: 1fr 1fr 1fr;
-      gap: 0.5rem;
     }
 
     label {
@@ -380,7 +386,7 @@
     }
 
     .target-card-label {
-      font-size: 0.7rem;
+      font-size: 0.68rem;
       font-weight: 600;
       white-space: nowrap;
     }
@@ -404,11 +410,11 @@
 
     /* Real-time Stats Chips Bar */
     .stats-bar {
-      background: #0d121c;
+      background: #0b0f18;
       border-bottom: 1px solid var(--border-color);
       padding: 0.65rem 1.2rem;
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(145px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
       gap: 0.65rem;
     }
 
@@ -428,6 +434,8 @@
     .stat-chip.observe { border-left-color: var(--dori-observe); }
     .stat-chip.detect { border-left-color: var(--dori-detect); }
     .stat-chip.monitor { border-left-color: var(--dori-monitor); }
+    .stat-chip.anpr-ok { border-left-color: var(--anpr-green); }
+    .stat-chip.anpr-warn { border-left-color: #f59e0b; }
 
     .stat-label {
       font-size: 0.66rem;
@@ -449,48 +457,52 @@
       color: #94a3b8;
     }
 
-    /* View Navigation Toolbar */
+    /* 1-Tap Primary View Switcher Toolbar */
     .view-toolbar {
       display: flex;
       align-items: center;
       justify-content: space-between;
       padding: 0.5rem 1.2rem;
-      background: #0b0f17;
+      background: #090e16;
       border-bottom: 1px solid var(--border-color);
       flex-wrap: wrap;
       gap: 0.6rem;
     }
 
-    .tab-group {
+    .one-tap-view-bar {
       display: flex;
-      gap: 0.3rem;
-      background: #141a26;
-      padding: 3px;
-      border-radius: 6px;
+      gap: 0.35rem;
+      background: #111724;
+      padding: 4px;
+      border-radius: 7px;
       border: 1px solid var(--border-color);
     }
 
-    .tab-btn {
+    .one-tap-btn {
       background: transparent;
       border: none;
       color: var(--text-muted);
-      padding: 0.38rem 0.8rem;
-      font-size: 0.78rem;
+      padding: 0.42rem 0.9rem;
+      font-size: 0.8rem;
       font-weight: 600;
-      border-radius: 4px;
+      border-radius: 5px;
       cursor: pointer;
-      transition: all 0.15s;
+      transition: all 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
     }
 
-    .tab-btn:hover {
+    .one-tap-btn:hover {
       color: #fff;
+      background: rgba(255,255,255,0.05);
     }
 
-    .tab-btn.active {
-      background: var(--bg-card);
+    .one-tap-btn.active {
+      background: #1d273a;
       color: var(--accent);
-      box-shadow: 0 1px 4px rgba(0,0,0,0.4);
-      border: 1px solid var(--border-color);
+      box-shadow: 0 1px 6px rgba(0,0,0,0.4);
+      border: 1px solid var(--border-light);
     }
 
     .dori-legend {
@@ -527,7 +539,7 @@
       display: none;
       width: 100%;
       height: 100%;
-      min-height: 520px;
+      min-height: 540px;
     }
 
     .view-container.active {
@@ -540,15 +552,15 @@
     .grid-multiview {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      grid-template-rows: 340px 320px;
+      grid-template-rows: 350px 330px;
       gap: 1rem;
-      min-height: 670px;
+      min-height: 690px;
     }
 
     @media (max-width: 1200px) {
       .grid-multiview {
         grid-template-columns: 1fr;
-        grid-template-rows: repeat(4, 340px);
+        grid-template-rows: repeat(4, 350px);
       }
     }
 
@@ -593,7 +605,7 @@
 
     .card-canvas-header span.tag {
       font-size: 0.68rem;
-      background: #1e283a;
+      background: #1c2536;
       padding: 0.15rem 0.45rem;
       border-radius: 4px;
       color: var(--accent);
@@ -606,7 +618,7 @@
       width: 100%;
       height: 100%;
       min-height: 240px;
-      background: #07090e;
+      background: #05070c;
     }
 
     canvas {
@@ -624,7 +636,7 @@
       display: flex;
       flex-wrap: wrap;
       gap: 0.35rem;
-      background: rgba(13, 18, 28, 0.88);
+      background: rgba(11, 16, 26, 0.88);
       backdrop-filter: blur(8px);
       padding: 0.4rem;
       border-radius: 6px;
@@ -636,7 +648,7 @@
       bottom: 10px;
       left: 10px;
       z-index: 6;
-      background: rgba(13, 18, 28, 0.88);
+      background: rgba(11, 16, 26, 0.88);
       backdrop-filter: blur(8px);
       padding: 0.35rem 0.65rem;
       border-radius: 6px;
@@ -660,8 +672,8 @@
       padding: 10px 14px;
       font-family: 'SF Mono', Consolas, Monaco, monospace;
       font-size: 0.72rem;
-      color: rgba(255, 255, 255, 0.8);
-      text-shadow: 0 1px 3px rgba(0,0,0,0.8);
+      color: rgba(255, 255, 255, 0.85);
+      text-shadow: 0 1px 3px rgba(0,0,0,0.9);
       z-index: 4;
     }
 
@@ -698,20 +710,20 @@
     .viewport-3d-full {
       width: 100%;
       height: 100%;
-      min-height: 600px;
+      min-height: 620px;
       border-radius: 8px;
       overflow: hidden;
       border: 1px solid var(--border-color);
       position: relative;
-      background: #07090e;
+      background: #05070c;
     }
 
     /* Target Detail & Inspection Panel */
     .camview-layout {
       display: grid;
-      grid-template-columns: 1fr 340px;
+      grid-template-columns: 1fr 350px;
       gap: 1rem;
-      min-height: 560px;
+      min-height: 580px;
     }
     @media (max-width: 1100px) {
       .camview-layout {
@@ -728,14 +740,14 @@
       padding: 1rem;
       display: flex;
       flex-direction: column;
-      gap: 1rem;
+      gap: 0.9rem;
       overflow-y: auto;
       background: var(--bg-panel);
       flex: 1;
     }
 
     .loupe-container {
-      background: #080b12;
+      background: #06090e;
       border: 1px solid var(--border-color);
       border-radius: 6px;
       padding: 0.75rem;
@@ -795,14 +807,155 @@
       color: #ef4444;
       border: 1px solid #ef4444;
     }
+    .status-anpr-pass {
+      background: rgba(34, 197, 94, 0.25);
+      color: #22c55e;
+      border: 1px solid #22c55e;
+    }
+
+    /* Modal / Help Dialog */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(4, 6, 10, 0.85);
+      backdrop-filter: blur(6px);
+      z-index: 1000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+    }
+    .modal-overlay.active {
+      display: flex;
+    }
+
+    .modal-container {
+      background: var(--bg-panel);
+      border: 1px solid var(--border-light);
+      border-radius: 12px;
+      width: 100%;
+      max-width: 860px;
+      max-height: 85vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.8);
+    }
+
+    .modal-header {
+      padding: 1rem 1.4rem;
+      background: var(--bg-card-header);
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .modal-header h2 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .modal-close-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-size: 1.4rem;
+      cursor: pointer;
+      line-height: 1;
+    }
+    .modal-close-btn:hover {
+      color: #fff;
+    }
+
+    .modal-nav {
+      display: flex;
+      background: #090e17;
+      border-bottom: 1px solid var(--border-color);
+      padding: 0.4rem 1.4rem;
+      gap: 0.5rem;
+      overflow-x: auto;
+    }
+
+    .modal-tab-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      padding: 0.45rem 0.85rem;
+      font-size: 0.8rem;
+      font-weight: 600;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .modal-tab-btn:hover {
+      color: #fff;
+    }
+    .modal-tab-btn.active {
+      background: var(--bg-card);
+      color: var(--accent);
+      border: 1px solid var(--border-color);
+    }
+
+    .modal-body {
+      padding: 1.4rem;
+      overflow-y: auto;
+      flex: 1;
+      font-size: 0.85rem;
+      line-height: 1.6;
+      color: #cbd5e1;
+    }
+
+    .guide-section {
+      display: none;
+    }
+    .guide-section.active {
+      display: block;
+    }
+
+    .guide-section h3 {
+      font-size: 1rem;
+      color: var(--accent);
+      margin-bottom: 0.6rem;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 0.3rem;
+    }
+
+    .guide-section p {
+      margin-bottom: 0.85rem;
+    }
+
+    .formula-box {
+      background: #070a10;
+      border: 1px solid var(--border-color);
+      border-left: 3px solid var(--accent);
+      padding: 0.75rem 1rem;
+      border-radius: 6px;
+      font-family: 'SF Mono', Consolas, Monaco, monospace;
+      font-size: 0.82rem;
+      color: #7dd3fc;
+      margin: 0.8rem 0;
+    }
+
+    .rule-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 0.9rem 1.1rem;
+      margin-bottom: 0.85rem;
+    }
+    .rule-card strong {
+      color: #fff;
+    }
 
     /* Modal / Drag & Drop overlay */
     .drop-zone-overlay {
       position: fixed;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
+      inset: 0;
       background: rgba(0, 210, 255, 0.15);
       backdrop-filter: blur(4px);
       border: 4px dashed var(--accent);
@@ -824,7 +977,7 @@
       position: fixed;
       bottom: 24px;
       right: 24px;
-      background: #151d2c;
+      background: #141b29;
       border: 1px solid var(--accent);
       color: #fff;
       padding: 0.75rem 1.25rem;
@@ -854,7 +1007,7 @@
     .dori-table th, .dori-table td {
       padding: 0.35rem 0.5rem;
       text-align: left;
-      border-bottom: 1px solid #232d40;
+      border-bottom: 1px solid #212c40;
     }
     .dori-table th {
       color: var(--text-muted);
@@ -880,6 +1033,129 @@
   <!-- Notification Toast -->
   <div class="toast" id="toast">Configuration imported successfully!</div>
 
+  <!-- Help & Optical Guide Modal -->
+  <div class="modal-overlay" id="helpModal">
+    <div class="modal-container">
+      <div class="modal-header">
+        <h2>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/>
+            <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
+            <line x1="12" y1="17" x2="12.01" y2="17"/>
+          </svg>
+          Optical Engineering & Camera Positioning Guide
+        </h2>
+        <button class="modal-close-btn" id="btnModalClose">&times;</button>
+      </div>
+
+      <div class="modal-nav">
+        <button class="modal-tab-btn active" data-guide="guide-optics">Optics & FOV</button>
+        <button class="modal-tab-btn" data-guide="guide-mounting">Camera Mounting & Angles</button>
+        <button class="modal-tab-btn" data-guide="guide-anpr">ANPR / License Plates</button>
+        <button class="modal-tab-btn" data-guide="guide-custom">Custom Objects & DORI</button>
+      </div>
+
+      <div class="modal-body">
+        
+        <!-- Tab 1: Optics & Formulas -->
+        <div class="guide-section active" id="guide-optics">
+          <h3>1. Lens Focal Length vs Field of View (FOV)</h3>
+          <p>
+            The field of view is governed by the physical dimensions of the image sensor ($W_{\text{sensor}}$, $H_{\text{sensor}}$) and the focal length of the optical lens ($f$):
+          </p>
+          <div class="formula-box">
+            HFOV = 2 × arctan( W_sensor / (2 × f) ) × (180° / π)<br>
+            VFOV = 2 × arctan( H_sensor / (2 × f) ) × (180° / π)<br>
+            f = W_sensor / ( 2 × tan( HFOV / 2 ) )
+          </div>
+          <p>
+            <strong>Key takeaway:</strong> Shorter focal lengths (e.g. 2.8mm, 4.0mm) yield wider scene coverage but lower pixel density at distance. Longer focal lengths (e.g. 12mm - 40mm telephoto) concentrate camera resolution into a tighter area, providing the high pixel density essential for facial identification and license plate recognition.
+          </p>
+
+          <h3>2. Sensor Formats & Crop Factor</h3>
+          <div class="rule-card">
+            <strong>Standard Surveillance Sensor Sizes:</strong><br>
+            • <strong>1/1.8" (7.18 × 5.32 mm)</strong>: High-end low-light & ANPR cameras (Bosch DINION 7100i). Superior sensitivity and larger field of view per mm of focal length.<br>
+            • <strong>1/2.8" (5.18 × 3.89 mm)</strong>: Standard mainstream IP dome and bullet cameras.<br>
+            • <strong>1/3" (4.80 × 3.60 mm)</strong>: Traditional legacy CCTV format.<br>
+            A 4.0mm lens on a 1/1.8" sensor yields ~84° HFOV, whereas the same 4.0mm lens on a 1/2.8" sensor yields only ~66° HFOV due to crop factor.
+          </div>
+        </div>
+
+        <!-- Tab 2: Camera Mounting & Positioning -->
+        <div class="guide-section" id="guide-mounting">
+          <h3>1. Optimal Mounting Height (h)</h3>
+          <p>
+            Camera mounting height determines the balance between surveillance coverage, perspective distortion, and vulnerability to tampering:
+          </p>
+          <div class="rule-card">
+            • <strong>Pedestrian Gates & Facial Recognition:</strong> Mount at <strong>2.5m to 3.5m</strong>. Keeping height low maintains a near-horizontal line-of-sight to capture facial features rather than the tops of hats or heads.<br>
+            • <strong>Perimeter Fences & Roadways:</strong> Mount at <strong>3.5m to 5.0m</strong>. Provides wide area overview while keeping cameras out of vandalism reach.<br>
+            • <strong>High Mast / Pole Towers (6m - 12m):</strong> For expansive yard or parking lot overviews. Requires telephoto optics to inspect objects at ground level.
+          </div>
+
+          <h3>2. Downward Tilt Angle (α) & Foreshortening</h3>
+          <div class="formula-box">
+            Recommended Downward Tilt: 10° to 15° (Maximum: 25°)<br>
+            Near Blind Spot Cutoff: D_near = h / tan( tilt + VFOV / 2 )<br>
+            Far Ground Cutoff: D_far = h / tan( tilt - VFOV / 2 )
+          </div>
+          <div class="rule-card">
+            <strong style="color: #ef4444;">Warning: Severe Tilt Foreshortening (&gt; 25°)</strong><br>
+            When a camera tilts steeply downward (&gt; 25° - 30°):<br>
+            1. <strong>Face Capture is Compromised:</strong> Cameras see the crown of the head rather than facial landmarks required by EN 62676-4 Identification.<br>
+            2. <strong>Vehicle Distortion:</strong> Roofs and hoods dominate the frame, and license plates appear severely keystoned/skewed, degrading ANPR OCR engines.<br>
+            3. <strong>Near Dead Zone:</strong> A large blind spot directly beneath the camera pole is created. Always design camera positions with 10% - 20% field overlap between consecutive cameras.
+          </div>
+        </div>
+
+        <!-- Tab 3: ANPR / License Plates -->
+        <div class="guide-section" id="guide-anpr">
+          <h3>Automatic Number Plate Recognition (ANPR / LPR) Engineering</h3>
+          <p>
+            Successful ANPR requires strict optical and geometric alignment:
+          </p>
+          <div class="formula-box">
+            Standard License Plate: 0.52m Wide × 0.15m High<br>
+            Plate Pixel Width: W_plate_px = PPM × 0.52<br>
+            Recommended OCR Pixel Width: ≥ 200 - 260 pixels (400 - 500 PPM)<br>
+            Maximum Vertical Tilt: ≤ 20° - 25°<br>
+            Maximum Horizontal Skew: ≤ 20°
+          </div>
+          <div class="rule-card">
+            <strong>ANPR Installation Checklist:</strong><br>
+            • <strong>Pixel Density:</strong> Aim for <strong>400 to 500+ PPM</strong> across the vehicle lane. While basic OCR can function at 150-200 pixels across a plate in ideal static conditions, moving traffic requires 200+ pixels for 99%+ accuracy.<br>
+            • <strong>Shutter Speed:</strong> Use high-speed electronic shutter (1/1000s to 1/2000s) to eliminate motion blur.<br>
+            • <strong>Infrared (IR) Illumination:</strong> Standard vehicle plates are retroreflective. Integrated 850nm IR illuminators bounce directly back to the camera sensor, making plates glow brightly while filtering out headlight glare.<br>
+            • <strong>Optical Skew:</strong> Ensure the horizontal approach angle is within ±15° of the lane trajectory.
+          </div>
+        </div>
+
+        <!-- Tab 4: Custom Objects & DORI -->
+        <div class="guide-section" id="guide-custom">
+          <h3>EN 62676-4 Standard DORI Reference</h3>
+          <div class="rule-card">
+            • <strong style="color:var(--dori-ident);">Identification (≥ 250 px/m):</strong> Enables positive identification of an individual beyond reasonable doubt in court.<br>
+            • <strong style="color:var(--dori-recog);">Recognition (≥ 125 px/m):</strong> Enables operators to recognize whether an individual has been seen before and identify vehicle make/model.<br>
+            • <strong style="color:var(--dori-observe);">Observation (≥ 63 px/m):</strong> Allows observation of general clothing, actions, and event progression.<br>
+            • <strong style="color:var(--dori-detect);">Detection (≥ 25 px/m):</strong> Alerts security operators that a human or vehicle is present in the monitored zone.<br>
+            • <strong style="color:var(--dori-monitor);">Monitoring (&lt; 25 px/m):</strong> General situational awareness only.
+          </div>
+
+          <h3>Creating & Measuring Custom Target Objects</h3>
+          <p>
+            Use the "Custom Dimensions" preset in the sidebar to define custom site assets (such as access control bollards, perimeter fences, cargo containers, or security gates):
+          </p>
+          <div class="formula-box">
+            Target Pixel Height (h_px) = ( Target_Height_m × f_px ) / Line_of_Sight_Distance<br>
+            where f_px = ( Frame_Width_px / 2 ) / tan( HFOV / 2 )
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
   <!-- Top Navigation Header -->
   <header>
     <div class="header-left">
@@ -892,11 +1168,16 @@
       </div>
       <div>
         <h1>Universal Camera FOV & 2D/3D Planning Tool</h1>
-        <div class="header-subtitle">Professional Optical Engineering • EN 62676-4 DORI • 3D Frustum & Ground Footprint</div>
+        <div class="header-subtitle">Professional Optical Engineering • EN 62676-4 DORI • ANPR/LPR & 3D Frustum</div>
       </div>
     </div>
 
     <div class="header-actions">
+      <!-- Help button -->
+      <button class="btn btn-help btn-sm" id="btnOpenHelp" title="Optical Engineering & Camera Mounting Guide">
+        ❓ Help & Guide
+      </button>
+
       <!-- Unit switch -->
       <button class="btn btn-sm" id="btnUnitToggle" title="Toggle Metric (m) / Imperial (ft)">
         Unit: <strong id="unitLabel">Metric (m)</strong>
@@ -938,6 +1219,7 @@
           <select id="cameraPreset">
             <option value="bosch-7100i-wide" selected>Bosch DINION 7100i IR - Standard (4.7-10mm, 1/1.8")</option>
             <option value="bosch-7100i-tele">Bosch DINION 7100i IR - Telephoto (10.5-47mm, 1/1.8")</option>
+            <option value="bosch-7100i-anpr">Bosch DINION 7100i - ANPR / LPR Dedicated (12-40mm, 1/1.8")</option>
             <option value="generic-1080p-28">Generic 1080p Fixed Dome (2.8mm, 1/2.8")</option>
             <option value="generic-1080p-40">Generic 1080p Fixed Bullet (4.0mm, 1/2.8")</option>
             <option value="generic-4mp-vf">Generic 4MP Varifocal (2.8-12mm, 1/2.7")</option>
@@ -949,7 +1231,7 @@
 
         <div class="form-group">
           <label for="cameraName">Camera Label / Tag</label>
-          <input type="text" id="cameraName" value="CAM-01 DINION 7100i" placeholder="e.g. Perimeter Gate 1" />
+          <input type="text" id="cameraName" value="CAM-01 DINION 7100i" placeholder="e.g. Gate 1 ANPR" />
         </div>
 
         <div class="form-row">
@@ -1109,10 +1391,10 @@
             <div class="target-card-label">Truck</div>
             <div class="target-card-dim">3.20m</div>
           </div>
-          <div class="target-card" data-target="plate">
+          <div class="target-card" data-target="anpr">
             <div class="target-card-icon">🏷️</div>
-            <div class="target-card-label">Plate</div>
-            <div class="target-card-dim">0.15m</div>
+            <div class="target-card-label">ANPR Plate</div>
+            <div class="target-card-dim">0.52m</div>
           </div>
         </div>
 
@@ -1125,7 +1407,7 @@
               <option value="car">Sedan Car (1.48m)</option>
               <option value="suv">SUV / Van (1.80m)</option>
               <option value="truck">Truck / Bus (3.20m)</option>
-              <option value="plate">License Plate (0.15m)</option>
+              <option value="anpr">ANPR License Plate (0.52 × 0.15m)</option>
               <option value="custom">Custom Dimensions</option>
             </select>
           </div>
@@ -1204,6 +1486,12 @@
           <div class="stat-sub" id="statDoriPpm">55 px/m @ target</div>
         </div>
 
+        <div class="stat-chip" id="chipAnpr">
+          <div class="stat-label">ANPR / LPR Density</div>
+          <div class="stat-value" id="statAnprPix">29 px on plate</div>
+          <div class="stat-sub" id="statAnprStatus">Standard: 400+ PPM</div>
+        </div>
+
         <div class="stat-chip">
           <div class="stat-label">Field Width @ Target</div>
           <div class="stat-value" id="statFieldWidth">35.0 m</div>
@@ -1223,13 +1511,21 @@
         </div>
       </div>
 
-      <!-- Navigation / View Tabs -->
+      <!-- 1-TAP VIEW NAVIGATION TOOLBAR -->
       <div class="view-toolbar">
-        <div class="tab-group">
-          <button class="tab-btn active" data-tab="tab-multiview">Combined Multi-View</button>
-          <button class="tab-btn" data-tab="tab-3d">3D Interactive Frustum</button>
-          <button class="tab-btn" data-tab="tab-2d">2D Top & Side Views</button>
-          <button class="tab-btn" data-tab="tab-camview">Simulated Camera POV & Inspector</button>
+        <div class="one-tap-view-bar">
+          <button class="one-tap-btn active" data-tab="tab-multiview">
+            <span>⊞</span> Quad Multi-View
+          </button>
+          <button class="one-tap-btn" data-tab="tab-3d">
+            <span>🌐</span> 3D Spatial Frustum
+          </button>
+          <button class="one-tap-btn" data-tab="tab-2d">
+            <span>📐</span> 2D Plan & Elevation
+          </button>
+          <button class="one-tap-btn" data-tab="tab-camview">
+            <span>📷</span> Camera POV & ANPR
+          </button>
         </div>
 
         <div class="dori-legend">
@@ -1237,6 +1533,7 @@
           <div class="legend-item"><div class="legend-dot" style="background: var(--dori-recog);"></div>Recog (≥125)</div>
           <div class="legend-item"><div class="legend-dot" style="background: var(--dori-observe);"></div>Observe (≥63)</div>
           <div class="legend-item"><div class="legend-dot" style="background: var(--dori-detect);"></div>Detect (≥25)</div>
+          <div class="legend-item"><div class="legend-dot" style="background: var(--anpr-green);"></div>ANPR (≥400)</div>
         </div>
       </div>
 
@@ -1283,7 +1580,7 @@
                 <div class="viewfinder-osd">
                   <div class="osd-top">
                     <div class="osd-rec"><span class="osd-rec-dot"></span>LIVE • <span id="osdCamName">CAM-01 DINION 7100i</span></div>
-                    <div id="osdTimestamp">2026-09-15 12:00:00</div>
+                    <div id="osdTimestamp">2026-09-16 12:00:00</div>
                   </div>
                   <div class="osd-bottom">
                     <div id="osdOptics">f=4.7mm • HFOV 75° • Tilt 15°</div>
@@ -1328,7 +1625,7 @@
           </div>
         </div>
 
-        <!-- TAB 2: Full 3D Interactive Frustum -->
+        <!-- TAB 2: Full 3D Interactive Frustum (1-TAP 3D VIEW) -->
         <div class="view-container" id="tab-3d">
           <div class="viewport-3d-full" id="wrapper3dFull">
             <div class="viewport-3d-overlay">
@@ -1340,14 +1637,14 @@
               <button class="btn btn-accent btn-sm" id="snap3dFull">📸 Snapshot</button>
             </div>
             <div class="viewport-3d-info">
-              Left Click + Drag: Orbit • Right Click + Drag: Pan • Scroll: Zoom In/Out
+              Left Click + Drag: Orbit & Rotate • Right Click + Drag: Pan • Scroll: Zoom In/Out
             </div>
           </div>
         </div>
 
-        <!-- TAB 3: Full 2D Top & Side Views -->
+        <!-- TAB 3: Full 2D Top & Side Views (1-TAP 2D VIEW) -->
         <div class="view-container" id="tab-2d">
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; min-height: 580px;">
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; min-height: 600px;">
             <div class="card-canvas">
               <div class="card-canvas-header">
                 <div class="header-left-title">
@@ -1380,7 +1677,7 @@
           </div>
         </div>
 
-        <!-- TAB 4: Full Simulated Camera POV & Inspector -->
+        <!-- TAB 4: Full Simulated Camera POV & ANPR Inspector (1-TAP POV) -->
         <div class="view-container" id="tab-camview">
           <div class="camview-layout">
             
@@ -1400,7 +1697,7 @@
                 <div class="viewfinder-osd">
                   <div class="osd-top">
                     <div class="osd-rec"><span class="osd-rec-dot"></span>LIVE • <span id="osdCamNameFull">CAM-01 DINION 7100i</span></div>
-                    <div id="osdTimestampFull">2026-09-15 12:00:00</div>
+                    <div id="osdTimestampFull">2026-09-16 12:00:00</div>
                   </div>
                   <div class="osd-bottom">
                     <div id="osdOpticsFull">f=4.7mm • HFOV 75° • Tilt 15°</div>
@@ -1410,11 +1707,11 @@
               </div>
             </div>
 
-            <!-- Target Inspection & DORI Compliance Panel -->
+            <!-- Target Inspection & ANPR / DORI Compliance Panel -->
             <div class="card-canvas inspector-card">
               <div class="card-canvas-header">
                 <div class="header-left-title">
-                  <span>Target Detail & DORI Compliance</span>
+                  <span>Target Detail & ANPR Quality</span>
                 </div>
                 <span class="tag" id="tagInspectorPpm">55 px/m</span>
               </div>
@@ -1427,6 +1724,21 @@
                     <canvas id="loupeCanvas"></canvas>
                   </div>
                   <span style="font-size:0.7rem; color:var(--text-muted);" id="loupeLabel">Target simulated at sensor resolution</span>
+                </div>
+
+                <!-- ANPR / LPR Specific Quality Box -->
+                <div style="background: rgba(34, 197, 94, 0.1); border: 1px solid rgba(34, 197, 94, 0.35); border-radius: 6px; padding: 0.65rem; font-size: 0.75rem;">
+                  <div style="font-weight: 700; color: #22c55e; margin-bottom: 0.3rem; display: flex; justify-content: space-between;">
+                    <span>Automatic Number Plate (ANPR)</span>
+                    <span id="inspAnprBadge">Checking...</span>
+                  </div>
+                  <div style="color: #cbd5e1; display: grid; grid-template-columns: 1fr 1fr; gap: 0.3rem;">
+                    <div>Plate Width: <strong id="inspPlatePix">29 px</strong></div>
+                    <div>Tilt Angle: <strong id="inspTiltAngle">15° (OK)</strong></div>
+                  </div>
+                  <div style="font-size: 0.68rem; color: #94a3b8; margin-top: 0.35rem;" id="inspAnprAdvice">
+                    Requirement: ≥ 150 px across plate (400+ PPM optimal), tilt ≤ 20°.
+                  </div>
                 </div>
 
                 <!-- DORI Compliance Assessment -->
@@ -1510,7 +1822,7 @@
         focalMin: 4.7, focalMax: 10.0,
         hfov: 75.0,
         mountH: 4.0, tilt: 15, pan: 0,
-        targetDist: 25, targetHeight: 1.70
+        targetDist: 25, targetHeight: 1.70, targetType: "human"
       },
       "bosch-7100i-tele": {
         name: "CAM-02 DINION 7100i (Telephoto)",
@@ -1522,7 +1834,19 @@
         focalMin: 10.5, focalMax: 47.0,
         hfov: 27.0,
         mountH: 4.5, tilt: 8, pan: 0,
-        targetDist: 45, targetHeight: 1.70
+        targetDist: 45, targetHeight: 1.70, targetType: "human"
+      },
+      "bosch-7100i-anpr": {
+        name: "CAM-03 DINION 7100i (ANPR / LPR Dedicated)",
+        sensorFormat: "1/1.8",
+        sensorW: 7.18, sensorH: 5.32,
+        resKey: "1920x1080",
+        resW: 1920, resH: 1080,
+        focalMm: 22.0,
+        focalMin: 10.5, focalMax: 47.0,
+        hfov: 18.5,
+        mountH: 3.5, tilt: 10, pan: 0,
+        targetDist: 20, targetHeight: 0.15, targetType: "anpr"
       },
       "generic-1080p-28": {
         name: "Generic 1080p Fixed Dome 2.8mm",
@@ -1534,7 +1858,7 @@
         focalMin: 2.8, focalMax: 2.8,
         hfov: 95.0,
         mountH: 3.0, tilt: 20, pan: 0,
-        targetDist: 15, targetHeight: 1.70
+        targetDist: 15, targetHeight: 1.70, targetType: "human"
       },
       "generic-1080p-40": {
         name: "Generic 1080p Fixed Bullet 4.0mm",
@@ -1546,7 +1870,7 @@
         focalMin: 4.0, focalMax: 4.0,
         hfov: 66.0,
         mountH: 3.5, tilt: 15, pan: 0,
-        targetDist: 20, targetHeight: 1.70
+        targetDist: 20, targetHeight: 1.70, targetType: "human"
       },
       "generic-4mp-vf": {
         name: "Generic 4MP Varifocal 2.8-12mm",
@@ -1558,7 +1882,7 @@
         focalMin: 2.8, focalMax: 12.0,
         hfov: 48.0,
         mountH: 4.0, tilt: 12, pan: 0,
-        targetDist: 30, targetHeight: 1.70
+        targetDist: 30, targetHeight: 1.70, targetType: "human"
       },
       "generic-4k-uhd": {
         name: "Generic 4K Ultra HD Bullet 4.0mm",
@@ -1570,7 +1894,7 @@
         focalMin: 4.0, focalMax: 12.0,
         hfov: 84.0,
         mountH: 5.0, tilt: 15, pan: 0,
-        targetDist: 35, targetHeight: 1.70
+        targetDist: 35, targetHeight: 1.70, targetType: "human"
       },
       "generic-4k-tele": {
         name: "Generic 4K Long-Range 8-32mm",
@@ -1582,7 +1906,7 @@
         focalMin: 8.0, focalMax: 32.0,
         hfov: 25.0,
         mountH: 6.0, tilt: 10, pan: 0,
-        targetDist: 60, targetHeight: 1.70
+        targetDist: 60, targetHeight: 1.70, targetType: "human"
       }
     };
 
@@ -1592,7 +1916,7 @@
       car:    { height: 1.48, width: 1.80, depth: 4.60, name: "Sedan Car", icon: "🚗" },
       suv:    { height: 1.80, width: 1.95, depth: 4.90, name: "SUV / Van", icon: "🚙" },
       truck:  { height: 3.20, width: 2.50, depth: 8.50, name: "Truck / Bus", icon: "🚛" },
-      plate:  { height: 0.15, width: 0.52, depth: 0.05, name: "License Plate", icon: "🏷️" },
+      anpr:   { height: 0.15, width: 0.52, depth: 0.05, name: "ANPR License Plate", icon: "🏷️" },
       custom: { height: 1.70, width: 0.50, depth: 0.50, name: "Custom Object", icon: "📐" }
     };
 
@@ -1631,6 +1955,7 @@
       losDist: 0,
       targetPixH: 0,
       targetPixW: 0,
+      platePixW: 0,
       doriLevel: "Observe",
       doriRanges: { ident: 0, recog: 0, observe: 0, detect: 0 }
     };
@@ -1649,6 +1974,11 @@
       jsonFileInput: document.getElementById("jsonFileInput"),
       dropZone: document.getElementById("dropZone"),
       toast: document.getElementById("toast"),
+
+      // Help Modal
+      btnOpenHelp: document.getElementById("btnOpenHelp"),
+      helpModal: document.getElementById("helpModal"),
+      btnModalClose: document.getElementById("btnModalClose"),
 
       cameraPreset: document.getElementById("cameraPreset"),
       cameraName: document.getElementById("cameraName"),
@@ -1691,6 +2021,9 @@
       chipDori: document.getElementById("chipDori"),
       statDoriLevel: document.getElementById("statDoriLevel"),
       statDoriPpm: document.getElementById("statDoriPpm"),
+      chipAnpr: document.getElementById("chipAnpr"),
+      statAnprPix: document.getElementById("statAnprPix"),
+      statAnprStatus: document.getElementById("statAnprStatus"),
       statFieldWidth: document.getElementById("statFieldWidth"),
       statFieldHeight: document.getElementById("statFieldHeight"),
       statBlindSpot: document.getElementById("statBlindSpot"),
@@ -1729,6 +2062,10 @@
 
       // Inspector Elements
       tagInspectorPpm: document.getElementById("tagInspectorPpm"),
+      inspAnprBadge: document.getElementById("inspAnprBadge"),
+      inspPlatePix: document.getElementById("inspPlatePix"),
+      inspTiltAngle: document.getElementById("inspTiltAngle"),
+      inspAnprAdvice: document.getElementById("inspAnprAdvice"),
       compIdent: document.getElementById("compIdent"),
       compRecog: document.getElementById("compRecog"),
       compObserve: document.getElementById("compObserve"),
@@ -1776,6 +2113,9 @@
       // Pixels per meter (PPM) at target distance
       state.ppm = state.resW / state.fieldWAtDist;
       state.ppf = state.ppm * 0.3048;
+
+      // ANPR License Plate pixels across standard plate (0.52m width)
+      state.platePixW = state.ppm * 0.52;
 
       // EN 62676-4 DORI Category Classification
       if (state.ppm >= 250) {
@@ -1853,6 +2193,23 @@
 
       els.chipDori.className = `stat-chip ${state.doriLevel.toLowerCase()}`;
 
+      // ANPR Chip
+      const platePix = Math.round(state.platePixW);
+      els.statAnprPix.textContent = `${platePix} px on plate`;
+      if (state.ppm >= 400 && state.tilt <= 20) {
+        els.statAnprStatus.textContent = "Optimal ANPR (99%+ OCR)";
+        els.chipAnpr.className = "stat-chip anpr-ok";
+      } else if (state.ppm >= 250 && state.tilt <= 25) {
+        els.statAnprStatus.textContent = "Capable (95% OCR)";
+        els.chipAnpr.className = "stat-chip anpr-ok";
+      } else if (state.ppm >= 150) {
+        els.statAnprStatus.textContent = "Low Density (Marginal)";
+        els.chipAnpr.className = "stat-chip anpr-warn";
+      } else {
+        els.statAnprStatus.textContent = "Insufficient for ANPR";
+        els.chipAnpr.className = "stat-chip detect";
+      }
+
       // Field dimensions
       els.statFieldWidth.textContent = formatDist(state.fieldWAtDist);
       els.statFieldHeight.textContent = `Field H: ${formatDist(state.fieldHAtDist)}`;
@@ -1887,6 +2244,26 @@
         els.inspObjW.textContent = formatDist(state.targetWidth);
         els.inspPixH.textContent = `${Math.round(state.targetPixH)} px (${Math.round(state.targetPixW)}w)`;
 
+        // ANPR inspector
+        els.inspPlatePix.textContent = `${platePix} px (${Math.round(state.ppm)} px/m)`;
+        const tiltOk = state.tilt <= 20;
+        els.inspTiltAngle.textContent = `${state.tilt}° (${tiltOk ? "Optimal" : state.tilt <= 25 ? "Acceptable" : "Too Steep"})`;
+        els.inspTiltAngle.style.color = tiltOk ? "#22c55e" : (state.tilt <= 25 ? "#f59e0b" : "#ef4444");
+
+        if (state.ppm >= 400 && state.tilt <= 20) {
+          els.inspAnprBadge.className = "compliance-status status-anpr-pass";
+          els.inspAnprBadge.textContent = "Optimal ANPR";
+          els.inspAnprAdvice.textContent = "High accuracy 99%+ automated OCR capture across highway lanes.";
+        } else if (state.ppm >= 250 && state.tilt <= 25) {
+          els.inspAnprBadge.className = "compliance-status status-anpr-pass";
+          els.inspAnprBadge.textContent = "Standard OCR";
+          els.inspAnprAdvice.textContent = "Suitable for parking gates, toll plazas, and stop-and-go lanes.";
+        } else {
+          els.inspAnprBadge.className = "compliance-status status-fail";
+          els.inspAnprBadge.textContent = "Sub-Optimal";
+          els.inspAnprAdvice.textContent = "Plate resolution is below standard (increase focal length or reduce distance).";
+        }
+
         const checkComp = (el, condition) => {
           if (condition) {
             el.className = "compliance-status status-pass";
@@ -1906,7 +2283,7 @@
       const now = new Date();
       const timeStr = `${now.toISOString().slice(0, 10)} ${now.toTimeString().slice(0, 8)}`;
       const opticsStr = `f=${state.focalMm.toFixed(1)}mm • HFOV ${state.hfov.toFixed(1)}° • VFOV ${state.vfov.toFixed(1)}° • Tilt ${state.tilt}°`;
-      const targetStr = `TARGET: ${formatDist(state.targetDist)} • ${densityVal} ${unitP} (${state.doriLevel})`;
+      const targetStr = `TARGET: ${formatDist(state.targetDist)} • ${densityVal} ${unitP} (${state.doriLevel}) | Plate: ${platePix}px`;
 
       if (els.osdCamName) els.osdCamName.textContent = state.cameraName;
       if (els.osdTimestamp) els.osdTimestamp.textContent = timeStr;
@@ -2197,11 +2574,17 @@
         ctx.fillRect(l * 0.38, -w * 0.4, 3, w * 0.8);
 
       } else {
-        // Plate or custom marker
-        ctx.fillStyle = "#ffaa00";
-        ctx.fillRect(-4, -targetW/2, 8, targetW);
-        ctx.strokeStyle = "#ffffff";
-        ctx.strokeRect(-4, -targetW/2, 8, targetW);
+        // ANPR License plate or custom marker
+        const pw = Math.max(14, targetW);
+        ctx.fillStyle = "#ffffff";
+        ctx.fillRect(-4, -pw/2, 8, pw);
+        ctx.strokeStyle = "#22c55e";
+        ctx.lineWidth = 2;
+        ctx.strokeRect(-4, -pw/2, 8, pw);
+
+        // Blue band
+        ctx.fillStyle = "#1d4ed8";
+        ctx.fillRect(-4, -pw/2, 8, pw * 0.2);
       }
 
       ctx.restore();
@@ -2410,19 +2793,14 @@
         const bodyW = 7;
         const headR = Math.max(3, hPx * 0.08);
 
-        // Legs
         ctx.fillRect(x - legW / 2, groundY - hPx * 0.5, legW, hPx * 0.5);
-        // Torso
         ctx.fillRect(x - bodyW / 2, groundY - hPx * 0.85, bodyW, hPx * 0.35);
-        // Head
         ctx.beginPath();
         ctx.arc(x, groundY - hPx + headR, headR, 0, Math.PI * 2);
         ctx.fill();
 
       } else if (type === "seated") {
         // Seated Person with Chair
-        const s = hPx / 1.3;
-        // Chair legs & back
         ctx.strokeStyle = "#94a3b8";
         ctx.lineWidth = 2;
         ctx.strokeRect(x - 6, groundY - 14, 12, 14);
@@ -2431,13 +2809,12 @@
         ctx.lineTo(x - 6, groundY - 26);
         ctx.stroke();
 
-        // Seated body
         ctx.fillStyle = "#ffaa00";
-        ctx.fillRect(x - 5, groundY - 24, 7, 12); // torso
-        ctx.fillRect(x - 5, groundY - 14, 12, 4); // thighs
-        ctx.fillRect(x + 5, groundY - 14, 4, 14); // lower legs
+        ctx.fillRect(x - 5, groundY - 24, 7, 12);
+        ctx.fillRect(x - 5, groundY - 14, 12, 4);
+        ctx.fillRect(x + 5, groundY - 14, 4, 14);
         ctx.beginPath();
-        ctx.arc(x - 2, groundY - 28, 4, 0, Math.PI * 2); // head
+        ctx.arc(x - 2, groundY - 28, 4, 0, Math.PI * 2);
         ctx.fill();
 
       } else if (type === "car" || type === "suv") {
@@ -2446,20 +2823,18 @@
         const carH = hPx;
         const wheelR = Math.max(3, carH * 0.22);
 
-        // Body chassis
         ctx.beginPath();
         ctx.moveTo(x - carL / 2, groundY - wheelR);
         ctx.lineTo(x - carL / 2, groundY - carH * 0.5);
         ctx.lineTo(x - carL * 0.25, groundY - carH * 0.55);
-        ctx.lineTo(x - carL * 0.1, groundY - carH); // windshield to roof
-        ctx.lineTo(x + carL * 0.25, groundY - carH); // roof
-        ctx.lineTo(x + carL * 0.4, groundY - carH * 0.5); // rear window
+        ctx.lineTo(x - carL * 0.1, groundY - carH);
+        ctx.lineTo(x + carL * 0.25, groundY - carH);
+        ctx.lineTo(x + carL * 0.4, groundY - carH * 0.5);
         ctx.lineTo(x + carL / 2, groundY - carH * 0.45);
         ctx.lineTo(x + carL / 2, groundY - wheelR);
         ctx.closePath();
         ctx.fill();
 
-        // Wheels
         ctx.fillStyle = "#1e293b";
         ctx.beginPath();
         ctx.arc(x - carL * 0.3, groundY - wheelR, wheelR, 0, Math.PI * 2);
@@ -2474,12 +2849,9 @@
         const truckH = hPx;
         const wheelR = Math.max(4, truckH * 0.16);
 
-        // Cargo box
         ctx.fillRect(x - truckL / 2, groundY - truckH, truckL * 0.68, truckH - wheelR);
-        // Cab
         ctx.fillRect(x + truckL * 0.2, groundY - truckH * 0.85, truckL * 0.3, truckH * 0.85 - wheelR);
 
-        // 3 Wheels
         ctx.fillStyle = "#1e293b";
         [ -truckL * 0.35, -truckL * 0.2, truckL * 0.35 ].forEach(wx => {
           ctx.beginPath();
@@ -2489,7 +2861,7 @@
         });
 
       } else {
-        // License plate on post
+        // License plate on bumper/post
         ctx.fillRect(x - 2, groundY - hPx, 4, hPx);
         ctx.fillStyle = "#ffffff";
         ctx.fillRect(x - 6, groundY - hPx - 6, 12, 6);
@@ -2598,10 +2970,10 @@
       const targetPixWScreen = (state.targetPixW / state.resW) * frameW;
 
       const isTargetInView =
-        targetScreenX >= offsetX - 50 &&
-        targetScreenX <= offsetX + frameW + 50 &&
+        targetScreenX >= offsetX - 60 &&
+        targetScreenX <= offsetX + frameW + 60 &&
         targetScreenGroundY >= offsetY &&
-        targetScreenGroundY <= offsetY + frameH + 80;
+        targetScreenGroundY <= offsetY + frameH + 90;
 
       if (isTargetInView) {
         const topY = targetScreenGroundY - targetPixHScreen;
@@ -2609,12 +2981,16 @@
 
         // DORI Color Bounding Box
         let boxColor = "#ef4444";
-        if (state.ppm >= 250) boxColor = "var(--dori-ident)";
-        else if (state.ppm >= 125) boxColor = "var(--dori-recog)";
-        else if (state.ppm >= 63) boxColor = "var(--dori-observe)";
-        else if (state.ppm >= 25) boxColor = "var(--dori-detect)";
+        if (state.ppm >= 250) boxColor = "#9333ea";
+        else if (state.ppm >= 125) boxColor = "#10b981";
+        else if (state.ppm >= 63) boxColor = "#f59e0b";
+        else if (state.ppm >= 25) boxColor = "#ef4444";
 
-        // Draw Detailed Vector Artwork for Target in Viewfinder
+        if (state.targetType === "anpr") {
+          boxColor = state.ppm >= 400 ? "#22c55e" : (state.ppm >= 250 ? "#10b981" : "#f59e0b");
+        }
+
+        // Draw Photorealistic Vector Target Illustration in Viewfinder
         drawTargetVectorArtwork(ctx, targetScreenX, targetScreenGroundY, targetPixWScreen, targetPixHScreen, state.targetType, state.ppm);
 
         // Technical Reticle Bounding Corners around Target
@@ -2643,7 +3019,10 @@
         ctx.stroke();
 
         // Target Overlay Tag
-        const badgeText = `${TARGET_PRESETS[state.targetType]?.name || "Target"} • ${Math.round(state.ppm)} px/m [${state.doriLevel}]`;
+        let badgeText = `${TARGET_PRESETS[state.targetType]?.name || "Target"} • ${Math.round(state.ppm)} px/m [${state.doriLevel}]`;
+        if (state.targetType === "anpr") {
+          badgeText = `ANPR PLATE • ${Math.round(state.platePixW)} px on plate [${state.ppm >= 400 ? "OPTIMAL" : "OCR"}]`;
+        }
         ctx.font = "bold 9px monospace";
         const badgeWidth = ctx.measureText(badgeText).width + 12;
         const badgeY = Math.max(offsetY + 4, topY - 18);
@@ -2672,7 +3051,7 @@
       ctx.restore();
 
       // Viewport Border Frame
-      ctx.strokeStyle = "#232d40";
+      ctx.strokeStyle = "#212c40";
       ctx.lineWidth = 2;
       ctx.strokeRect(offsetX, offsetY, frameW, frameH);
 
@@ -2680,12 +3059,12 @@
       renderTargetLoupe();
     }
 
-    /* Helper: Draw High-Detail Vector Illustrations for Target Objects in Camera Viewport */
+    /* Helper: Draw High-Detail Photorealistic Vector Illustrations for Targets in Viewport */
     function drawTargetVectorArtwork(ctx, cx, groundY, w, h, type, ppm) {
       ctx.save();
       const topY = groundY - h;
-      const wActual = Math.max(6, w);
-      const hActual = Math.max(10, h);
+      const wActual = Math.max(8, w);
+      const hActual = Math.max(12, h);
 
       // If PPM is below detection threshold, simulate blocky/pixelated appearance
       if (ppm < 25) {
@@ -2720,20 +3099,16 @@
         ctx.fillStyle = "#ffffff";
         ctx.fillRect(cx - 12 * s, groundY - 69 * s, 24 * s, 3 * s);
 
-        // Arms
+        // Arms & Hands
         ctx.fillStyle = "#0284c7";
         ctx.fillRect(cx - 16 * s, groundY - 76 * s, 4 * s, 32 * s);
         ctx.fillRect(cx + 12 * s, groundY - 76 * s, 4 * s, 32 * s);
-
-        // Hands
         ctx.fillStyle = "#f6c89f";
         ctx.fillRect(cx - 16 * s, groundY - 44 * s, 4 * s, 6 * s);
         ctx.fillRect(cx + 12 * s, groundY - 44 * s, 4 * s, 6 * s);
 
-        // Neck
+        // Neck & Head
         ctx.fillRect(cx - 3 * s, groundY - 84 * s, 6 * s, 6 * s);
-
-        // Head
         ctx.beginPath();
         ctx.arc(cx, groundY - 90 * s, headR, 0, Math.PI * 2);
         ctx.fill();
@@ -2741,11 +3116,9 @@
         // Facial features if high resolution (>=125 ppm)
         if (ppm >= 125) {
           ctx.fillStyle = "#0f172a";
-          // Hair/Cap
           ctx.beginPath();
           ctx.arc(cx, groundY - 92 * s, headR, Math.PI, 0);
           ctx.fill();
-          // Eyes
           ctx.fillRect(cx - 3 * s, groundY - 90 * s, 2 * s, 2 * s);
           ctx.fillRect(cx + 1 * s, groundY - 90 * s, 2 * s, 2 * s);
         }
@@ -2754,21 +3127,17 @@
         // Seated Person with Bench/Chair
         const s = hActual / 80;
 
-        // Chair legs & frame
         ctx.strokeStyle = "#64748b";
         ctx.lineWidth = Math.max(1, 2 * s);
         ctx.strokeRect(cx - 14 * s, groundY - 30 * s, 28 * s, 30 * s);
 
-        // Legs
         ctx.fillStyle = "#1e3a8a";
         ctx.fillRect(cx - 8 * s, groundY - 26 * s, 6 * s, 26 * s);
         ctx.fillRect(cx + 2 * s, groundY - 26 * s, 6 * s, 26 * s);
 
-        // Torso
         ctx.fillStyle = "#0284c7";
         ctx.fillRect(cx - 10 * s, groundY - 58 * s, 20 * s, 32 * s);
 
-        // Head
         ctx.fillStyle = "#f6c89f";
         ctx.beginPath();
         ctx.arc(cx, groundY - 68 * s, 8 * s, 0, Math.PI * 2);
@@ -2779,27 +3148,34 @@
         const s = wActual / 90;
 
         // Tires
-        ctx.fillStyle = "#0f172a";
+        ctx.fillStyle = "#0a0e17";
         ctx.fillRect(cx - 42 * s, groundY - 14 * s, 10 * s, 14 * s);
         ctx.fillRect(cx + 32 * s, groundY - 14 * s, 10 * s, 14 * s);
 
-        // Lower bumper / chassis
-        ctx.fillStyle = "#1d4ed8";
+        // Lower bumper / chassis with metallic gloss
+        const carGrad = ctx.createLinearGradient(cx - 44 * s, 0, cx + 44 * s, 0);
+        carGrad.addColorStop(0, "#1d4ed8");
+        carGrad.addColorStop(0.5, "#3b82f6");
+        carGrad.addColorStop(1, "#1d4ed8");
+        ctx.fillStyle = carGrad;
         ctx.beginPath();
         ctx.roundRect ? ctx.roundRect(cx - 44 * s, groundY - 32 * s, 88 * s, 24 * s, 6 * s) : ctx.rect(cx - 44 * s, groundY - 32 * s, 88 * s, 24 * s);
         ctx.fill();
 
         // Radiator Grille
-        ctx.fillStyle = "#0f172a";
+        ctx.fillStyle = "#090d16";
         ctx.fillRect(cx - 24 * s, groundY - 26 * s, 48 * s, 14 * s);
 
-        // Front Headlights
+        // Front Headlights with LED DRL glow
         ctx.fillStyle = "#ffffff";
+        ctx.shadowColor = "#38bdf8";
+        ctx.shadowBlur = 6;
         ctx.fillRect(cx - 38 * s, groundY - 30 * s, 12 * s, 6 * s);
         ctx.fillRect(cx + 26 * s, groundY - 30 * s, 12 * s, 6 * s);
+        ctx.shadowBlur = 0;
 
         // Windshield and Greenhouse Cabin
-        ctx.fillStyle = "#0a1120";
+        ctx.fillStyle = "#09101d";
         ctx.beginPath();
         ctx.moveTo(cx - 36 * s, groundY - 32 * s);
         ctx.lineTo(cx - 28 * s, groundY - 62 * s);
@@ -2815,39 +3191,34 @@
         // License Plate on Front Bumper
         ctx.fillStyle = "#ffffff";
         ctx.fillRect(cx - 14 * s, groundY - 18 * s, 28 * s, 7 * s);
+        ctx.fillStyle = "#1e293b";
+        ctx.fillRect(cx - 14 * s, groundY - 18 * s, 4 * s, 7 * s); // blue band
         if (ppm >= 125) {
-          ctx.fillStyle = "#1e293b";
           ctx.font = `bold ${Math.max(4, Math.round(5 * s))}px monospace`;
-          ctx.fillText("DINION", cx - 11 * s, groundY - 13 * s);
+          ctx.fillText("DINION", cx - 9 * s, groundY - 13 * s);
         }
 
       } else if (type === "suv") {
         // Frontal Perspective SUV / Van
         const s = wActual / 95;
 
-        // Large Tires
-        ctx.fillStyle = "#0f172a";
+        ctx.fillStyle = "#0a0e17";
         ctx.fillRect(cx - 45 * s, groundY - 18 * s, 12 * s, 18 * s);
         ctx.fillRect(cx + 33 * s, groundY - 18 * s, 12 * s, 18 * s);
 
-        // Elevated Chassis
-        ctx.fillStyle = "#b45309";
+        ctx.fillStyle = "#d97706";
         ctx.fillRect(cx - 46 * s, groundY - 42 * s, 92 * s, 30 * s);
 
-        // Large High Windshield
         ctx.fillStyle = "#0b121e";
         ctx.fillRect(cx - 38 * s, groundY - 78 * s, 76 * s, 36 * s);
 
-        // Roof Rack Rails
         ctx.fillStyle = "#1e293b";
         ctx.fillRect(cx - 36 * s, groundY - 82 * s, 72 * s, 4 * s);
 
-        // Heavy Headlights
         ctx.fillStyle = "#ffffff";
         ctx.fillRect(cx - 42 * s, groundY - 40 * s, 14 * s, 10 * s);
         ctx.fillRect(cx + 28 * s, groundY - 40 * s, 14 * s, 10 * s);
 
-        // Chrome/Dark Grille
         ctx.fillStyle = "#1e293b";
         ctx.fillRect(cx - 26 * s, groundY - 38 * s, 52 * s, 16 * s);
 
@@ -2855,52 +3226,66 @@
         // Heavy Transport Truck Frontal
         const s = wActual / 100;
 
-        // Heavy dual front wheels
-        ctx.fillStyle = "#0f172a";
+        ctx.fillStyle = "#090d16";
         ctx.fillRect(cx - 48 * s, groundY - 20 * s, 12 * s, 20 * s);
         ctx.fillRect(cx + 36 * s, groundY - 20 * s, 12 * s, 20 * s);
 
-        // Front bumper
         ctx.fillStyle = "#334155";
         ctx.fillRect(cx - 50 * s, groundY - 24 * s, 100 * s, 12 * s);
 
-        // Massive Radiator Grille
         ctx.fillStyle = "#cbd5e1";
         ctx.fillRect(cx - 32 * s, groundY - 58 * s, 64 * s, 34 * s);
 
-        // Main Cab
         ctx.fillStyle = "#b91c1c";
         ctx.fillRect(cx - 48 * s, groundY - 110 * s, 96 * s, 54 * s);
 
-        // Panoramic Windshield
         ctx.fillStyle = "#080e18";
         ctx.fillRect(cx - 44 * s, groundY - 105 * s, 88 * s, 36 * s);
 
-        // Cab Roof / Air Deflector
         ctx.fillStyle = "#cbd5e1";
         ctx.fillRect(cx - 48 * s, groundY - 128 * s, 96 * s, 18 * s);
 
-      } else if (type === "plate") {
-        // License Plate Frontal
+      } else if (type === "anpr") {
+        // Dedicated High-Resolution ANPR License Plate & Front Bumper
+        const s = wActual / 52;
+        
+        // Front vehicle bumper contour
+        ctx.fillStyle = "#1e293b";
+        ctx.fillRect(cx - wActual * 0.9, groundY - hActual * 1.8, wActual * 1.8, hActual * 1.8);
+
+        // Retroreflective White License Plate
         ctx.fillStyle = "#ffffff";
-        ctx.fillRect(cx - wActual / 2, groundY - hActual, wActual, hActual);
+        ctx.fillRect(cx - wActual / 2, groundY - hActual * 1.1, wActual, hActual);
         ctx.strokeStyle = "#000000";
-        ctx.lineWidth = 1.5;
-        ctx.strokeRect(cx - wActual / 2, groundY - hActual, wActual, hActual);
+        ctx.lineWidth = Math.max(1, 1.8 * s);
+        ctx.strokeRect(cx - wActual / 2, groundY - hActual * 1.1, wActual, hActual);
 
-        // Blue EU band on left
+        // Blue Country Strip on left
         ctx.fillStyle = "#1d4ed8";
-        ctx.fillRect(cx - wActual / 2, groundY - hActual, wActual * 0.16, hActual);
+        ctx.fillRect(cx - wActual / 2, groundY - hActual * 1.1, wActual * 0.16, hActual);
 
-        // License Alphanumeric Text
-        if (ppm >= 100) {
-          ctx.fillStyle = "#000000";
-          ctx.font = `bold ${Math.max(6, Math.round(hActual * 0.65))}px monospace`;
-          ctx.fillText("DINION 7100", cx - wActual * 0.28, groundY - hActual * 0.28);
-        }
+        // Embossed License Plate Text
+        ctx.fillStyle = "#000000";
+        const fontSize = Math.max(6, Math.round(hActual * 0.68));
+        ctx.font = `bold ${fontSize}px 'SF Mono', monospace`;
+        ctx.fillText("DL•01•AB•1234", cx - wActual * 0.28, groundY - hActual * 0.38);
+
+        // ANPR Green OCR Detection Box with simulated confidence
+        ctx.strokeStyle = "#22c55e";
+        ctx.lineWidth = 1.5;
+        ctx.strokeRect(cx - wActual / 2 - 4, groundY - hActual * 1.1 - 4, wActual + 8, hActual + 8);
+
+        // Floating OCR Confidence Tag
+        const ocrTag = `OCR: DL-01-AB-1234 (99.4%)`;
+        ctx.font = "bold 8px monospace";
+        const ocrW = ctx.measureText(ocrTag).width + 8;
+        ctx.fillStyle = "rgba(34, 197, 94, 0.95)";
+        ctx.fillRect(cx - ocrW / 2, groundY - hActual * 1.1 - 18, ocrW, 12);
+        ctx.fillStyle = "#000000";
+        ctx.fillText(ocrTag, cx - ocrW / 2 + 4, groundY - hActual * 1.1 - 9);
 
       } else {
-        // Custom calibration target
+        // Custom target block
         ctx.fillStyle = "#f59e0b";
         ctx.fillRect(cx - wActual / 2, topY, wActual, hActual);
       }
@@ -2917,8 +3302,7 @@
       const lh = (lcv.height = 180);
       lctx.clearRect(0, 0, lw, lh);
 
-      // Draw background dark grid
-      lctx.fillStyle = "#070a10";
+      lctx.fillStyle = "#06090e";
       lctx.fillRect(0, 0, lw, lh);
 
       // Draw simulated sensor pixel grid
@@ -2932,7 +3316,6 @@
         lctx.beginPath(); lctx.moveTo(0, y); lctx.lineTo(lw, y); lctx.stroke();
       }
 
-      // Draw magnified vector target in center of loupe
       const targetLoupeH = Math.min(140, Math.max(30, state.targetPixH * 1.5));
       const targetLoupeW = Math.min(140, Math.max(20, state.targetPixW * 1.5));
       const targetGroundY = lh / 2 + targetLoupeH / 2;
@@ -2952,7 +3335,7 @@
        ========================================================================== */
 
     // Helper: Dynamic Billboard Text Sprite in Three.js for CAD-grade measurement labels
-    function createTextSprite(text, { color = "#ffffff", bgColor = "rgba(13, 18, 28, 0.9)", borderColor = "#00d2ff", fontSize = 28 } = {}) {
+    function createTextSprite(text, { color = "#ffffff", bgColor = "rgba(11, 16, 26, 0.92)", borderColor = "#00d2ff", fontSize = 28 } = {}) {
       const canvas = document.createElement("canvas");
       const ctx = canvas.getContext("2d");
       ctx.font = `bold ${fontSize}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, monospace`;
@@ -3013,7 +3396,7 @@
 
         // 3D Scene
         this.scene = new THREE.Scene();
-        this.scene.background = new THREE.Color(0x07090e);
+        this.scene.background = new THREE.Color(0x05070c);
 
         // Perspective Camera
         this.camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 1200);
@@ -3031,21 +3414,27 @@
           this.controls = new THREE.OrbitControls(this.camera, this.renderer.domElement);
           this.controls.enableDamping = true;
           this.controls.dampingFactor = 0.08;
-          this.controls.maxPolarAngle = Math.PI / 2 + 0.05; // don't go below ground
+          this.controls.maxPolarAngle = Math.PI / 2 + 0.05;
           this.controls.target.set(0, 2, 22);
         }
 
-        // Ambient & Directional Lighting
-        const ambient = new THREE.AmbientLight(0xffffff, 0.7);
-        this.scene.add(ambient);
+        // Multi-Point Surveillance Lighting Rig
+        // 1. Hemisphere Light (sky light & ground bounce)
+        const hemiLight = new THREE.HemisphereLight(0xdce8ff, 0x182030, 0.85);
+        this.scene.add(hemiLight);
 
-        const dirLight = new THREE.DirectionalLight(0xffffff, 0.9);
-        dirLight.position.set(30, 60, 30);
-        dirLight.castShadow = true;
+        // 2. Key Sun Directional Light
+        const dirLight = new THREE.DirectionalLight(0xffffff, 1.1);
+        dirLight.position.set(35, 70, 35);
         this.scene.add(dirLight);
 
+        // 3. Fill Rim Light for crisp highlights
+        const fillLight = new THREE.DirectionalLight(0x00d2ff, 0.4);
+        fillLight.position.set(-30, 40, -20);
+        this.scene.add(fillLight);
+
         // Metric Ground Grid
-        const gridHelper = new THREE.GridHelper(240, 48, 0x00d2ff, 0x1e2738);
+        const gridHelper = new THREE.GridHelper(240, 48, 0x00d2ff, 0x182232);
         gridHelper.position.set(0, 0, 50);
         this.scene.add(gridHelper);
 
@@ -3099,7 +3488,6 @@
         pole.position.set(0, mountH / 2, 0);
         this.dynamicGroup.add(pole);
 
-        // Base flange
         const baseFlange = new THREE.Mesh(new THREE.CylinderGeometry(0.35, 0.35, 0.1, 16), poleMat);
         baseFlange.position.set(0, 0.05, 0);
         this.dynamicGroup.add(baseFlange);
@@ -3117,27 +3505,21 @@
         const halfVRad = degToRad(vfov / 2);
         const euler = new THREE.Euler(degToRad(tilt), -degToRad(pan), 0, 'YXZ');
 
-        // Local corner ray vectors (+Z forward, +X right, +Y up)
         const localRays = [
-          new THREE.Vector3(-Math.tan(halfHRad), -Math.tan(halfVRad), 1.0).normalize(), // Bottom-Left
-          new THREE.Vector3( Math.tan(halfHRad), -Math.tan(halfVRad), 1.0).normalize(), // Bottom-Right
-          new THREE.Vector3( Math.tan(halfHRad),  Math.tan(halfVRad), 1.0).normalize(), // Top-Right
-          new THREE.Vector3(-Math.tan(halfHRad),  Math.tan(halfVRad), 1.0).normalize()  // Top-Left
+          new THREE.Vector3(-Math.tan(halfHRad), -Math.tan(halfVRad), 1.0).normalize(),
+          new THREE.Vector3( Math.tan(halfHRad), -Math.tan(halfVRad), 1.0).normalize(),
+          new THREE.Vector3( Math.tan(halfHRad),  Math.tan(halfVRad), 1.0).normalize(),
+          new THREE.Vector3(-Math.tan(halfHRad),  Math.tan(halfVRad), 1.0).normalize()
         ];
 
-        // Transform rays to world directions
         const worldRays = localRays.map(r => r.clone().applyEuler(euler));
-
-        // Calculate Ground Footprint (Y = 0) intersection coordinates
         const maxPlaneDist = Math.max(80, targetDist * 1.5, state.doriRanges.detect * 1.1, 60);
 
         const groundCorners = worldRays.map(r => {
-          // If ray points towards the ground (Y < -0.001)
           if (r.y < -0.001) {
             const t = -mountH / r.y;
             return new THREE.Vector3(r.x * t, 0.02, r.z * t);
           } else {
-            // Ray points at or above horizon -> project to maximum bounding ground distance
             const horizDist = Math.sqrt(r.x * r.x + r.z * r.z);
             const t = maxPlaneDist / (horizDist || 1);
             return new THREE.Vector3(r.x * t, 0.02, r.z * t);
@@ -3165,7 +3547,7 @@
         const footprintMesh = new THREE.Mesh(footprintGeo, footprintMat);
         this.dynamicGroup.add(footprintMesh);
 
-        // Ground Footprint Glowing Border Lines
+        // Ground Footprint Border Lines
         const fpLinePoints = [
           groundCorners[0], groundCorners[1],
           groundCorners[1], groundCorners[2],
@@ -3173,7 +3555,7 @@
           groundCorners[3], groundCorners[0]
         ];
         const fpLineGeo = new THREE.BufferGeometry().setFromPoints(fpLinePoints);
-        const fpLineMat = new THREE.LineBasicMaterial({ color: 0x00d2ff, opacity: 0.8, transparent: true, linewidth: 2 });
+        const fpLineMat = new THREE.LineBasicMaterial({ color: 0x00d2ff, opacity: 0.85, transparent: true, linewidth: 2 });
         this.dynamicGroup.add(new THREE.LineSegments(fpLineGeo, fpLineMat));
 
         // 3. 3D Volumetric Frustum Guide Rays
@@ -3220,63 +3602,54 @@
 
         const targetModelGroup = this.buildTargetModel(state.targetType, targetHeight, targetWidth, targetDepth);
         targetModelGroup.position.set(tX, 0, tZ);
-        targetModelGroup.rotation.y = -panRad; // Face towards camera
+        targetModelGroup.rotation.y = -panRad;
         this.dynamicGroup.add(targetModelGroup);
 
         // 6. CAD 3D Measurement Dimension Lines & Billboard Badges
         this.buildMeasurements3D(camPos, tX, tZ, mountH, targetDist, targetHeight);
       }
 
-      /* Realistic CCTV Camera Mesh Generator */
       buildCameraModel() {
         const group = new THREE.Group();
 
-        // Mounting wall/pole bracket
         const bracketMat = new THREE.MeshStandardMaterial({ color: 0x334155, metalness: 0.7, roughness: 0.3 });
         const bracketArm = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.06, 0.7, 12), bracketMat);
         bracketArm.rotation.x = Math.PI / 2;
         bracketArm.position.set(0, 0, 0.35);
         group.add(bracketArm);
 
-        // Pan/Tilt Swivel Joint
         const swivel = new THREE.Mesh(new THREE.SphereGeometry(0.12, 16, 16), bracketMat);
         swivel.position.set(0, 0, 0.7);
         group.add(swivel);
 
-        // Bullet Camera Housing
         const bodyMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, metalness: 0.5, roughness: 0.4 });
         const body = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.18, 0.9, 20), bodyMat);
         body.rotation.x = Math.PI / 2;
         body.position.set(0, 0, 1.15);
         group.add(body);
 
-        // Front Aluminum Bezel
         const bezelMat = new THREE.MeshStandardMaterial({ color: 0x94a3b8, metalness: 0.8, roughness: 0.2 });
         const bezel = new THREE.Mesh(new THREE.CylinderGeometry(0.19, 0.19, 0.08, 20), bezelMat);
         bezel.rotation.x = Math.PI / 2;
         bezel.position.set(0, 0, 1.62);
         group.add(bezel);
 
-        // Front Optical Glass Lens Element
         const lensMat = new THREE.MeshStandardMaterial({ color: 0x050810, metalness: 0.9, roughness: 0.1 });
         const lens = new THREE.Mesh(new THREE.CircleGeometry(0.16, 20), lensMat);
         lens.position.set(0, 0, 1.661);
         group.add(lens);
 
-        // Blue Iris Glow Ring
         const irisMat = new THREE.MeshBasicMaterial({ color: 0x00d2ff, side: THREE.DoubleSide });
         const iris = new THREE.Mesh(new THREE.RingGeometry(0.06, 0.09, 20), irisMat);
         iris.position.set(0, 0, 1.662);
         group.add(iris);
 
-        // Sunshield Visor Canopy
         const visorMat = new THREE.MeshStandardMaterial({ color: 0x475569, roughness: 0.5 });
         const visor = new THREE.Mesh(new THREE.CylinderGeometry(0.21, 0.21, 0.95, 20, 1, false, -Math.PI / 2, Math.PI), visorMat);
         visor.rotation.x = Math.PI / 2;
         visor.position.set(0, 0.03, 1.25);
         group.add(visor);
 
-        // Green Power LED
         const led = new THREE.Mesh(new THREE.SphereGeometry(0.025, 8, 8), new THREE.MeshBasicMaterial({ color: 0x10b981 }));
         led.position.set(0.13, 0.13, 1.58);
         group.add(led);
@@ -3284,15 +3657,35 @@
         return group;
       }
 
-      /* Procedural 3D Target Model Generator */
+      /* Professional 3D Target Models with PBR Materials & Soft Contact Shadow */
       buildTargetModel(type, height, width, depth) {
         const group = new THREE.Group();
+
+        // Soft contact drop shadow on ground
+        const shadowR = Math.max(1.0, (width || 0.6) * 1.3);
+        const shadowGeo = new THREE.PlaneGeometry(shadowR * 2.2, (depth || 1.0) * 1.5);
+        const shadowCanvas = document.createElement("canvas");
+        shadowCanvas.width = 128; shadowCanvas.height = 128;
+        const sctx = shadowCanvas.getContext("2d");
+        const sgrad = sctx.createRadialGradient(64, 64, 5, 64, 64, 60);
+        sgrad.addColorStop(0, "rgba(0,0,0,0.65)");
+        sgrad.addColorStop(0.6, "rgba(0,0,0,0.3)");
+        sgrad.addColorStop(1, "rgba(0,0,0,0)");
+        sctx.fillStyle = sgrad;
+        sctx.fillRect(0, 0, 128, 128);
+
+        const shadowTex = new THREE.CanvasTexture(shadowCanvas);
+        const shadowMat = new THREE.MeshBasicMaterial({ map: shadowTex, transparent: true, opacity: 0.8, depthWrite: false });
+        const shadowMesh = new THREE.Mesh(shadowGeo, shadowMat);
+        shadowMesh.rotation.x = -Math.PI / 2;
+        shadowMesh.position.y = 0.025;
+        group.add(shadowMesh);
 
         if (type === "human") {
           // Standing Human Mannequin
           const s = height / 1.70;
-          const bodyMat = new THREE.MeshStandardMaterial({ color: 0x0284c7, roughness: 0.6 });
-          const pantsMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.8 });
+          const bodyMat = new THREE.MeshStandardMaterial({ color: 0x0284c7, roughness: 0.5 });
+          const pantsMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.7 });
           const skinMat = new THREE.MeshStandardMaterial({ color: 0xf6c89f, roughness: 0.5 });
           const shoeMat = new THREE.MeshStandardMaterial({ color: 0x0f172a });
 
@@ -3341,22 +3734,20 @@
           group.add(cap);
 
         } else if (type === "seated") {
-          // Seated Person with Chair
+          // Seated Person with Office/Security Chair
           const s = height / 1.30;
-          const chairMat = new THREE.MeshStandardMaterial({ color: 0x475569 });
+          const chairMat = new THREE.MeshStandardMaterial({ color: 0x334155, metalness: 0.6 });
           const clothesMat = new THREE.MeshStandardMaterial({ color: 0x1e3a8a });
           const skinMat = new THREE.MeshStandardMaterial({ color: 0xf6c89f });
 
-          // Chair seat & back
-          const seat = new THREE.Mesh(new THREE.BoxGeometry(0.5 * s, 0.05 * s, 0.5 * s), chairMat);
+          const seat = new THREE.Mesh(new THREE.BoxGeometry(0.5 * s, 0.06 * s, 0.5 * s), chairMat);
           seat.position.set(0, 0.45 * s, 0);
           group.add(seat);
 
-          const backrest = new THREE.Mesh(new THREE.BoxGeometry(0.5 * s, 0.45 * s, 0.05 * s), chairMat);
-          backrest.position.set(0, 0.72 * s, -0.22 * s);
+          const backrest = new THREE.Mesh(new THREE.BoxGeometry(0.5 * s, 0.48 * s, 0.06 * s), chairMat);
+          backrest.position.set(0, 0.74 * s, -0.22 * s);
           group.add(backrest);
 
-          // Seated Human
           const thighs = new THREE.Mesh(new THREE.BoxGeometry(0.36 * s, 0.12 * s, 0.42 * s), clothesMat);
           thighs.position.set(0, 0.53 * s, 0.1 * s);
           group.add(thighs);
@@ -3370,28 +3761,34 @@
           group.add(head);
 
         } else if (type === "car") {
-          // 3D Sedan Car
+          // Professional 3D Sedan Car with Specular Clearcoat & Wheel Rims
           const sH = height / 1.48;
           const sW = (width || 1.80) / 1.80;
           const sL = (depth || 4.60) / 4.60;
 
-          const bodyMat = new THREE.MeshStandardMaterial({ color: 0x2563eb, metalness: 0.6, roughness: 0.3 });
-          const glassMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.1, metalness: 0.9, opacity: 0.85, transparent: true });
-          const tireMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.9 });
-          const rimMat = new THREE.MeshStandardMaterial({ color: 0xd1d5db, metalness: 0.8, roughness: 0.2 });
+          const bodyMat = new THREE.MeshStandardMaterial({ color: 0x1d4ed8, metalness: 0.7, roughness: 0.25 });
+          const glassMat = new THREE.MeshStandardMaterial({ color: 0x050912, roughness: 0.05, metalness: 0.95 });
+          const tireMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.9 });
+          const rimMat = new THREE.MeshStandardMaterial({ color: 0xd1d5db, metalness: 0.85, roughness: 0.15 });
 
-          // Chassis
-          const chassis = new THREE.Mesh(new THREE.BoxGeometry(1.8 * sW, 0.55 * sH, 4.4 * sL), bodyMat);
+          // Chassis Lower Body
+          const chassis = new THREE.Mesh(new THREE.BoxGeometry(1.82 * sW, 0.55 * sH, 4.4 * sL), bodyMat);
           chassis.position.set(0, 0.48 * sH, 0);
           group.add(chassis);
 
-          // Cabin
-          const cabin = new THREE.Mesh(new THREE.BoxGeometry(1.6 * sW, 0.52 * sH, 2.3 * sL), bodyMat);
+          // Aerodynamic Cabin Roof
+          const cabin = new THREE.Mesh(new THREE.BoxGeometry(1.6 * sW, 0.54 * sH, 2.3 * sL), bodyMat);
           cabin.position.set(0, 0.98 * sH, -0.2 * sL);
           group.add(cabin);
 
-          // 4 Wheels
-          const tireGeo = new THREE.CylinderGeometry(0.33 * sH, 0.33 * sH, 0.25 * sW, 16);
+          // Slanted Windshield (Dark Specular Glass)
+          const windshield = new THREE.Mesh(new THREE.PlaneGeometry(1.5 * sW, 0.65 * sH), glassMat);
+          windshield.rotation.x = -Math.PI / 4;
+          windshield.position.set(0, 0.95 * sH, 1.05 * sL);
+          group.add(windshield);
+
+          // 4 Wheels with Alloy Rims
+          const tireGeo = new THREE.CylinderGeometry(0.33 * sH, 0.33 * sH, 0.25 * sW, 18);
           tireGeo.rotateZ(Math.PI / 2);
           [
             [-0.92 * sW, 0.33 * sH, 1.35 * sL], [0.92 * sW, 0.33 * sH, 1.35 * sL],
@@ -3400,29 +3797,53 @@
             const tire = new THREE.Mesh(tireGeo, tireMat);
             tire.position.set(wx, wy, wz);
             group.add(tire);
+
+            const rim = new THREE.Mesh(new THREE.CircleGeometry(0.2 * sH, 12), rimMat);
+            rim.rotation.y = wx > 0 ? Math.PI / 2 : -Math.PI / 2;
+            rim.position.set(wx + (wx > 0 ? 0.13 : -0.13) * sW, wy, wz);
+            group.add(rim);
           });
 
-          // Headlights
+          // Headlights with Emissive Projector Glow
           [-0.65 * sW, 0.65 * sW].forEach(hx => {
             const hl = new THREE.Mesh(new THREE.BoxGeometry(0.28 * sW, 0.12 * sH, 0.05), new THREE.MeshBasicMaterial({ color: 0xffffff }));
             hl.position.set(hx, 0.58 * sH, 2.22 * sL);
             group.add(hl);
           });
 
+          // Taillights
+          [-0.7 * sW, 0.7 * sW].forEach(tx => {
+            const tl = new THREE.Mesh(new THREE.BoxGeometry(0.26 * sW, 0.12 * sH, 0.05), new THREE.MeshBasicMaterial({ color: 0xef4444 }));
+            tl.position.set(tx, 0.58 * sH, -2.22 * sL);
+            group.add(tl);
+          });
+
+          // License Plate on Front Bumper
+          const plate = new THREE.Mesh(new THREE.BoxGeometry(0.52 * sW, 0.15 * sH, 0.03), new THREE.MeshBasicMaterial({ color: 0xffffff }));
+          plate.position.set(0, 0.32 * sH, 2.22 * sL);
+          group.add(plate);
+
         } else if (type === "suv") {
-          // 3D Full-Size SUV
+          // 3D Full-Size SUV / Crossover
           const sH = height / 1.80;
           const sW = (width || 1.95) / 1.95;
           const sL = (depth || 4.90) / 4.90;
 
-          const bodyMat = new THREE.MeshStandardMaterial({ color: 0xd97706, metalness: 0.5, roughness: 0.4 });
+          const bodyMat = new THREE.MeshStandardMaterial({ color: 0xd97706, metalness: 0.6, roughness: 0.3 });
           const chassis = new THREE.Mesh(new THREE.BoxGeometry(1.95 * sW, 0.75 * sH, 4.7 * sL), bodyMat);
           chassis.position.set(0, 0.68 * sH, 0);
           group.add(chassis);
 
-          const cabin = new THREE.Mesh(new THREE.BoxGeometry(1.8 * sW, 0.65 * sH, 3.1 * sL), bodyMat);
+          const cabin = new THREE.Mesh(new THREE.BoxGeometry(1.8 * sW, 0.68 * sH, 3.1 * sL), bodyMat);
           cabin.position.set(0, 1.35 * sH, -0.4 * sL);
           group.add(cabin);
+
+          // Roof rails
+          [-0.7 * sW, 0.7 * sW].forEach(rx => {
+            const rail = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.06, 2.8 * sL), new THREE.MeshStandardMaterial({ color: 0x1e293b }));
+            rail.position.set(rx, 1.72 * sH, -0.4 * sL);
+            group.add(rail);
+          });
 
         } else if (type === "truck") {
           // Heavy Commercial Box Truck
@@ -3430,33 +3851,48 @@
           const sW = (width || 2.50) / 2.50;
           const sL = (depth || 8.50) / 8.50;
 
-          const cabMat = new THREE.MeshStandardMaterial({ color: 0xdc2626 });
-          const boxMat = new THREE.MeshStandardMaterial({ color: 0xe2e8f0 });
+          const cabMat = new THREE.MeshStandardMaterial({ color: 0xdc2626, roughness: 0.4 });
+          const boxMat = new THREE.MeshStandardMaterial({ color: 0xe2e8f0, roughness: 0.5 });
 
-          // Front cab
           const cab = new THREE.Mesh(new THREE.BoxGeometry(2.45 * sW, 2.1 * sH, 2.3 * sL), cabMat);
           cab.position.set(0, 1.75 * sH, 2.7 * sL);
           group.add(cab);
 
-          // Cargo box
           const cargo = new THREE.Mesh(new THREE.BoxGeometry(2.5 * sW, 2.4 * sH, 5.8 * sL), boxMat);
           cargo.position.set(0, 1.95 * sH, -1.3 * sL);
           group.add(cargo);
 
-        } else if (type === "plate") {
-          // License Plate on Stanchion
-          const postMat = new THREE.MeshStandardMaterial({ color: 0x475569 });
-          const post = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 0.75, 12), postMat);
-          post.position.set(0, 0.375, 0);
-          group.add(post);
+        } else if (type === "anpr") {
+          // Dedicated ANPR License Plate & Front Bumper Assembly
+          const bumperMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, metalness: 0.6, roughness: 0.3 });
+          const bumper = new THREE.Mesh(new THREE.BoxGeometry(1.8, 0.45, 0.3), bumperMat);
+          bumper.position.set(0, 0.4, 0);
+          group.add(bumper);
 
-          const plate = new THREE.Mesh(new THREE.BoxGeometry(0.52, 0.15, 0.02), new THREE.MeshBasicMaterial({ color: 0xffffff }));
-          plate.position.set(0, 0.75, 0.03);
-          group.add(plate);
+          // Retroreflective License Plate Board (0.52m x 0.15m standard)
+          const plateBack = new THREE.Mesh(new THREE.BoxGeometry(0.56, 0.18, 0.04), new THREE.MeshStandardMaterial({ color: 0x0f172a }));
+          plateBack.position.set(0, 0.4, 0.16);
+          group.add(plateBack);
+
+          const plateMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
+          const plateFace = new THREE.Mesh(new THREE.PlaneGeometry(0.52, 0.15), plateMat);
+          plateFace.position.set(0, 0.4, 0.182);
+          group.add(plateFace);
+
+          // Blue Country Strip
+          const euBand = new THREE.Mesh(new THREE.PlaneGeometry(0.08, 0.15), new THREE.MeshBasicMaterial({ color: 0x1d4ed8 }));
+          euBand.position.set(-0.22, 0.4, 0.183);
+          group.add(euBand);
+
+          // Green ANPR OCR Detection Box in 3D
+          const ocrBoxGeo = new THREE.RingGeometry(0.28, 0.3, 4);
+          const ocrBox = new THREE.Mesh(ocrBoxGeo, new THREE.MeshBasicMaterial({ color: 0x22c55e, side: THREE.DoubleSide }));
+          ocrBox.position.set(0, 0.4, 0.19);
+          group.add(ocrBox);
 
         } else {
-          // Custom Target Block
-          const box = new THREE.Mesh(new THREE.BoxGeometry(width || 0.5, height, depth || 0.5), new THREE.MeshStandardMaterial({ color: 0xf59e0b }));
+          // Custom Metric Target with Calibration Stand
+          const box = new THREE.Mesh(new THREE.BoxGeometry(width || 0.5, height, depth || 0.5), new THREE.MeshStandardMaterial({ color: 0xf59e0b, roughness: 0.4 }));
           box.position.set(0, height / 2, 0);
           group.add(box);
         }
@@ -3464,7 +3900,7 @@
         // Circular Target Base Landing Disc on ground
         const disc = new THREE.Mesh(
           new THREE.RingGeometry(0.1, Math.max(0.9, (width || 0.5) * 1.2), 24),
-          new THREE.MeshBasicMaterial({ color: 0xffaa00, side: THREE.DoubleSide })
+          new THREE.MeshBasicMaterial({ color: type === "anpr" ? 0x22c55e : 0xffaa00, side: THREE.DoubleSide })
         );
         disc.rotation.x = -Math.PI / 2;
         disc.position.y = 0.04;
@@ -3473,7 +3909,6 @@
         return group;
       }
 
-      /* Build DORI Colored Bands directly projected on the ground */
       buildDoriGroundBands(euler, halfHRad) {
         const bands = [
           { rMin: 0, rMax: state.doriRanges.ident, color: 0x9333ea, opacity: 0.28, label: "IDENT" },
@@ -3490,7 +3925,6 @@
           const r2 = Math.min(120, b.rMax);
           if (r2 <= r1) return;
 
-          // Build trapezoidal band on ground
           const w1 = r1 * Math.tan(halfHRad);
           const w2 = r2 * Math.tan(halfHRad);
 
@@ -3501,7 +3935,6 @@
             new THREE.Vector3(-w2, 0, r2)
           ];
 
-          // Rotate by pan azimuth
           const rotY = new THREE.Euler(0, -panRad, 0);
           const worldPts = localPts.map(p => p.clone().applyEuler(rotY));
 
@@ -3524,7 +3957,6 @@
           }));
           this.dynamicGroup.add(bandMesh);
 
-          // Boundary line across the far edge of the band
           const edgePoints = [
             new THREE.Vector3(worldPts[2].x, 0.03, worldPts[2].z),
             new THREE.Vector3(worldPts[3].x, 0.03, worldPts[3].z)
@@ -3533,7 +3965,6 @@
           const edgeLine = new THREE.Line(edgeGeo, new THREE.LineBasicMaterial({ color: b.color, linewidth: 2 }));
           this.dynamicGroup.add(edgeLine);
 
-          // Billboard badge on the boundary line
           const badgePos = new THREE.Vector3((worldPts[2].x + worldPts[3].x) / 2, 0.5, (worldPts[2].z + worldPts[3].z) / 2);
           const sprite = createTextSprite(`${b.label} • ${formatDist(b.rMax)}`, {
             borderColor: `#${b.color.toString(16).padStart(6, '0')}`,
@@ -3544,14 +3975,12 @@
         });
       }
 
-      /* Build CAD 3D Measurement Lines & Labels */
       buildMeasurements3D(camPos, tX, tZ, mountH, targetDist, targetHeight) {
-        // A. Mounting Height Vertical Dimension Line
+        // A. Mounting Height Dimension Line
         const dimX = -1.4;
         const heightPoints = [
           new THREE.Vector3(dimX, 0, 0),
           new THREE.Vector3(dimX, mountH, 0),
-          // top/bottom extension ticks
           new THREE.Vector3(dimX - 0.4, 0, 0), new THREE.Vector3(dimX + 0.4, 0, 0),
           new THREE.Vector3(dimX - 0.4, mountH, 0), new THREE.Vector3(dimX + 0.4, mountH, 0)
         ];
@@ -3569,7 +3998,6 @@
           const bZ = state.blindSpot * Math.cos(panRad);
           const bX = state.blindSpot * Math.sin(panRad);
 
-          // Red hazard zone on ground
           const hazardMesh = new THREE.Mesh(
             new THREE.RingGeometry(0.2, state.blindSpot, 16, 1, panRad - Math.PI / 4, Math.PI / 2),
             new THREE.MeshBasicMaterial({ color: 0xef4444, side: THREE.DoubleSide, transparent: true, opacity: 0.2 })
@@ -3630,7 +4058,6 @@
 
         const wBarPoints = [
           wPt1, wPt2,
-          // End ticks
           new THREE.Vector3(wPt1.x, 0.05, wPt1.z - 0.4), new THREE.Vector3(wPt1.x, 0.05, wPt1.z + 0.4),
           new THREE.Vector3(wPt2.x, 0.05, wPt2.z - 0.4), new THREE.Vector3(wPt2.x, 0.05, wPt2.z + 0.4)
         ];
@@ -3655,7 +4082,6 @@
         } else if (type === "side") {
           this.camera.position.set(-65, state.mountH + 4, targetZ);
         } else if (type === "cam") {
-          // Camera POV looking through lens
           this.camera.position.set(0, state.mountH, 0.5);
           const fwdZ = targetZ + 15;
           this.controls.target.set(
@@ -3694,7 +4120,6 @@
       state.targetDist = parseFloat(els.targetDist.value) || 25.0;
       state.targetOffset = parseFloat(els.targetOffset.value) || 0.0;
 
-      // Sync preset geometry dimensions if available
       if (TARGET_PRESETS[state.targetType]) {
         state.targetWidth = TARGET_PRESETS[state.targetType].width;
         state.targetDepth = TARGET_PRESETS[state.targetType].depth;
@@ -3731,12 +4156,10 @@
       if (visualizer3dFull) visualizer3dFull.updateScene();
     }
 
-    /* Helper: Snapshot / Download Canvas Image */
     function exportCanvasSnapshot(canvasOrId, filenamePrefix = "camera-fov-plan") {
       let canvas = typeof canvasOrId === "string" ? document.getElementById(canvasOrId) : canvasOrId;
       if (!canvas) return;
 
-      // For Three.js WebGL canvas
       if (canvasOrId === "wrapper3dMulti" && visualizer3dMulti) {
         canvas = visualizer3dMulti.renderer.domElement;
       } else if (canvasOrId === "wrapper3dFull" && visualizer3dFull) {
@@ -3803,6 +4226,14 @@
         els.targetDist.value = p.targetDist;
         els.targetHeightM.value = p.targetHeight;
 
+        if (p.targetType) {
+          els.targetType.value = p.targetType;
+          document.querySelectorAll(".target-card").forEach(c => {
+            if (c.getAttribute("data-target") === p.targetType) c.classList.add("active");
+            else c.classList.remove("active");
+          });
+        }
+
         syncInputsToState();
         const angles = computeFovFromFocal(state.focalMm, state.sensorW, state.sensorH);
         state.hfov = angles.hfov;
@@ -3835,7 +4266,6 @@
       renderAll();
     });
 
-    // Sensor custom dimensions
     [els.sensorWidthMm, els.sensorHeightMm].forEach(el => {
       el.addEventListener("input", () => {
         syncInputsToState();
@@ -3917,24 +4347,61 @@
       renderAll();
     });
 
-    // Tabs switching
-    const tabBtns = document.querySelectorAll(".tab-btn");
+    // 1-Tap View Switcher Buttons
+    const oneTapBtns = document.querySelectorAll(".one-tap-btn");
     const tabContainers = document.querySelectorAll(".view-container");
-    tabBtns.forEach(btn => {
+
+    function switchViewTab(targetId) {
+      oneTapBtns.forEach(b => {
+        if (b.getAttribute("data-tab") === targetId) b.classList.add("active");
+        else b.classList.remove("active");
+      });
+      tabContainers.forEach(c => {
+        if (c.id === targetId) c.classList.add("active");
+        else c.classList.remove("active");
+      });
+
+      setTimeout(() => {
+        if (visualizer3dMulti) visualizer3dMulti.resize();
+        if (visualizer3dFull) visualizer3dFull.resize();
+        renderAll();
+      }, 60);
+    }
+
+    oneTapBtns.forEach(btn => {
       btn.addEventListener("click", () => {
-        tabBtns.forEach(b => b.classList.remove("active"));
-        tabContainers.forEach(c => c.classList.remove("active"));
-
-        btn.classList.add("active");
         const targetId = btn.getAttribute("data-tab");
-        const targetEl = document.getElementById(targetId);
-        if (targetEl) targetEl.classList.add("active");
+        switchViewTab(targetId);
+      });
+    });
 
-        setTimeout(() => {
-          if (visualizer3dMulti) visualizer3dMulti.resize();
-          if (visualizer3dFull) visualizer3dFull.resize();
-          renderAll();
-        }, 50);
+    // Help Modal Open / Close
+    els.btnOpenHelp.addEventListener("click", () => {
+      els.helpModal.classList.add("active");
+    });
+    els.btnModalClose.addEventListener("click", () => {
+      els.helpModal.classList.remove("active");
+    });
+    els.helpModal.addEventListener("click", (e) => {
+      if (e.target === els.helpModal) els.helpModal.classList.remove("active");
+    });
+    window.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && els.helpModal.classList.contains("active")) {
+        els.helpModal.classList.remove("active");
+      }
+    });
+
+    // Help Modal Tabs
+    const modalTabBtns = document.querySelectorAll(".modal-tab-btn");
+    const guideSections = document.querySelectorAll(".guide-section");
+    modalTabBtns.forEach(btn => {
+      btn.addEventListener("click", () => {
+        modalTabBtns.forEach(b => b.classList.remove("active"));
+        guideSections.forEach(s => s.classList.remove("active"));
+        btn.classList.add("active");
+        const guideId = btn.getAttribute("data-guide");
+        const sec = document.getElementById(guideId);
+        if (sec) sec.classList.add("active");
       });
     });
 
@@ -4023,6 +4490,10 @@
           groundWidthM: Number(state.fieldWAtDist.toFixed(2)),
           blindSpotNearCutoffM: Number(state.blindSpot.toFixed(2)),
           farCutoffM: isFinite(state.farCutoff) ? Number(state.farCutoff.toFixed(2)) : "infinity",
+          anpr: {
+            pixelsAcrossPlate: Math.round(state.platePixW),
+            isOptimal: state.ppm >= 400 && state.tilt <= 20
+          },
           doriRangesM: {
             identification: Number(state.doriRanges.ident.toFixed(2)),
             recognition: Number(state.doriRanges.recog.toFixed(2)),
@@ -4255,7 +4726,6 @@
        12. INITIALIZATION ON PAGE LOAD
        ========================================================================== */
     window.addEventListener("DOMContentLoaded", () => {
-      // Initialize 3D Scenes
       if (window.THREE) {
         visualizer3dMulti = new Visualizer3D(els.wrapper3dMulti);
         visualizer3dFull = new Visualizer3D(els.wrapper3dFull);
@@ -4263,7 +4733,6 @@
       refreshSavedPresetsDropdown();
       syncInputsToState();
       
-      // Calculate initial angles & render
       const angles = computeFovFromFocal(state.focalMm, state.sensorW, state.sensorH);
       state.hfov = angles.hfov;
       state.vfov = angles.vfov;

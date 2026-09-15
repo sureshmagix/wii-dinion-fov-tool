@@ -10,9 +10,39 @@ Hosted via GitHub Pages:
 ## Key Features
 
 - **Universal Camera & Sensor Support**:
-  - Pre-configured camera profiles: Bosch DINION 7100i IR (Standard ALX & Telephoto ALXT lenses), Generic 1080p Fixed Dome & Bullet, Generic 4MP Varifocal, Generic 4K/8MP Ultra HD, and Custom Camera specification.
+  - Pre-configured camera profiles: Bosch DINION 7100i IR (Standard ALX & Telephoto ALXT lenses), **Bosch DINION 7100i ANPR / LPR (12–40mm telephoto optimized for vehicle capture)**, Generic 1080p Fixed Dome & Bullet, Generic 4MP Varifocal, Generic 4K/8MP Ultra HD, and Custom Camera specification.
   - Sensor formats: 1/1.8", 1/2.8", 1/2.7", 1/2.5", 1/2", 1/3", 2/3", 1", and custom sensor width/height in millimeters.
   - Resolutions: 1080p (1920×1080), 4MP (2560×1440), 5MP (2592×1944), 4K/8MP (3840×2160), 12MP (4000×3000), 720p, or custom pixel dimensions.
+
+- **1-Tap View Switching**:
+  - Instant navigation between views via the primary header toolbar:
+    - **[⊞ Quad Multi-View]**: Synchronized 4-quadrant layout (3D Frustum, Viewfinder, 2D Plan, 2D Elevation).
+    - **[🌐 3D Spatial Frustum]**: Full-height interactive 3D WebGL scene with orbit controls, camera angle presets, and CAD dimension lines.
+    - **[📐 2D Plan & Elevation]**: Split architectural CAD layout with top-down footprint, azimuth arcs, and elevation blind spot profiles.
+    - **[📷 Camera POV & ANPR]**: Simulated sensor viewfinder with optical OSD, 1:1 pixel loupe, and live ANPR OCR readout.
+
+- **Automatic Number Plate Recognition (ANPR / LPR) Engine**:
+  - First-class target model: Standard retroreflective license plate ($0.52\text{m} \times 0.15\text{m}$) mounted on a vehicle bumper with green OCR bounding box.
+  - Real-time plate pixel resolution calculator: Measures exact horizontal pixels across the plate ($\text{Plate}_{\text{px}} = W_{\text{plate}} \times \text{PPM}$).
+  - Live ANPR compliance evaluator:
+    - Minimum readable threshold ($\ge 150\text{ px}$ across plate or $\ge 288\text{ PPM}$).
+    - Optimal accuracy threshold ($\ge 200-250+\text{ px}$ across plate or $400-500+\text{ PPM}$).
+    - Vertical tilt angle compliance check ($\text{Tilt} \le 20^\circ-25^\circ$ to prevent keystoning and character distortion).
+    - Horizontal approach angle check ($\le 20^\circ$).
+  - Simulated OCR engine readout with confidence percentage, plate character rendering (`DL-01-AB-1234`), and recommendations for shutter speed ($1/1000\text{s}-1/2000\text{s}$) and IR illumination.
+
+- **Interactive Engineering Help Guide (`? Guide & Theory`)**:
+  - In-app 4-tab interactive modal explaining key surveillance engineering concepts:
+    1. **Surveillance Optics & FOV**: Focal length equations, sensor size crop factors, and DORI classification (EN 62676-4).
+    2. **Camera Mounting & Positioning**: Optimal mounting heights, tilt angle selection, keystoning avoidance, near blind spot formula ($D_{\text{near}} = h/\tan(\alpha + \text{VFOV}/2)$), and dead-zone mitigation.
+    3. **ANPR / LPR Capture Guide**: Camera placement guidelines, vertical/horizontal angle limits, minimum pixel densities, shutter speeds for moving vehicles, and retroreflective license plate illumination.
+    4. **Custom Objects & DORI Guidelines**: How to define custom target heights/widths and map scene metrics to security requirements.
+
+- **Ultra-Realistic 3D PBR Target Models & Lighting**:
+  - 3-point studio surveillance lighting: Sky/ground bounce hemisphere light, sun directional key light with depth, and rim fill light.
+  - Soft contact drop shadows underneath all vehicles and pedestrians on the ground plane.
+  - Physically-based materials with metallic car body clearcoats, tinted glass windows, pedestrian cloth textures, and hi-vis reflective vests.
+  - Supported targets: Standing Person (1.70m), Seated Person on ergonomic chair (1.30m), Sedan Car (1.48m), Full-size SUV / Van (1.80m), Heavy Commercial Truck / Bus (3.20m), ANPR License Plate (0.15m), and Custom Target with circular landing pad.
 
 - **Bidirectional Optical Synchronization**:
   - Live reactive conversion between **Focal Length ($f$ in mm)** and **Field of View angles** (Horizontal HFOV, Vertical VFOV, and Diagonal DFOV).
