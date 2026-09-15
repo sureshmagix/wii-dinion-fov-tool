@@ -11,25 +11,30 @@
 
   <style>
     :root {
-      --bg-dark: #0f1218;
-      --bg-card: #171b23;
-      --bg-input: #1f2530;
-      --bg-input-focus: #28303f;
-      --border-color: #2c3545;
-      --border-hover: #3d4a60;
+      --bg-dark: #090c12;
+      --bg-panel: #0f141f;
+      --bg-card: #151b28;
+      --bg-card-header: #1a2232;
+      --bg-input: #1b2333;
+      --bg-input-focus: #242f45;
+      --border-color: #232d40;
+      --border-light: #32405a;
+      --border-glow: rgba(0, 210, 255, 0.4);
       --accent: #00d2ff;
       --accent-hover: #38dcff;
-      --accent-dim: rgba(0, 210, 255, 0.15);
+      --accent-dim: rgba(0, 210, 255, 0.12);
+      --accent-secondary: #3b82f6;
       --text: #e2e8f0;
-      --text-muted: #8c9cb0;
+      --text-muted: #8493a8;
       --text-bright: #ffffff;
+      --text-dim: #5a6880;
       
       /* DORI Standard EN 62676-4 Colors */
-      --dori-ident: #8b5cf6;    /* >=250 PPM */
-      --dori-recog: #10b981;    /* >=125 PPM */
-      --dori-observe: #f59e0b;  /* >=63 PPM */
-      --dori-detect: #ef4444;   /* >=25 PPM */
-      --dori-monitor: #64748b;  /* <25 PPM */
+      --dori-ident: #9333ea;    /* >=250 PPM - Identification */
+      --dori-recog: #10b981;    /* >=125 PPM - Recognition */
+      --dori-observe: #f59e0b;  /* >=63 PPM  - Observation */
+      --dori-detect: #ef4444;   /* >=25 PPM  - Detection */
+      --dori-monitor: #64748b;  /* <25 PPM   - Monitoring */
     }
 
     * {
@@ -39,60 +44,72 @@
     }
 
     body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
       background: var(--bg-dark);
       color: var(--text);
       min-height: 100vh;
       display: flex;
       flex-direction: column;
       overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
     }
 
+    /* Top Navigation Header */
     header {
-      background: #090c10;
+      background: #080a0f;
       border-bottom: 1px solid var(--border-color);
-      padding: 0.75rem 1.5rem;
+      padding: 0.65rem 1.4rem;
       display: flex;
       align-items: center;
       justify-content: space-between;
       flex-wrap: wrap;
       gap: 1rem;
-      z-index: 10;
+      z-index: 20;
     }
 
     .header-left {
       display: flex;
       align-items: center;
-      gap: 1rem;
+      gap: 0.9rem;
     }
 
     .logo-badge {
-      background: linear-gradient(135deg, #0077ff, #00d2ff);
-      color: #fff;
+      background: linear-gradient(135deg, #0284c7, #00d2ff);
+      color: #000;
       font-weight: 800;
-      font-size: 0.9rem;
+      font-size: 0.82rem;
       padding: 0.35rem 0.65rem;
       border-radius: 6px;
-      letter-spacing: 0.5px;
-      box-shadow: 0 2px 10px rgba(0, 210, 255, 0.3);
+      letter-spacing: 0.8px;
+      box-shadow: 0 0 16px rgba(0, 210, 255, 0.4);
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+
+    .logo-badge svg {
+      width: 14px;
+      height: 14px;
     }
 
     h1 {
-      font-size: 1.15rem;
-      font-weight: 600;
+      font-size: 1.1rem;
+      font-weight: 700;
       color: var(--text-bright);
       margin: 0;
+      letter-spacing: -0.2px;
     }
 
     .header-subtitle {
-      font-size: 0.75rem;
+      font-size: 0.72rem;
       color: var(--text-muted);
+      margin-top: 1px;
     }
 
     .header-actions {
       display: flex;
       align-items: center;
-      gap: 0.6rem;
+      gap: 0.55rem;
       flex-wrap: wrap;
     }
 
@@ -101,21 +118,26 @@
       color: var(--text-bright);
       border: 1px solid var(--border-color);
       border-radius: 6px;
-      padding: 0.45rem 0.85rem;
-      font-size: 0.82rem;
-      font-weight: 500;
+      padding: 0.4rem 0.8rem;
+      font-size: 0.8rem;
+      font-weight: 600;
       cursor: pointer;
       display: inline-flex;
       align-items: center;
       gap: 0.4rem;
       transition: all 0.2s ease;
       text-decoration: none;
+      white-space: nowrap;
     }
 
     .btn:hover {
       background: var(--bg-input-focus);
-      border-color: var(--accent);
+      border-color: var(--border-light);
       color: #fff;
+    }
+
+    .btn:active {
+      transform: translateY(1px);
     }
 
     .btn-primary {
@@ -136,23 +158,49 @@
     .btn-accent:hover {
       background: var(--accent);
       color: #000;
+      box-shadow: 0 0 12px rgba(0, 210, 255, 0.5);
     }
 
     .btn-sm {
-      padding: 0.25rem 0.55rem;
+      padding: 0.28rem 0.6rem;
       font-size: 0.75rem;
     }
 
-    /* Main Layout */
+    .btn-xs {
+      padding: 0.18rem 0.45rem;
+      font-size: 0.7rem;
+      border-radius: 4px;
+    }
+
+    .btn-icon {
+      background: rgba(255,255,255,0.06);
+      border: 1px solid var(--border-color);
+      color: var(--text-muted);
+      padding: 0.25rem 0.5rem;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.75rem;
+      transition: all 0.15s;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+    }
+    .btn-icon:hover {
+      background: rgba(0,210,255,0.15);
+      border-color: var(--accent);
+      color: #fff;
+    }
+
+    /* Main App Layout */
     .app-layout {
       display: grid;
-      grid-template-columns: 360px 1fr;
+      grid-template-columns: 370px 1fr;
       flex: 1;
-      min-height: calc(100vh - 65px);
+      min-height: calc(100vh - 60px);
       background: var(--bg-dark);
     }
 
-    @media (max-width: 1024px) {
+    @media (max-width: 1100px) {
       .app-layout {
         grid-template-columns: 1fr;
       }
@@ -160,25 +208,37 @@
 
     /* Sidebar Controls */
     .sidebar {
-      background: var(--bg-card);
+      background: var(--bg-panel);
       border-right: 1px solid var(--border-color);
       padding: 1rem;
       overflow-y: auto;
-      max-height: calc(100vh - 65px);
+      max-height: calc(100vh - 60px);
       display: flex;
       flex-direction: column;
-      gap: 1.2rem;
+      gap: 1rem;
+    }
+
+    .sidebar::-webkit-scrollbar {
+      width: 6px;
+    }
+    .sidebar::-webkit-scrollbar-thumb {
+      background: var(--border-color);
+      border-radius: 3px;
     }
 
     .control-section {
-      background: rgba(15, 18, 24, 0.6);
+      background: var(--bg-card);
       border: 1px solid var(--border-color);
       border-radius: 8px;
-      padding: 0.9rem;
+      padding: 0.85rem;
+      transition: border-color 0.2s;
+    }
+    .control-section:focus-within {
+      border-color: var(--border-light);
     }
 
     .section-title {
-      font-size: 0.8rem;
+      font-size: 0.78rem;
       font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 0.8px;
@@ -190,7 +250,7 @@
     }
 
     .form-group {
-      margin-bottom: 0.85rem;
+      margin-bottom: 0.8rem;
     }
     .form-group:last-child {
       margin-bottom: 0;
@@ -212,33 +272,35 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      font-size: 0.78rem;
+      font-size: 0.76rem;
       color: var(--text-muted);
       margin-bottom: 0.3rem;
+      font-weight: 500;
     }
 
     label .val-badge {
-      font-weight: 600;
+      font-weight: 700;
       color: var(--text-bright);
       background: var(--bg-input);
-      padding: 0.1rem 0.4rem;
+      padding: 0.12rem 0.45rem;
       border-radius: 4px;
-      font-family: monospace;
-      font-size: 0.78rem;
+      font-family: 'SF Mono', Consolas, Monaco, monospace;
+      font-size: 0.74rem;
+      border: 1px solid var(--border-color);
     }
 
     input[type="text"],
     input[type="number"],
     select {
       width: 100%;
-      padding: 0.45rem 0.6rem;
+      padding: 0.45rem 0.65rem;
       background: var(--bg-input);
       border: 1px solid var(--border-color);
-      border-radius: 5px;
+      border-radius: 6px;
       color: var(--text-bright);
       font-size: 0.82rem;
       outline: none;
-      transition: border-color 0.2s;
+      transition: all 0.2s;
     }
 
     input[type="text"]:focus,
@@ -246,55 +308,115 @@
     select:focus {
       border-color: var(--accent);
       background: var(--bg-input-focus);
+      box-shadow: 0 0 0 2px rgba(0, 210, 255, 0.15);
     }
 
     input[type="range"] {
       width: 100%;
-      height: 5px;
-      background: #2a3342;
+      height: 6px;
+      background: #20293a;
       border-radius: 3px;
       outline: none;
       -webkit-appearance: none;
-      margin: 0.5rem 0 0.2rem;
+      margin: 0.45rem 0 0.15rem;
+      cursor: pointer;
     }
 
     input[type="range"]::-webkit-slider-thumb {
       -webkit-appearance: none;
-      width: 15px;
-      height: 15px;
+      width: 16px;
+      height: 16px;
       border-radius: 50%;
       background: var(--accent);
       cursor: pointer;
-      box-shadow: 0 0 6px rgba(0, 210, 255, 0.6);
-      transition: transform 0.15s;
+      box-shadow: 0 0 8px rgba(0, 210, 255, 0.7);
+      transition: transform 0.15s ease, background-color 0.15s;
     }
     input[type="range"]::-webkit-slider-thumb:hover {
-      transform: scale(1.2);
+      transform: scale(1.25);
+      background: #fff;
     }
 
-    /* Main Content Area */
+    /* Target Preset Visual Cards Grid */
+    .target-card-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.45rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .target-card {
+      background: var(--bg-input);
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      padding: 0.5rem 0.35rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 0.25rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      color: var(--text-muted);
+      text-align: center;
+    }
+
+    .target-card:hover {
+      background: var(--bg-input-focus);
+      border-color: var(--border-light);
+      color: var(--text-bright);
+    }
+
+    .target-card.active {
+      background: rgba(0, 210, 255, 0.12);
+      border-color: var(--accent);
+      color: var(--text-bright);
+      box-shadow: 0 0 10px rgba(0, 210, 255, 0.25);
+    }
+
+    .target-card-icon {
+      font-size: 1.25rem;
+      line-height: 1;
+    }
+
+    .target-card-label {
+      font-size: 0.7rem;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    .target-card-dim {
+      font-size: 0.62rem;
+      color: var(--text-dim);
+      font-family: monospace;
+    }
+    .target-card.active .target-card-dim {
+      color: var(--accent);
+    }
+
+    /* Right Main Viewport */
     .main-viewport {
       display: flex;
       flex-direction: column;
       overflow: hidden;
-      background: #0b0e14;
+      background: var(--bg-dark);
     }
 
-    /* Stats Overview Bar */
+    /* Real-time Stats Chips Bar */
     .stats-bar {
-      background: #12161f;
+      background: #0d121c;
       border-bottom: 1px solid var(--border-color);
-      padding: 0.75rem 1.25rem;
+      padding: 0.65rem 1.2rem;
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-      gap: 0.75rem;
+      grid-template-columns: repeat(auto-fit, minmax(145px, 1fr));
+      gap: 0.65rem;
     }
 
     .stat-chip {
-      background: rgba(23, 27, 35, 0.85);
+      background: var(--bg-card);
       border: 1px solid var(--border-color);
       border-radius: 6px;
-      padding: 0.45rem 0.7rem;
+      padding: 0.45rem 0.65rem;
       border-left: 3px solid var(--accent);
       display: flex;
       flex-direction: column;
@@ -308,10 +430,11 @@
     .stat-chip.monitor { border-left-color: var(--dori-monitor); }
 
     .stat-label {
-      font-size: 0.68rem;
+      font-size: 0.66rem;
       color: var(--text-muted);
       text-transform: uppercase;
-      letter-spacing: 0.5px;
+      letter-spacing: 0.6px;
+      font-weight: 600;
     }
 
     .stat-value {
@@ -326,22 +449,22 @@
       color: #94a3b8;
     }
 
-    /* View Tabs */
+    /* View Navigation Toolbar */
     .view-toolbar {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 0.5rem 1.25rem;
-      background: #0e121a;
+      padding: 0.5rem 1.2rem;
+      background: #0b0f17;
       border-bottom: 1px solid var(--border-color);
       flex-wrap: wrap;
-      gap: 0.5rem;
+      gap: 0.6rem;
     }
 
     .tab-group {
       display: flex;
-      gap: 0.35rem;
-      background: #161b24;
+      gap: 0.3rem;
+      background: #141a26;
       padding: 3px;
       border-radius: 6px;
       border: 1px solid var(--border-color);
@@ -351,12 +474,12 @@
       background: transparent;
       border: none;
       color: var(--text-muted);
-      padding: 0.4rem 0.85rem;
+      padding: 0.38rem 0.8rem;
       font-size: 0.78rem;
       font-weight: 600;
       border-radius: 4px;
       cursor: pointer;
-      transition: all 0.2s;
+      transition: all 0.15s;
     }
 
     .tab-btn:hover {
@@ -364,18 +487,33 @@
     }
 
     .tab-btn.active {
-      background: #232b3a;
+      background: var(--bg-card);
       color: var(--accent);
-      box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+      box-shadow: 0 1px 4px rgba(0,0,0,0.4);
+      border: 1px solid var(--border-color);
     }
 
-    .view-controls {
+    .dori-legend {
       display: flex;
       align-items: center;
-      gap: 0.5rem;
+      gap: 0.75rem;
+      font-size: 0.72rem;
+      flex-wrap: wrap;
     }
 
-    /* View Panels Area */
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+
+    .legend-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 2px;
+    }
+
+    /* Views Display Area */
     .views-display {
       flex: 1;
       padding: 1rem;
@@ -398,20 +536,19 @@
       gap: 1rem;
     }
 
-    /* Multi-View Grid */
+    /* Multi-View Quad Grid */
     .grid-multiview {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      grid-template-rows: 320px 280px;
+      grid-template-rows: 340px 320px;
       gap: 1rem;
-      height: auto;
-      min-height: 620px;
+      min-height: 670px;
     }
 
-    @media (max-width: 1280px) {
+    @media (max-width: 1200px) {
       .grid-multiview {
         grid-template-columns: 1fr;
-        grid-template-rows: repeat(4, 320px);
+        grid-template-rows: repeat(4, 340px);
       }
     }
 
@@ -426,8 +563,8 @@
     }
 
     .card-canvas-header {
-      padding: 0.5rem 0.8rem;
-      background: rgba(18, 22, 30, 0.95);
+      padding: 0.45rem 0.8rem;
+      background: var(--bg-card-header);
       border-bottom: 1px solid var(--border-color);
       display: flex;
       align-items: center;
@@ -435,15 +572,32 @@
       font-size: 0.78rem;
       font-weight: 600;
       color: var(--text-bright);
-      z-index: 2;
+      z-index: 5;
+      gap: 0.5rem;
+    }
+
+    .card-canvas-header .header-left-title {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .card-canvas-header .header-right-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
     }
 
     .card-canvas-header span.tag {
       font-size: 0.68rem;
-      background: #222a38;
+      background: #1e283a;
       padding: 0.15rem 0.45rem;
       border-radius: 4px;
       color: var(--accent);
+      border: 1px solid rgba(0, 210, 255, 0.2);
     }
 
     .canvas-wrapper {
@@ -452,7 +606,7 @@
       width: 100%;
       height: 100%;
       min-height: 240px;
-      background: #090c10;
+      background: #07090e;
     }
 
     canvas {
@@ -461,96 +615,185 @@
       display: block;
     }
 
-    /* 3D Viewport Full */
-    .viewport-3d-full {
-      width: 100%;
-      height: 100%;
-      min-height: 580px;
-      border-radius: 8px;
-      overflow: hidden;
-      border: 1px solid var(--border-color);
-      position: relative;
-      background: #090c10;
-    }
-
+    /* 3D Viewport Controls Overlay */
     .viewport-3d-overlay {
       position: absolute;
-      top: 12px;
-      right: 12px;
-      z-index: 5;
+      top: 10px;
+      right: 10px;
+      z-index: 6;
       display: flex;
-      flex-direction: column;
-      gap: 0.4rem;
-      background: rgba(15, 18, 25, 0.85);
+      flex-wrap: wrap;
+      gap: 0.35rem;
+      background: rgba(13, 18, 28, 0.88);
       backdrop-filter: blur(8px);
-      padding: 0.5rem;
+      padding: 0.4rem;
       border-radius: 6px;
       border: 1px solid var(--border-color);
     }
 
     .viewport-3d-info {
       position: absolute;
-      bottom: 12px;
-      left: 12px;
-      z-index: 5;
-      background: rgba(15, 18, 25, 0.85);
+      bottom: 10px;
+      left: 10px;
+      z-index: 6;
+      background: rgba(13, 18, 28, 0.88);
       backdrop-filter: blur(8px);
-      padding: 0.5rem 0.8rem;
+      padding: 0.35rem 0.65rem;
       border-radius: 6px;
       border: 1px solid var(--border-color);
-      font-size: 0.75rem;
+      font-size: 0.72rem;
       color: var(--text-muted);
       pointer-events: none;
-    }
-
-    /* DORI Legend */
-    .dori-legend {
       display: flex;
       align-items: center;
-      gap: 0.75rem;
-      font-size: 0.72rem;
-      flex-wrap: wrap;
+      gap: 0.4rem;
     }
 
-    .legend-item {
+    /* Camera Viewfinder OSD and Crosshair */
+    .viewfinder-osd {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 10px 14px;
+      font-family: 'SF Mono', Consolas, Monaco, monospace;
+      font-size: 0.72rem;
+      color: rgba(255, 255, 255, 0.8);
+      text-shadow: 0 1px 3px rgba(0,0,0,0.8);
+      z-index: 4;
+    }
+
+    .osd-top {
+      display: flex;
+      justify-content: space-between;
+    }
+    .osd-bottom {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+    }
+
+    .osd-rec {
+      color: #ef4444;
+      font-weight: 700;
       display: flex;
       align-items: center;
       gap: 0.35rem;
     }
-
-    .legend-dot {
-      width: 10px;
-      height: 10px;
-      border-radius: 2px;
+    .osd-rec-dot {
+      width: 8px;
+      height: 8px;
+      background: #ef4444;
+      border-radius: 50%;
+      animation: blinkRec 1.5s infinite;
+    }
+    @keyframes blinkRec {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.2; }
     }
 
-    /* Camera Viewfinder Overlay */
-    .viewfinder-crosshair {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      width: 24px;
-      height: 24px;
-      transform: translate(-50%, -50%);
-      pointer-events: none;
+    /* Full 3D Viewport */
+    .viewport-3d-full {
+      width: 100%;
+      height: 100%;
+      min-height: 600px;
+      border-radius: 8px;
+      overflow: hidden;
+      border: 1px solid var(--border-color);
+      position: relative;
+      background: #07090e;
     }
-    .viewfinder-crosshair::before,
-    .viewfinder-crosshair::after {
-      content: '';
-      position: absolute;
-      background: rgba(0, 210, 255, 0.4);
+
+    /* Target Detail & Inspection Panel */
+    .camview-layout {
+      display: grid;
+      grid-template-columns: 1fr 340px;
+      gap: 1rem;
+      min-height: 560px;
     }
-    .viewfinder-crosshair::before {
-      top: 11px;
-      left: 0;
-      width: 24px;
-      height: 2px;
+    @media (max-width: 1100px) {
+      .camview-layout {
+        grid-template-columns: 1fr;
+      }
     }
-    .viewfinder-crosshair::after {
-      top: 0;
-      left: 11px;
-      width: 2px;
-      height: 24px;
+
+    .inspector-card {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .inspector-body {
+      padding: 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      overflow-y: auto;
+      background: var(--bg-panel);
+      flex: 1;
+    }
+
+    .loupe-container {
+      background: #080b12;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      padding: 0.75rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .loupe-canvas-box {
+      width: 180px;
+      height: 180px;
+      background: #030508;
+      border: 1px solid var(--border-light);
+      border-radius: 6px;
+      position: relative;
+      overflow: hidden;
+      box-shadow: inset 0 0 20px rgba(0,0,0,0.8);
+    }
+
+    .loupe-canvas-box canvas {
+      width: 100%;
+      height: 100%;
+      image-rendering: pixelated;
+    }
+
+    .compliance-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.45rem;
+    }
+
+    .compliance-item {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      padding: 0.5rem 0.65rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 0.75rem;
+    }
+
+    .compliance-status {
+      font-weight: 700;
+      padding: 0.15rem 0.45rem;
+      border-radius: 4px;
+      font-size: 0.7rem;
+    }
+    .status-pass {
+      background: rgba(16, 185, 129, 0.2);
+      color: #10b981;
+      border: 1px solid #10b981;
+    }
+    .status-fail {
+      background: rgba(239, 68, 68, 0.15);
+      color: #ef4444;
+      border: 1px solid #ef4444;
     }
 
     /* Modal / Drag & Drop overlay */
@@ -581,13 +824,13 @@
       position: fixed;
       bottom: 24px;
       right: 24px;
-      background: #1a2230;
+      background: #151d2c;
       border: 1px solid var(--accent);
       color: #fff;
       padding: 0.75rem 1.25rem;
       border-radius: 6px;
       font-size: 0.85rem;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+      box-shadow: 0 4px 20px rgba(0,0,0,0.6);
       z-index: 1000;
       transform: translateY(100px);
       opacity: 0;
@@ -611,7 +854,7 @@
     .dori-table th, .dori-table td {
       padding: 0.35rem 0.5rem;
       text-align: left;
-      border-bottom: 1px solid #232b38;
+      border-bottom: 1px solid #232d40;
     }
     .dori-table th {
       color: var(--text-muted);
@@ -622,7 +865,6 @@
       text-align: right;
     }
 
-    /* Hidden file input */
     #jsonFileInput {
       display: none;
     }
@@ -641,10 +883,16 @@
   <!-- Top Navigation Header -->
   <header>
     <div class="header-left">
-      <div class="logo-badge">WII OPTICS</div>
+      <div class="logo-badge">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+          <circle cx="12" cy="13" r="4"/>
+        </svg>
+        WII OPTICS
+      </div>
       <div>
         <h1>Universal Camera FOV & 2D/3D Planning Tool</h1>
-        <div class="header-subtitle">Comprehensive Optical Engineering • EN 62676-4 DORI • Multi-Angle & 3D Frustum</div>
+        <div class="header-subtitle">Professional Optical Engineering • EN 62676-4 DORI • 3D Frustum & Ground Footprint</div>
       </div>
     </div>
 
@@ -701,7 +949,7 @@
 
         <div class="form-group">
           <label for="cameraName">Camera Label / Tag</label>
-          <input type="text" id="cameraName" value="CAM-01 DINION 7100i" placeholder="e.g. Entrance Gate 1" />
+          <input type="text" id="cameraName" value="CAM-01 DINION 7100i" placeholder="e.g. Perimeter Gate 1" />
         </div>
 
         <div class="form-row">
@@ -734,7 +982,7 @@
           </div>
         </div>
 
-        <!-- Custom Sensor mm Inputs (conditionally visible or editable) -->
+        <!-- Custom Sensor mm Inputs -->
         <div class="form-row" id="customSensorRow" style="display: none;">
           <div class="form-group">
             <label>Sensor W <span class="val-badge">mm</span></label>
@@ -785,11 +1033,11 @@
         <div class="form-row">
           <div class="form-group">
             <label>Vertical FOV (VFOV)</label>
-            <input type="text" id="vfovVal" value="45.0°" readonly style="background: #161b24; color: #94a3b8;" />
+            <input type="text" id="vfovVal" value="45.0°" readonly style="background: #141a26; color: #94a3b8;" />
           </div>
           <div class="form-group">
             <label>Diagonal FOV (DFOV)</label>
-            <input type="text" id="dfovVal" value="85.0°" readonly style="background: #161b24; color: #94a3b8;" />
+            <input type="text" id="dfovVal" value="85.0°" readonly style="background: #141a26; color: #94a3b8;" />
           </div>
         </div>
       </div>
@@ -826,16 +1074,51 @@
         </div>
       </div>
 
-      <!-- Section 4: Target Object & Distance -->
+      <!-- Section 4: Target Object & Inspection -->
       <div class="control-section">
         <div class="section-title">
           <span>Target Object & Inspection</span>
           <span class="val-badge" id="badgeTargetPpm">55 px/m</span>
         </div>
 
+        <!-- Target Visual Selector Cards -->
+        <label>Select Target Object:</label>
+        <div class="target-card-grid" id="targetCardGrid">
+          <div class="target-card active" data-target="human">
+            <div class="target-card-icon">🚶</div>
+            <div class="target-card-label">Person</div>
+            <div class="target-card-dim">1.70m</div>
+          </div>
+          <div class="target-card" data-target="seated">
+            <div class="target-card-icon">🪑</div>
+            <div class="target-card-label">Seated</div>
+            <div class="target-card-dim">1.30m</div>
+          </div>
+          <div class="target-card" data-target="car">
+            <div class="target-card-icon">🚗</div>
+            <div class="target-card-label">Sedan</div>
+            <div class="target-card-dim">1.48m</div>
+          </div>
+          <div class="target-card" data-target="suv">
+            <div class="target-card-icon">🚙</div>
+            <div class="target-card-label">SUV / Van</div>
+            <div class="target-card-dim">1.80m</div>
+          </div>
+          <div class="target-card" data-target="truck">
+            <div class="target-card-icon">🚛</div>
+            <div class="target-card-label">Truck</div>
+            <div class="target-card-dim">3.20m</div>
+          </div>
+          <div class="target-card" data-target="plate">
+            <div class="target-card-icon">🏷️</div>
+            <div class="target-card-label">Plate</div>
+            <div class="target-card-dim">0.15m</div>
+          </div>
+        </div>
+
         <div class="form-row">
           <div class="form-group">
-            <label for="targetType">Target Object Preset</label>
+            <label for="targetType">Preset Dropdown</label>
             <select id="targetType">
               <option value="human" selected>Standing Person (1.70m)</option>
               <option value="seated">Seated Person (1.30m)</option>
@@ -843,7 +1126,7 @@
               <option value="suv">SUV / Van (1.80m)</option>
               <option value="truck">Truck / Bus (3.20m)</option>
               <option value="plate">License Plate (0.15m)</option>
-              <option value="custom">Custom Height</option>
+              <option value="custom">Custom Dimensions</option>
             </select>
           </div>
 
@@ -946,7 +1229,7 @@
           <button class="tab-btn active" data-tab="tab-multiview">Combined Multi-View</button>
           <button class="tab-btn" data-tab="tab-3d">3D Interactive Frustum</button>
           <button class="tab-btn" data-tab="tab-2d">2D Top & Side Views</button>
-          <button class="tab-btn" data-tab="tab-camview">Simulated Camera POV</button>
+          <button class="tab-btn" data-tab="tab-camview">Simulated Camera POV & Inspector</button>
         </div>
 
         <div class="dori-legend">
@@ -967,8 +1250,19 @@
             <!-- 3D Scene Card -->
             <div class="card-canvas">
               <div class="card-canvas-header">
-                <span>3D Spatial Frustum & Ground Footprint</span>
-                <span class="tag">WebGL 3D (Drag to Orbit / Scroll to Zoom)</span>
+                <div class="header-left-title">
+                  <span>3D Spatial Frustum & Ground Footprint</span>
+                </div>
+                <div class="header-right-actions">
+                  <div class="tab-group" style="padding: 2px;">
+                    <button class="btn btn-xs" id="btnMultiIso" title="Isometric View">3D Iso</button>
+                    <button class="btn btn-xs" id="btnMultiTop" title="Top View">Top</button>
+                    <button class="btn btn-xs" id="btnMultiSide" title="Side View">Side</button>
+                    <button class="btn btn-xs" id="btnMultiCam" title="Camera POV">POV</button>
+                    <button class="btn btn-xs" id="btnMultiReset" title="Reset View">Reset</button>
+                  </div>
+                  <button class="btn-icon" id="snap3dMulti" title="Snapshot 3D View">📸</button>
+                </div>
               </div>
               <div class="canvas-wrapper" id="wrapper3dMulti"></div>
             </div>
@@ -976,20 +1270,39 @@
             <!-- Simulated Camera POV -->
             <div class="card-canvas">
               <div class="card-canvas-header">
-                <span>Simulated Camera Sensor Viewport</span>
-                <span class="tag" id="tagCamRes">1920 × 1080</span>
+                <div class="header-left-title">
+                  <span>Simulated Camera Sensor Viewport</span>
+                  <span class="tag" id="tagCamRes">1920 × 1080</span>
+                </div>
+                <div class="header-right-actions">
+                  <button class="btn-icon" id="snapCamMulti" title="Snapshot Camera View">📸</button>
+                </div>
               </div>
               <div class="canvas-wrapper">
                 <canvas id="camPovCanvasMulti"></canvas>
-                <div class="viewfinder-crosshair"></div>
+                <div class="viewfinder-osd">
+                  <div class="osd-top">
+                    <div class="osd-rec"><span class="osd-rec-dot"></span>LIVE • <span id="osdCamName">CAM-01 DINION 7100i</span></div>
+                    <div id="osdTimestamp">2026-09-15 12:00:00</div>
+                  </div>
+                  <div class="osd-bottom">
+                    <div id="osdOptics">f=4.7mm • HFOV 75° • Tilt 15°</div>
+                    <div id="osdTargetInfo">TARGET: 25.0m • 55 px/m (Observe)</div>
+                  </div>
+                </div>
               </div>
             </div>
 
             <!-- 2D Top View Plan -->
             <div class="card-canvas">
               <div class="card-canvas-header">
-                <span>2D Plan View (Top-Down Azimuth Footprint)</span>
-                <span class="tag">Ground Plane</span>
+                <div class="header-left-title">
+                  <span>2D Plan View (Top-Down Azimuth Footprint & Measurements)</span>
+                </div>
+                <div class="header-right-actions">
+                  <span class="tag">Ground Plane</span>
+                  <button class="btn-icon" id="snapTopMulti" title="Snapshot Top View">📸</button>
+                </div>
               </div>
               <div class="canvas-wrapper">
                 <canvas id="topViewCanvasMulti"></canvas>
@@ -999,8 +1312,13 @@
             <!-- 2D Side Profile Elevation -->
             <div class="card-canvas">
               <div class="card-canvas-header">
-                <span>2D Elevation Profile (Side Tilt & Blind Spot)</span>
-                <span class="tag">Vertical Plane</span>
+                <div class="header-left-title">
+                  <span>2D Elevation Profile (Side Tilt, Height & Blind Spot)</span>
+                </div>
+                <div class="header-right-actions">
+                  <span class="tag">Vertical Plane</span>
+                  <button class="btn-icon" id="snapSideMulti" title="Snapshot Side View">📸</button>
+                </div>
               </div>
               <div class="canvas-wrapper">
                 <canvas id="sideViewCanvasMulti"></canvas>
@@ -1019,20 +1337,26 @@
               <button class="btn btn-sm" id="btnViewSide">Side View</button>
               <button class="btn btn-sm" id="btnViewCamPov">Camera POV</button>
               <button class="btn btn-sm" id="btnReset3d">Reset View</button>
+              <button class="btn btn-accent btn-sm" id="snap3dFull">📸 Snapshot</button>
             </div>
             <div class="viewport-3d-info">
-              Left Click + Drag: Orbit & Rotate • Right Click + Drag: Pan • Scroll: Zoom In/Out
+              Left Click + Drag: Orbit • Right Click + Drag: Pan • Scroll: Zoom In/Out
             </div>
           </div>
         </div>
 
         <!-- TAB 3: Full 2D Top & Side Views -->
         <div class="view-container" id="tab-2d">
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; min-height: 550px;">
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; min-height: 580px;">
             <div class="card-canvas">
               <div class="card-canvas-header">
-                <span>Top-Down 2D Projection (Azimuth Footprint & DORI Zones)</span>
-                <span class="tag">Bird's Eye</span>
+                <div class="header-left-title">
+                  <span>Top-Down 2D Architectural Projection (Azimuth Footprint & DORI Zones)</span>
+                </div>
+                <div class="header-right-actions">
+                  <span class="tag">Bird's Eye</span>
+                  <button class="btn-icon" id="snapTopFull" title="Snapshot Top View">📸</button>
+                </div>
               </div>
               <div class="canvas-wrapper">
                 <canvas id="topViewCanvasFull"></canvas>
@@ -1041,8 +1365,13 @@
 
             <div class="card-canvas">
               <div class="card-canvas-header">
-                <span>Side Profile 2D (Mount Height, Tilt & Blind Spot)</span>
-                <span class="tag">Elevation</span>
+                <div class="header-left-title">
+                  <span>Side Profile 2D (Mount Height, Downward Tilt & Blind Spot)</span>
+                </div>
+                <div class="header-right-actions">
+                  <span class="tag">Elevation</span>
+                  <button class="btn-icon" id="snapSideFull" title="Snapshot Side View">📸</button>
+                </div>
               </div>
               <div class="canvas-wrapper">
                 <canvas id="sideViewCanvasFull"></canvas>
@@ -1051,17 +1380,90 @@
           </div>
         </div>
 
-        <!-- TAB 4: Full Simulated Camera POV -->
+        <!-- TAB 4: Full Simulated Camera POV & Inspector -->
         <div class="view-container" id="tab-camview">
-          <div class="card-canvas" style="min-height: 550px;">
-            <div class="card-canvas-header">
-              <span>Simulated Camera Sensor View (Synthesized Viewport & Target Bounding Box)</span>
-              <span class="tag" id="tagCamResFull">1920 × 1080</span>
+          <div class="camview-layout">
+            
+            <!-- Sensor Viewport -->
+            <div class="card-canvas">
+              <div class="card-canvas-header">
+                <div class="header-left-title">
+                  <span>Simulated Camera Sensor View (Pinhole Sensor Projection & Target Graphic)</span>
+                  <span class="tag" id="tagCamResFull">1920 × 1080</span>
+                </div>
+                <div class="header-right-actions">
+                  <button class="btn-icon" id="snapCamFull" title="Snapshot Sensor View">📸</button>
+                </div>
+              </div>
+              <div class="canvas-wrapper">
+                <canvas id="camPovCanvasFull"></canvas>
+                <div class="viewfinder-osd">
+                  <div class="osd-top">
+                    <div class="osd-rec"><span class="osd-rec-dot"></span>LIVE • <span id="osdCamNameFull">CAM-01 DINION 7100i</span></div>
+                    <div id="osdTimestampFull">2026-09-15 12:00:00</div>
+                  </div>
+                  <div class="osd-bottom">
+                    <div id="osdOpticsFull">f=4.7mm • HFOV 75° • Tilt 15°</div>
+                    <div id="osdTargetInfoFull">TARGET: 25.0m • 55 px/m (Observe)</div>
+                  </div>
+                </div>
+              </div>
             </div>
-            <div class="canvas-wrapper">
-              <canvas id="camPovCanvasFull"></canvas>
-              <div class="viewfinder-crosshair"></div>
+
+            <!-- Target Inspection & DORI Compliance Panel -->
+            <div class="card-canvas inspector-card">
+              <div class="card-canvas-header">
+                <div class="header-left-title">
+                  <span>Target Detail & DORI Compliance</span>
+                </div>
+                <span class="tag" id="tagInspectorPpm">55 px/m</span>
+              </div>
+              <div class="inspector-body">
+                
+                <!-- Target Magnifier Loupe -->
+                <div class="loupe-container">
+                  <label style="width:100%; text-align:center;">1:1 Sensor Pixel Resolution Preview</label>
+                  <div class="loupe-canvas-box">
+                    <canvas id="loupeCanvas"></canvas>
+                  </div>
+                  <span style="font-size:0.7rem; color:var(--text-muted);" id="loupeLabel">Target simulated at sensor resolution</span>
+                </div>
+
+                <!-- DORI Compliance Assessment -->
+                <label>EN 62676-4 Compliance Assessment:</label>
+                <div class="compliance-list">
+                  <div class="compliance-item">
+                    <span>Identification (≥250 px/m)</span>
+                    <span class="compliance-status status-fail" id="compIdent">Not Met</span>
+                  </div>
+                  <div class="compliance-item">
+                    <span>Recognition (≥125 px/m)</span>
+                    <span class="compliance-status status-fail" id="compRecog">Not Met</span>
+                  </div>
+                  <div class="compliance-item">
+                    <span>Observation (≥63 px/m)</span>
+                    <span class="compliance-status status-pass" id="compObserve">Achieved</span>
+                  </div>
+                  <div class="compliance-item">
+                    <span>Detection (≥25 px/m)</span>
+                    <span class="compliance-status status-pass" id="compDetect">Achieved</span>
+                  </div>
+                </div>
+
+                <!-- Target Dimensions Summary -->
+                <div style="background:var(--bg-card); border:1px solid var(--border-color); border-radius:6px; padding:0.65rem; font-size:0.75rem;">
+                  <div style="font-weight:700; color:var(--accent); margin-bottom:0.35rem;">Target Metric Geometry</div>
+                  <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.3rem; color:var(--text-muted);">
+                    <div>Object Type: <strong style="color:#fff;" id="inspObjType">Person</strong></div>
+                    <div>Height: <strong style="color:#fff;" id="inspObjH">1.70 m</strong></div>
+                    <div>Target Width: <strong style="color:#fff;" id="inspObjW">0.50 m</strong></div>
+                    <div>Pixel Height: <strong style="color:#fff;" id="inspPixH">93 px</strong></div>
+                  </div>
+                </div>
+
+              </div>
             </div>
+
           </div>
         </div>
 
@@ -1185,12 +1587,13 @@
     };
 
     const TARGET_PRESETS = {
-      human:  { height: 1.70, name: "Standing Person" },
-      seated: { height: 1.30, name: "Seated Person" },
-      car:    { height: 1.48, name: "Sedan Car" },
-      suv:    { height: 1.80, name: "SUV / Van" },
-      truck:  { height: 3.20, name: "Truck / Bus" },
-      plate:  { height: 0.15, name: "License Plate" }
+      human:  { height: 1.70, width: 0.50, depth: 0.30, name: "Standing Person", icon: "🚶" },
+      seated: { height: 1.30, width: 0.55, depth: 0.70, name: "Seated Person", icon: "🪑" },
+      car:    { height: 1.48, width: 1.80, depth: 4.60, name: "Sedan Car", icon: "🚗" },
+      suv:    { height: 1.80, width: 1.95, depth: 4.90, name: "SUV / Van", icon: "🚙" },
+      truck:  { height: 3.20, width: 2.50, depth: 8.50, name: "Truck / Bus", icon: "🚛" },
+      plate:  { height: 0.15, width: 0.52, depth: 0.05, name: "License Plate", icon: "🏷️" },
+      custom: { height: 1.70, width: 0.50, depth: 0.50, name: "Custom Object", icon: "📐" }
     };
 
     /* State Management */
@@ -1213,17 +1616,21 @@
       pan: 0.0,
       targetType: "human",
       targetHeight: 1.70,
+      targetWidth: 0.50,
+      targetDepth: 0.30,
       targetDist: 25.0,
       targetOffset: 0.0,
       
       // Computed Metrics
-      targetWidth: 0,
-      targetHeightScene: 0,
+      fieldWAtDist: 0,
+      fieldHAtDist: 0,
       ppm: 0,
+      ppf: 0,
       blindSpot: 0,
       farCutoff: 0,
       losDist: 0,
       targetPixH: 0,
+      targetPixW: 0,
       doriLevel: "Observe",
       doriRanges: { ident: 0, recog: 0, observe: 0, detect: 0 }
     };
@@ -1249,11 +1656,10 @@
       resolutionPreset: document.getElementById("resolutionPreset"),
       sensorWidthMm: document.getElementById("sensorWidthMm"),
       sensorHeightMm: document.getElementById("sensorHeightMm"),
-      customSensorRow: document.getElementById("customSensorRow"),
       resWidthPx: document.getElementById("resWidthPx"),
       resHeightPx: document.getElementById("resHeightPx"),
+      customSensorRow: document.getElementById("customSensorRow"),
       customResRow: document.getElementById("customResRow"),
-      badgeAspect: document.getElementById("badgeAspect"),
 
       focalSlider: document.getElementById("focalSlider"),
       focalVal: document.getElementById("focalVal"),
@@ -1269,6 +1675,7 @@
       panAngle: document.getElementById("panAngle"),
       panVal: document.getElementById("panVal"),
 
+      targetCardGrid: document.getElementById("targetCardGrid"),
       targetType: document.getElementById("targetType"),
       targetHeightM: document.getElementById("targetHeightM"),
       targetDist: document.getElementById("targetDist"),
@@ -1276,7 +1683,12 @@
       targetOffset: document.getElementById("targetOffset"),
       offsetVal: document.getElementById("offsetVal"),
 
-      // Stats
+      badgeAspect: document.getElementById("badgeAspect"),
+      badgeTiltStatus: document.getElementById("badgeTiltStatus"),
+      badgeTargetPpm: document.getElementById("badgeTargetPpm"),
+
+      // Stats Chips
+      chipDori: document.getElementById("chipDori"),
       statDoriLevel: document.getElementById("statDoriLevel"),
       statDoriPpm: document.getElementById("statDoriPpm"),
       statFieldWidth: document.getElementById("statFieldWidth"),
@@ -1285,9 +1697,8 @@
       statFarCutoff: document.getElementById("statFarCutoff"),
       statLosDist: document.getElementById("statLosDist"),
       statTargetPix: document.getElementById("statTargetPix"),
-      badgeTargetPpm: document.getElementById("badgeTargetPpm"),
-      chipDori: document.getElementById("chipDori"),
 
+      // DORI Ranges Table
       rangeIdent: document.getElementById("rangeIdent"),
       rangeRecog: document.getElementById("rangeRecog"),
       rangeObserve: document.getElementById("rangeObserve"),
@@ -1295,30 +1706,51 @@
 
       // Canvases
       topMulti: document.getElementById("topViewCanvasMulti"),
-      sideMulti: document.getElementById("sideViewCanvasMulti"),
-      camMulti: document.getElementById("camPovCanvasMulti"),
       topFull: document.getElementById("topViewCanvasFull"),
+      sideMulti: document.getElementById("sideViewCanvasMulti"),
       sideFull: document.getElementById("sideViewCanvasFull"),
+      camMulti: document.getElementById("camPovCanvasMulti"),
       camFull: document.getElementById("camPovCanvasFull"),
-      tagCamRes: document.getElementById("tagCamRes"),
-      tagCamResFull: document.getElementById("tagCamResFull"),
+      loupeCanvas: document.getElementById("loupeCanvas"),
 
+      // 3D Viewport Containers
       wrapper3dMulti: document.getElementById("wrapper3dMulti"),
-      wrapper3dFull: document.getElementById("wrapper3dFull")
+      wrapper3dFull: document.getElementById("wrapper3dFull"),
+
+      // OSD text elements
+      osdCamName: document.getElementById("osdCamName"),
+      osdTimestamp: document.getElementById("osdTimestamp"),
+      osdOptics: document.getElementById("osdOptics"),
+      osdTargetInfo: document.getElementById("osdTargetInfo"),
+      osdCamNameFull: document.getElementById("osdCamNameFull"),
+      osdTimestampFull: document.getElementById("osdTimestampFull"),
+      osdOpticsFull: document.getElementById("osdOpticsFull"),
+      osdTargetInfoFull: document.getElementById("osdTargetInfoFull"),
+
+      // Inspector Elements
+      tagInspectorPpm: document.getElementById("tagInspectorPpm"),
+      compIdent: document.getElementById("compIdent"),
+      compRecog: document.getElementById("compRecog"),
+      compObserve: document.getElementById("compObserve"),
+      compDetect: document.getElementById("compDetect"),
+      inspObjType: document.getElementById("inspObjType"),
+      inspObjH: document.getElementById("inspObjH"),
+      inspObjW: document.getElementById("inspObjW"),
+      inspPixH: document.getElementById("inspPixH"),
+      loupeLabel: document.getElementById("loupeLabel")
     };
 
     /* ==========================================================================
-       3. MATHEMATICAL COMPUTATIONS & FOV FORMULAS
+       3. OPTICAL MATHEMATICS & METRICS CALCULATOR
        ========================================================================== */
     function radToDeg(r) { return r * (180 / Math.PI); }
     function degToRad(d) { return d * (Math.PI / 180); }
 
-    // Computes FOV angles from focal length and sensor dimensions
     function computeFovFromFocal(focalMm, sensorW, sensorH) {
       const hfov = 2 * Math.atan(sensorW / (2 * focalMm));
       const vfov = 2 * Math.atan(sensorH / (2 * focalMm));
-      const diag = Math.hypot(sensorW, sensorH);
-      const dfov = 2 * Math.atan(diag / (2 * focalMm));
+      const diagSensor = Math.sqrt(sensorW * sensorW + sensorH * sensorH);
+      const dfov = 2 * Math.atan(diagSensor / (2 * focalMm));
       return {
         hfov: radToDeg(hfov),
         vfov: radToDeg(vfov),
@@ -1326,171 +1758,217 @@
       };
     }
 
-    // Computes focal length from HFOV and sensor width
     function computeFocalFromHfov(hfovDeg, sensorW) {
-      const rad = degToRad(hfovDeg / 2);
-      return sensorW / (2 * Math.tan(rad));
+      const hRad = degToRad(hfovDeg / 2);
+      return sensorW / (2 * Math.tan(hRad));
     }
 
     function calculateMetrics() {
-      const {
-        sensorW, sensorH, resW, resH,
-        hfov, vfov, mountH, tilt, targetDist, targetHeight, targetOffset
-      } = state;
+      const hfovRad = degToRad(state.hfov);
+      const vfovRad = degToRad(state.vfov);
+      const tiltRad = degToRad(state.tilt);
 
-      // Aspect Ratio
-      const gcd = (a, b) => b ? gcd(b, a % b) : a;
-      const d = gcd(resW, resH);
-      const aspectStr = `${resW / d}:${resH / d}`;
-      els.badgeAspect.textContent = aspectStr;
-      els.tagCamRes.textContent = `${resW} × ${resH}`;
-      if (els.tagCamResFull) els.tagCamResFull.textContent = `${resW} × ${resH}`;
+      // Field of view dimensions at target distance along ground optical line
+      const groundDist = state.targetDist;
+      state.fieldWAtDist = 2 * groundDist * Math.tan(hfovRad / 2);
+      state.fieldHAtDist = 2 * groundDist * Math.tan(vfovRad / 2);
 
-      // Ground Footprint & Line of Sight at optical center line
-      const radH = degToRad(hfov / 2);
-      const radV = degToRad(vfov / 2);
-      state.targetWidth = 2 * targetDist * Math.tan(radH);
-      state.targetHeightScene = 2 * targetDist * Math.tan(radV);
+      // Pixels per meter (PPM) at target distance
+      state.ppm = state.resW / state.fieldWAtDist;
+      state.ppf = state.ppm * 0.3048;
 
-      // PPM (Pixels Per Meter)
-      state.ppm = state.targetWidth > 0 ? (resW / state.targetWidth) : 0;
-      state.losDist = Math.hypot(targetDist, mountH, targetOffset);
-
-      // Target pixel height in sensor via pinhole triangle similarity
-      // f_px = (resW / 2) / tan(HFOV/2)
-      const f_px = (resW / 2) / Math.tan(radH);
-      state.targetPixH = (targetHeight * f_px) / state.losDist;
-
-      // Blind spot & Near / Far cutoffs on ground plane
-      const tiltRad = degToRad(tilt);
-      const bottomAngle = tiltRad + radV;
-      const topAngle = tiltRad - radV;
-
-      // Near ground cutoff (dead zone directly under pole)
-      if (bottomAngle > 0 && bottomAngle < Math.PI / 2) {
-        state.blindSpot = mountH / Math.tan(bottomAngle);
-      } else if (bottomAngle >= Math.PI / 2) {
-        state.blindSpot = 0;
-      } else {
-        state.blindSpot = Infinity;
-      }
-
-      // Far ground cutoff (optical ray touches ground)
-      if (topAngle > 0.001) {
-        state.farCutoff = mountH / Math.tan(topAngle);
-      } else {
-        state.farCutoff = Infinity; // Looking at or above horizon
-      }
-
-      // DORI Classification
+      // EN 62676-4 DORI Category Classification
       if (state.ppm >= 250) {
         state.doriLevel = "Identification";
-        els.chipDori.className = "stat-chip ident";
       } else if (state.ppm >= 125) {
         state.doriLevel = "Recognition";
-        els.chipDori.className = "stat-chip recog";
       } else if (state.ppm >= 63) {
         state.doriLevel = "Observation";
-        els.chipDori.className = "stat-chip observe";
       } else if (state.ppm >= 25) {
         state.doriLevel = "Detection";
-        els.chipDori.className = "stat-chip detect";
       } else {
         state.doriLevel = "Monitoring";
-        els.chipDori.className = "stat-chip monitor";
       }
 
-      // DORI Max Range Limits: D_max = resW / (2 * PPM_req * tan(HFOV/2))
-      const tanHalfH = Math.tan(radH);
-      state.doriRanges.ident = (resW / (2 * 250 * tanHalfH));
-      state.doriRanges.recog = (resW / (2 * 125 * tanHalfH));
-      state.doriRanges.observe = (resW / (2 * 63 * tanHalfH));
-      state.doriRanges.detect = (resW / (2 * 25 * tanHalfH));
+      // Maximum DORI range calculations
+      const doriIdentPpm = 250;
+      const doriRecogPpm = 125;
+      const doriObservePpm = 63;
+      const doriDetectPpm = 25;
 
+      const halfTanH = Math.tan(hfovRad / 2);
+      state.doriRanges.ident = state.resW / (2 * doriIdentPpm * halfTanH);
+      state.doriRanges.recog = state.resW / (2 * doriRecogPpm * halfTanH);
+      state.doriRanges.observe = state.resW / (2 * doriObservePpm * halfTanH);
+      state.doriRanges.detect = state.resW / (2 * doriDetectPpm * halfTanH);
+
+      // Blind Spot (Near Cutoff) under the camera pole
+      const thetaBottom = tiltRad + vfovRad / 2;
+      if (thetaBottom > 0 && thetaBottom < Math.PI / 2) {
+        state.blindSpot = state.mountH / Math.tan(thetaBottom);
+      } else {
+        state.blindSpot = 0;
+      }
+
+      // Far Cutoff (where top edge of FOV intersects ground)
+      const thetaTop = tiltRad - vfovRad / 2;
+      if (thetaTop > 0.01) {
+        state.farCutoff = state.mountH / Math.tan(thetaTop);
+      } else {
+        state.farCutoff = Infinity; // Looking to/above horizon
+      }
+
+      // 3D Euclidean Line of Sight (LOS) Distance from camera lens to target
+      state.losDist = Math.sqrt(
+        state.targetDist * state.targetDist +
+        state.mountH * state.mountH +
+        state.targetOffset * state.targetOffset
+      );
+
+      // Target object pixel dimensions on sensor frame
+      const focalPx = (state.resW / 2) / Math.tan(hfovRad / 2);
+      state.targetPixH = (state.targetHeight * focalPx) / state.losDist;
+      state.targetPixW = (state.targetWidth * focalPx) / state.losDist;
+
+      // Update UI statistics
       updateStatsUI();
     }
 
     function formatDist(meters) {
-      if (!isFinite(meters) || meters < 0) return "∞ (Horizon)";
+      if (!isFinite(meters)) return "∞ (Horizon)";
       if (state.unit === "ft") {
-        return `${(meters * 3.28084).toFixed(1)} ft`;
+        const ft = meters * 3.28084;
+        return `${ft.toFixed(1)} ft`;
       }
       return `${meters.toFixed(1)} m`;
     }
 
     function updateStatsUI() {
-      const u = state.unit === "ft" ? "px/ft" : "px/m";
-      const ppmDisp = state.unit === "ft" ? (state.ppm / 3.28084) : state.ppm;
-
+      // DORI Chip
       els.statDoriLevel.textContent = state.doriLevel;
-      els.statDoriPpm.textContent = `${Math.round(ppmDisp)} ${u} @ target`;
-      els.badgeTargetPpm.textContent = `${Math.round(ppmDisp)} ${u}`;
+      const unitP = state.unit === "ft" ? "px/ft" : "px/m";
+      const densityVal = state.unit === "ft" ? Math.round(state.ppf) : Math.round(state.ppm);
+      els.statDoriPpm.textContent = `${densityVal} ${unitP} @ target`;
+      els.badgeTargetPpm.textContent = `${densityVal} ${unitP}`;
 
-      els.statFieldWidth.textContent = formatDist(state.targetWidth);
-      els.statFieldHeight.textContent = `Field H: ${formatDist(state.targetHeightScene)}`;
+      els.chipDori.className = `stat-chip ${state.doriLevel.toLowerCase()}`;
 
+      // Field dimensions
+      els.statFieldWidth.textContent = formatDist(state.fieldWAtDist);
+      els.statFieldHeight.textContent = `Field H: ${formatDist(state.fieldHAtDist)}`;
+
+      // Blind spot & far cutoff
       els.statBlindSpot.textContent = formatDist(state.blindSpot);
       els.statFarCutoff.textContent = `Far: ${formatDist(state.farCutoff)}`;
 
+      // Line of Sight & Target pixels
       els.statLosDist.textContent = formatDist(state.losDist);
       els.statTargetPix.textContent = `Target: ${Math.round(state.targetPixH)} px high`;
 
-      // DORI Table
+      // Aspect ratio badge
+      const gcd = (a, b) => b === 0 ? a : gcd(b, a % b);
+      const div = gcd(state.resW, state.resH);
+      els.badgeAspect.textContent = `${state.resW / div}:${state.resH / div}`;
+
+      // Tilt badge
+      els.badgeTiltStatus.textContent = state.tilt >= 0 ? "Downward" : "Upward";
+
+      // DORI Ranges Table
       els.rangeIdent.textContent = formatDist(state.doriRanges.ident);
       els.rangeRecog.textContent = formatDist(state.doriRanges.recog);
       els.rangeObserve.textContent = formatDist(state.doriRanges.observe);
       els.rangeDetect.textContent = formatDist(state.doriRanges.detect);
+
+      // Inspector panel updates
+      if (els.tagInspectorPpm) {
+        els.tagInspectorPpm.textContent = `${densityVal} ${unitP}`;
+        els.inspObjType.textContent = TARGET_PRESETS[state.targetType]?.name || "Object";
+        els.inspObjH.textContent = formatDist(state.targetHeight);
+        els.inspObjW.textContent = formatDist(state.targetWidth);
+        els.inspPixH.textContent = `${Math.round(state.targetPixH)} px (${Math.round(state.targetPixW)}w)`;
+
+        const checkComp = (el, condition) => {
+          if (condition) {
+            el.className = "compliance-status status-pass";
+            el.textContent = "Achieved";
+          } else {
+            el.className = "compliance-status status-fail";
+            el.textContent = "Not Met";
+          }
+        };
+        checkComp(els.compIdent, state.ppm >= 250);
+        checkComp(els.compRecog, state.ppm >= 125);
+        checkComp(els.compObserve, state.ppm >= 63);
+        checkComp(els.compDetect, state.ppm >= 25);
+      }
+
+      // OSD updates
+      const now = new Date();
+      const timeStr = `${now.toISOString().slice(0, 10)} ${now.toTimeString().slice(0, 8)}`;
+      const opticsStr = `f=${state.focalMm.toFixed(1)}mm • HFOV ${state.hfov.toFixed(1)}° • VFOV ${state.vfov.toFixed(1)}° • Tilt ${state.tilt}°`;
+      const targetStr = `TARGET: ${formatDist(state.targetDist)} • ${densityVal} ${unitP} (${state.doriLevel})`;
+
+      if (els.osdCamName) els.osdCamName.textContent = state.cameraName;
+      if (els.osdTimestamp) els.osdTimestamp.textContent = timeStr;
+      if (els.osdOptics) els.osdOptics.textContent = opticsStr;
+      if (els.osdTargetInfo) els.osdTargetInfo.textContent = targetStr;
+
+      if (els.osdCamNameFull) els.osdCamNameFull.textContent = state.cameraName;
+      if (els.osdTimestampFull) els.osdTimestampFull.textContent = timeStr;
+      if (els.osdOpticsFull) els.osdOpticsFull.textContent = opticsStr;
+      if (els.osdTargetInfoFull) els.osdTargetInfoFull.textContent = targetStr;
     }
 
     /* ==========================================================================
-       4. 2D CANVAS VISUALIZERS (Top-Down & Side Profile)
+       4. 2D TOP-DOWN VIEW (Azimuth Footprint & Blueprint Measurements)
        ========================================================================== */
     function drawTopViewOnCanvas(canvas) {
       if (!canvas) return;
-      const ctx = canvas.getContext("2d");
-      const w = (canvas.width = canvas.clientWidth * window.devicePixelRatio || 600);
-      const h = (canvas.height = canvas.clientHeight * window.devicePixelRatio || 340);
-      ctx.scale(window.devicePixelRatio || 1, window.devicePixelRatio || 1);
+      const dpr = window.devicePixelRatio || 1;
+      const cw = canvas.clientWidth || 600;
+      const ch = canvas.clientHeight || 340;
+      if (cw === 0 || ch === 0) return;
 
-      const cw = canvas.clientWidth;
-      const ch = canvas.clientHeight;
+      canvas.width = cw * dpr;
+      canvas.height = ch * dpr;
+      const ctx = canvas.getContext("2d");
+      ctx.scale(dpr, dpr);
       ctx.clearRect(0, 0, cw, ch);
 
-      const originX = 50;
+      const originX = 55;
       const originY = ch / 2;
-      const maxRangeMeters = Math.max(80, state.targetDist * 1.5, state.doriRanges.detect * 1.1);
-      const scale = (cw - 80) / maxRangeMeters;
+      const maxRangeMeters = Math.max(75, state.targetDist * 1.45, state.doriRanges.detect * 1.1);
+      const scale = (cw - 95) / maxRangeMeters;
 
-      // Metric / distance circular grid arcs
+      // Distance concentric range rings
       ctx.lineWidth = 1;
       const stepM = maxRangeMeters > 150 ? 50 : (maxRangeMeters > 60 ? 20 : 10);
       for (let r = stepM; r <= maxRangeMeters; r += stepM) {
         const radiusPx = r * scale;
-        ctx.strokeStyle = "#1f2937";
+        ctx.strokeStyle = "rgba(44, 53, 69, 0.6)";
         ctx.beginPath();
         ctx.arc(originX, originY, radiusPx, -Math.PI / 2, Math.PI / 2);
         ctx.stroke();
 
         ctx.fillStyle = "#64748b";
         ctx.font = "10px monospace";
-        ctx.fillText(formatDist(r), originX + radiusPx + 2, originY - 4);
+        ctx.fillText(formatDist(r), originX + radiusPx + 3, originY - 4);
       }
 
-      // Optical Center Axis
       const panRad = degToRad(state.pan);
       const radH = degToRad(state.hfov / 2);
 
-      // Draw DORI zones in reverse order: Detect -> Observe -> Recog -> Ident
+      // Draw DORI zones on top-down view
       const doriBands = [
-        { r: state.doriRanges.detect,  color: "rgba(239, 68, 68, 0.12)", stroke: "rgba(239, 68, 68, 0.3)" },
-        { r: state.doriRanges.observe, color: "rgba(245, 158, 11, 0.16)", stroke: "rgba(245, 158, 11, 0.4)" },
-        { r: state.doriRanges.recog,   color: "rgba(16, 185, 129, 0.20)", stroke: "rgba(16, 185, 129, 0.5)" },
-        { r: state.doriRanges.ident,   color: "rgba(139, 92, 246, 0.25)", stroke: "rgba(139, 92, 246, 0.6)" }
+        { r: state.doriRanges.detect,  color: "rgba(239, 68, 68, 0.12)", stroke: "rgba(239, 68, 68, 0.35)", name: "Detect" },
+        { r: state.doriRanges.observe, color: "rgba(245, 158, 11, 0.16)", stroke: "rgba(245, 158, 11, 0.45)", name: "Observe" },
+        { r: state.doriRanges.recog,   color: "rgba(16, 185, 129, 0.20)", stroke: "rgba(16, 185, 129, 0.55)", name: "Recog" },
+        { r: state.doriRanges.ident,   color: "rgba(147, 51, 234, 0.26)", stroke: "rgba(147, 51, 234, 0.65)", name: "Ident" }
       ];
 
-      const drawFovSector = (distanceM, fillStyle, strokeStyle) => {
+      const drawFovSector = (distanceM, fillStyle, strokeStyle, label) => {
         if (!isFinite(distanceM) || distanceM <= 0) return;
-        const dPx = Math.min(distanceM * scale, (cw - originX) * 1.2);
+        const dPx = Math.min(distanceM * scale, (cw - originX) * 1.25);
         ctx.beginPath();
         ctx.moveTo(originX, originY);
         ctx.arc(originX, originY, dPx, panRad - radH, panRad + radH);
@@ -1501,88 +1979,269 @@
         }
         if (strokeStyle) {
           ctx.strokeStyle = strokeStyle;
+          ctx.lineWidth = 1.2;
           ctx.stroke();
+        }
+        if (label && dPx > 30) {
+          ctx.fillStyle = strokeStyle;
+          ctx.font = "bold 9px monospace";
+          const lx = originX + Math.cos(panRad + radH) * dPx;
+          const ly = originY + Math.sin(panRad + radH) * dPx;
+          ctx.fillText(label, lx + 4, ly);
         }
       };
 
-      doriBands.forEach(b => drawFovSector(b.r, b.color, b.stroke));
+      doriBands.forEach(b => drawFovSector(b.r, b.color, b.stroke, b.name));
 
-      // Main Outer FOV Cone
-      const coneRange = Math.min(maxRangeMeters, (cw - originX - 20) / scale);
-      drawFovSector(coneRange, "rgba(0, 210, 255, 0.08)", "#00d2ff");
+      // Main Outer FOV Ray lines
+      const coneRange = Math.min(maxRangeMeters, (cw - originX - 30) / scale);
+      drawFovSector(coneRange, "rgba(0, 210, 255, 0.05)", "#00d2ff");
 
-      // Target Object Marker
+      // Optical Boresight / Center Axis Line
+      ctx.strokeStyle = "rgba(0, 210, 255, 0.6)";
+      ctx.setLineDash([4, 4]);
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(originX, originY);
+      ctx.lineTo(
+        originX + coneRange * scale * Math.cos(panRad),
+        originY + coneRange * scale * Math.sin(panRad)
+      );
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      // Near Blind Spot arc around camera pole
+      if (state.blindSpot > 0 && isFinite(state.blindSpot)) {
+        const blindPx = state.blindSpot * scale;
+        ctx.strokeStyle = "rgba(239, 68, 68, 0.8)";
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.arc(originX, originY, blindPx, panRad - radH, panRad + radH);
+        ctx.stroke();
+
+        ctx.fillStyle = "rgba(239, 68, 68, 0.25)";
+        ctx.beginPath();
+        ctx.moveTo(originX, originY);
+        ctx.arc(originX, originY, blindPx, panRad - radH, panRad + radH);
+        ctx.closePath();
+        ctx.fill();
+      }
+
+      // Target Object Coordinates
       const tX = originX + (state.targetDist * Math.cos(panRad) - state.targetOffset * Math.sin(panRad)) * scale;
       const tY = originY + (state.targetDist * Math.sin(panRad) + state.targetOffset * Math.cos(panRad)) * scale;
 
-      // Target lateral line (field width at target)
-      const tHalfW = state.targetDist * Math.tan(radH) * scale;
+      // Field Width Measurement Bar across target distance
+      const halfSceneW = (state.fieldWAtDist / 2) * scale;
       const normalAngle = panRad + Math.PI / 2;
-      ctx.strokeStyle = "#ff9900";
-      ctx.lineWidth = 2;
-      ctx.beginPath();
-      ctx.moveTo(
-        originX + state.targetDist * Math.cos(panRad) * scale - Math.cos(normalAngle) * tHalfW,
-        originY + state.targetDist * Math.sin(panRad) * scale - Math.sin(normalAngle) * tHalfW
-      );
-      ctx.lineTo(
-        originX + state.targetDist * Math.cos(panRad) * scale + Math.cos(normalAngle) * tHalfW,
-        originY + state.targetDist * Math.sin(panRad) * scale + Math.sin(normalAngle) * tHalfW
-      );
-      ctx.stroke();
+      const centerTargetX = originX + state.targetDist * Math.cos(panRad) * scale;
+      const centerTargetY = originY + state.targetDist * Math.sin(panRad) * scale;
 
-      // Target point
-      ctx.fillStyle = "#ffaa00";
-      ctx.beginPath();
-      ctx.arc(tX, tY, 5, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.strokeStyle = "#ffffff";
+      const wX1 = centerTargetX - Math.cos(normalAngle) * halfSceneW;
+      const wY1 = centerTargetY - Math.sin(normalAngle) * halfSceneW;
+      const wX2 = centerTargetX + Math.cos(normalAngle) * halfSceneW;
+      const wY2 = centerTargetY + Math.sin(normalAngle) * halfSceneW;
+
+      ctx.strokeStyle = "rgba(0, 210, 255, 0.7)";
       ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(wX1, wY1);
+      ctx.lineTo(wX2, wY2);
       ctx.stroke();
 
-      // Target label
-      ctx.fillStyle = "#ffffff";
-      ctx.font = "bold 11px sans-serif";
-      ctx.fillText(`Target (${formatDist(state.targetDist)})`, tX + 8, tY - 6);
+      // End ticks for field width bar
+      const tickLen = 6;
+      [ [wX1, wY1], [wX2, wY2] ].forEach(([px, py]) => {
+        ctx.beginPath();
+        ctx.moveTo(px - Math.cos(panRad) * tickLen, py - Math.sin(panRad) * tickLen);
+        ctx.lineTo(px + Math.cos(panRad) * tickLen, py + Math.sin(panRad) * tickLen);
+        ctx.stroke();
+      });
+
+      // Field width text badge
+      ctx.fillStyle = "rgba(15, 23, 42, 0.85)";
+      ctx.strokeStyle = "#00d2ff";
+      ctx.lineWidth = 1;
+      const wLabel = `Width: ${formatDist(state.fieldWAtDist)}`;
+      ctx.font = "bold 9px monospace";
+      const wMetrics = ctx.measureText(wLabel);
+      const badgeW = wMetrics.width + 10;
+      ctx.fillRect(centerTargetX - badgeW / 2, centerTargetY - 18, badgeW, 14);
+      ctx.strokeRect(centerTargetX - badgeW / 2, centerTargetY - 18, badgeW, 14);
+      ctx.fillStyle = "#00d2ff";
+      ctx.fillText(wLabel, centerTargetX - badgeW / 2 + 5, centerTargetY - 8);
+
+      // Distance line from camera to target
+      ctx.strokeStyle = "rgba(255, 170, 0, 0.5)";
+      ctx.setLineDash([3, 3]);
+      ctx.beginPath();
+      ctx.moveTo(originX, originY);
+      ctx.lineTo(tX, tY);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      // Draw Top-Down Target Object Blueprint
+      drawTargetTopBlueprint(ctx, tX, tY, state.targetType, panRad, scale);
 
       // Camera Pole Base Marker
       ctx.fillStyle = "#00d2ff";
       ctx.beginPath();
-      ctx.arc(originX, originY, 7, 0, Math.PI * 2);
+      ctx.arc(originX, originY, 6, 0, Math.PI * 2);
       ctx.fill();
       ctx.strokeStyle = "#ffffff";
       ctx.lineWidth = 2;
       ctx.stroke();
 
+      // Camera label & pan azimuth arc
       ctx.fillStyle = "#ffffff";
-      ctx.font = "bold 11px sans-serif";
-      ctx.fillText(state.cameraName || "Camera", originX - 25, originY - 14);
+      ctx.font = "bold 10px sans-serif";
+      ctx.fillText(state.cameraName || "Camera", originX - 30, originY - 12);
     }
 
+    /* Helper: Draw detailed top-down blueprint symbol for target */
+    function drawTargetTopBlueprint(ctx, x, y, type, panRad, scale) {
+      ctx.save();
+      ctx.translate(x, y);
+      ctx.rotate(panRad);
+
+      const targetW = state.targetWidth * scale;
+      const targetL = state.targetDepth * scale;
+
+      // Outer glow disc
+      ctx.fillStyle = "rgba(255, 170, 0, 0.25)";
+      ctx.beginPath();
+      ctx.arc(0, 0, Math.max(12, targetW * 1.1), 0, Math.PI * 2);
+      ctx.fill();
+
+      if (type === "human") {
+        // Standing person: Shoulders ellipse + head circle
+        const sw = Math.max(12, targetW);
+        const sl = Math.max(6, targetL);
+        ctx.fillStyle = "#0284c7";
+        ctx.strokeStyle = "#ffffff";
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.ellipse(0, 0, sl / 2, sw / 2, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+
+        // Head
+        ctx.fillStyle = "#f6c89f";
+        ctx.beginPath();
+        ctx.arc(0, 0, Math.max(3, sw / 3.5), 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+
+      } else if (type === "seated") {
+        // Seated person: Chair square + head
+        const sw = Math.max(14, targetW);
+        ctx.fillStyle = "#475569";
+        ctx.fillRect(-sw/2, -sw/2, sw, sw);
+        ctx.strokeStyle = "#ffffff";
+        ctx.lineWidth = 1.2;
+        ctx.strokeRect(-sw/2, -sw/2, sw, sw);
+
+        ctx.fillStyle = "#f6c89f";
+        ctx.beginPath();
+        ctx.arc(0, -sw/4, sw/3.5, 0, Math.PI * 2);
+        ctx.fill();
+
+      } else if (type === "car" || type === "suv") {
+        // Vehicle top-down silhouette
+        const w = Math.max(14, targetW);
+        const l = Math.max(28, targetL);
+        ctx.fillStyle = type === "suv" ? "#d97706" : "#2563eb";
+        ctx.strokeStyle = "#ffffff";
+        ctx.lineWidth = 1.5;
+        
+        // Body rounded rect
+        const r = 4;
+        ctx.beginPath();
+        ctx.roundRect ? ctx.roundRect(-l/2, -w/2, l, w, r) : ctx.rect(-l/2, -w/2, l, w);
+        ctx.fill();
+        ctx.stroke();
+
+        // Windshield and roof
+        ctx.fillStyle = "#0f172a";
+        ctx.fillRect(-l * 0.15, -w * 0.4, l * 0.4, w * 0.8);
+
+        // Headlights
+        ctx.fillStyle = "#ffffff";
+        ctx.fillRect(l/2 - 2, -w * 0.42, 2, 4);
+        ctx.fillRect(l/2 - 2, w * 0.42 - 4, 2, 4);
+
+        // Taillights
+        ctx.fillStyle = "#ef4444";
+        ctx.fillRect(-l/2, -w * 0.42, 2, 4);
+        ctx.fillRect(-l/2, w * 0.42 - 4, 2, 4);
+
+      } else if (type === "truck") {
+        // Commercial truck top-down: Cab + long cargo trailer
+        const w = Math.max(16, targetW);
+        const l = Math.max(38, targetL);
+        
+        // Trailer box
+        ctx.fillStyle = "#cbd5e1";
+        ctx.strokeStyle = "#ffffff";
+        ctx.lineWidth = 1.5;
+        ctx.fillRect(-l/2, -w/2, l * 0.7, w);
+        ctx.strokeRect(-l/2, -w/2, l * 0.7, w);
+
+        // Front cab
+        ctx.fillStyle = "#dc2626";
+        ctx.fillRect(l * 0.22, -w * 0.48, l * 0.28, w * 0.96);
+        ctx.strokeRect(l * 0.22, -w * 0.48, l * 0.28, w * 0.96);
+
+        // Windshield
+        ctx.fillStyle = "#0f172a";
+        ctx.fillRect(l * 0.38, -w * 0.4, 3, w * 0.8);
+
+      } else {
+        // Plate or custom marker
+        ctx.fillStyle = "#ffaa00";
+        ctx.fillRect(-4, -targetW/2, 8, targetW);
+        ctx.strokeStyle = "#ffffff";
+        ctx.strokeRect(-4, -targetW/2, 8, targetW);
+      }
+
+      ctx.restore();
+
+      // Target Label with DORI badge
+      ctx.fillStyle = "#ffaa00";
+      ctx.font = "bold 10px sans-serif";
+      const targetText = `${TARGET_PRESETS[type]?.name || "Target"} (${formatDist(state.targetDist)})`;
+      ctx.fillText(targetText, x + 12, y - 6);
+    }
+
+    /* ==========================================================================
+       5. 2D SIDE PROFILE VIEW (Elevation, Height & Blind Spot)
+       ========================================================================== */
     function drawSideViewOnCanvas(canvas) {
       if (!canvas) return;
-      const ctx = canvas.getContext("2d");
-      const w = (canvas.width = canvas.clientWidth * window.devicePixelRatio || 600);
-      const h = (canvas.height = canvas.clientHeight * window.devicePixelRatio || 340);
-      ctx.scale(window.devicePixelRatio || 1, window.devicePixelRatio || 1);
+      const dpr = window.devicePixelRatio || 1;
+      const cw = canvas.clientWidth || 600;
+      const ch = canvas.clientHeight || 340;
+      if (cw === 0 || ch === 0) return;
 
-      const cw = canvas.clientWidth;
-      const ch = canvas.clientHeight;
+      canvas.width = cw * dpr;
+      canvas.height = ch * dpr;
+      const ctx = canvas.getContext("2d");
+      ctx.scale(dpr, dpr);
       ctx.clearRect(0, 0, cw, ch);
 
-      const originX = 50;
-      const groundY = ch - 45;
-      const maxDistance = Math.max(80, state.targetDist * 1.5, state.doriRanges.detect * 1.1);
-      const scaleX = (cw - 80) / maxDistance;
-      const maxHeight = Math.max(12, state.mountH * 1.8);
-      const scaleY = (groundY - 30) / maxHeight;
+      const originX = 55;
+      const groundY = ch - 50;
+      const maxDistance = Math.max(75, state.targetDist * 1.45, state.doriRanges.detect * 1.1);
+      const scaleX = (cw - 95) / maxDistance;
+      const maxHeight = Math.max(10, state.mountH * 1.9);
+      const scaleY = (groundY - 40) / maxHeight;
 
       // Ground Line
       ctx.strokeStyle = "#374151";
       ctx.lineWidth = 2;
       ctx.beginPath();
-      ctx.moveTo(10, groundY);
-      ctx.lineTo(cw - 10, groundY);
+      ctx.moveTo(15, groundY);
+      ctx.lineTo(cw - 15, groundY);
       ctx.stroke();
 
       // Ground Distance Tick Marks
@@ -1591,7 +2250,7 @@
       const stepM = maxDistance > 150 ? 50 : (maxDistance > 60 ? 20 : 10);
       for (let d = stepM; d <= maxDistance; d += stepM) {
         const x = originX + d * scaleX;
-        ctx.strokeStyle = "#1f2937";
+        ctx.strokeStyle = "rgba(44, 53, 69, 0.8)";
         ctx.beginPath();
         ctx.moveTo(x, groundY - 4);
         ctx.lineTo(x, groundY + 4);
@@ -1601,35 +2260,60 @@
 
       // Camera Pole
       const camY = groundY - state.mountH * scaleY;
-      ctx.strokeStyle = "#94a3b8";
+      ctx.strokeStyle = "#64748b";
       ctx.lineWidth = 4;
       ctx.beginPath();
       ctx.moveTo(originX, groundY);
       ctx.lineTo(originX, camY);
       ctx.stroke();
 
-      // Camera Head
+      // Pole Base Flange
+      ctx.fillStyle = "#475569";
+      ctx.fillRect(originX - 8, groundY - 3, 16, 6);
+
+      // Camera Mounting Height Dimension Line
+      const dimX = originX - 22;
+      ctx.strokeStyle = "rgba(0, 210, 255, 0.7)";
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(dimX, groundY);
+      ctx.lineTo(dimX, camY);
+      ctx.moveTo(dimX - 4, groundY); ctx.lineTo(dimX + 4, groundY);
+      ctx.moveTo(dimX - 4, camY); ctx.lineTo(dimX + 4, camY);
+      ctx.stroke();
+
+      // Height text
+      ctx.save();
+      ctx.translate(dimX - 6, (groundY + camY) / 2);
+      ctx.rotate(-Math.PI / 2);
+      ctx.fillStyle = "#00d2ff";
+      ctx.font = "bold 9px monospace";
+      ctx.textAlign = "center";
+      ctx.fillText(`H: ${formatDist(state.mountH)}`, 0, 0);
+      ctx.restore();
+
+      // Camera Housing Head
       ctx.fillStyle = "#00d2ff";
       ctx.beginPath();
       ctx.arc(originX, camY, 6, 0, Math.PI * 2);
       ctx.fill();
 
-      // Rays: Top Ray, Optical Axis, Bottom Ray
+      // Rays: Top Ray, Optical Center Line, Bottom Ray
       const tiltRad = degToRad(state.tilt);
       const vRad = degToRad(state.vfov / 2);
       const topAngle = tiltRad - vRad;
       const btmAngle = tiltRad + vRad;
-      const rayMaxLen = (cw - originX) / Math.cos(Math.max(-0.5, Math.min(0.5, tiltRad)));
+      const rayMaxLen = (cw - originX - 20) / Math.cos(Math.max(-0.6, Math.min(0.6, tiltRad)));
 
       const xTopEnd = originX + Math.cos(topAngle) * rayMaxLen;
       const yTopEnd = camY + Math.sin(topAngle) * rayMaxLen;
       const xBtmEnd = originX + Math.cos(btmAngle) * rayMaxLen;
       const yBtmEnd = camY + Math.sin(btmAngle) * rayMaxLen;
 
-      // Projected FOV Volume
-      ctx.fillStyle = "rgba(0, 210, 255, 0.12)";
-      ctx.strokeStyle = "#00d2ff";
-      ctx.lineWidth = 1.5;
+      // Projected FOV Volume Shading
+      ctx.fillStyle = "rgba(0, 210, 255, 0.08)";
+      ctx.strokeStyle = "rgba(0, 210, 255, 0.7)";
+      ctx.lineWidth = 1.2;
       ctx.beginPath();
       ctx.moveTo(originX, camY);
       ctx.lineTo(xTopEnd, yTopEnd);
@@ -1638,57 +2322,202 @@
       ctx.fill();
       ctx.stroke();
 
-      // Blind Spot (Near Cutoff) Indicator under pole
+      // Optical Center Axis Ray (dashed)
+      const xCenterEnd = originX + Math.cos(tiltRad) * rayMaxLen;
+      const yCenterEnd = camY + Math.sin(tiltRad) * rayMaxLen;
+      ctx.strokeStyle = "rgba(0, 210, 255, 0.9)";
+      ctx.setLineDash([4, 4]);
+      ctx.beginPath();
+      ctx.moveTo(originX, camY);
+      ctx.lineTo(xCenterEnd, yCenterEnd);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      // Near Blind Spot / Dead Zone on ground under pole
       if (state.blindSpot > 0 && isFinite(state.blindSpot)) {
         const blindX = originX + state.blindSpot * scaleX;
         ctx.fillStyle = "rgba(239, 68, 68, 0.25)";
-        ctx.fillRect(originX, groundY - 8, (blindX - originX), 8);
+        ctx.fillRect(originX, groundY - 10, (blindX - originX), 10);
 
         ctx.strokeStyle = "#ef4444";
         ctx.lineWidth = 2;
         ctx.beginPath();
-        ctx.moveTo(blindX, groundY - 12);
+        ctx.moveTo(blindX, groundY - 16);
         ctx.lineTo(blindX, groundY + 8);
         ctx.stroke();
 
         ctx.fillStyle = "#ef4444";
-        ctx.font = "bold 10px sans-serif";
-        ctx.fillText(`Blind Spot: ${formatDist(state.blindSpot)}`, originX + 5, groundY - 14);
+        ctx.font = "bold 9px monospace";
+        ctx.fillText(`Blind Spot: ${formatDist(state.blindSpot)}`, originX + 5, groundY - 18);
       }
 
-      // Target Object Silhouette
+      // Target Object Coordinates
       const tX = originX + state.targetDist * scaleX;
       const tHeightPx = state.targetHeight * scaleY;
-      ctx.fillStyle = "#ffaa00";
-      ctx.fillRect(tX - 3, groundY - tHeightPx, 6, tHeightPx);
 
-      // Target Head circle if person
-      if (state.targetHeight >= 1.2) {
+      // Direct Line of Sight (LOS) Ray
+      ctx.strokeStyle = "rgba(255, 170, 0, 0.7)";
+      ctx.setLineDash([3, 3]);
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(originX, camY);
+      ctx.lineTo(tX, groundY - tHeightPx / 2);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      // LOS Distance badge
+      const midLosX = (originX + tX) / 2;
+      const midLosY = (camY + (groundY - tHeightPx / 2)) / 2;
+      ctx.fillStyle = "rgba(15, 23, 42, 0.85)";
+      ctx.strokeStyle = "#ffaa00";
+      ctx.lineWidth = 1;
+      const losLabel = `LOS: ${formatDist(state.losDist)}`;
+      ctx.font = "bold 9px monospace";
+      const losW = ctx.measureText(losLabel).width + 8;
+      ctx.fillRect(midLosX - losW/2, midLosY - 8, losW, 14);
+      ctx.strokeRect(midLosX - losW/2, midLosY - 8, losW, 14);
+      ctx.fillStyle = "#ffaa00";
+      ctx.fillText(losLabel, midLosX - losW/2 + 4, midLosY + 2);
+
+      // Draw Detailed Side Profile Silhouette of Target
+      drawTargetSideSilhouette(ctx, tX, groundY, state.targetType, tHeightPx, state.targetWidth * scaleX);
+
+      // Target Height Dimension Line
+      ctx.strokeStyle = "#ffaa00";
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(tX + 18, groundY);
+      ctx.lineTo(tX + 18, groundY - tHeightPx);
+      ctx.moveTo(tX + 14, groundY); ctx.lineTo(tX + 22, groundY);
+      ctx.moveTo(tX + 14, groundY - tHeightPx); ctx.lineTo(tX + 22, groundY - tHeightPx);
+      ctx.stroke();
+
+      ctx.fillStyle = "#ffaa00";
+      ctx.font = "bold 9px monospace";
+      ctx.fillText(formatDist(state.targetHeight), tX + 24, groundY - tHeightPx / 2 + 3);
+    }
+
+    /* Helper: Draw detailed side silhouette for target */
+    function drawTargetSideSilhouette(ctx, x, groundY, type, hPx, wPx) {
+      ctx.save();
+      ctx.fillStyle = "#ffaa00";
+      ctx.strokeStyle = "#ffffff";
+      ctx.lineWidth = 1.2;
+
+      if (type === "human") {
+        // Standing Person Side Profile
+        const legW = 3;
+        const bodyW = 7;
+        const headR = Math.max(3, hPx * 0.08);
+
+        // Legs
+        ctx.fillRect(x - legW / 2, groundY - hPx * 0.5, legW, hPx * 0.5);
+        // Torso
+        ctx.fillRect(x - bodyW / 2, groundY - hPx * 0.85, bodyW, hPx * 0.35);
+        // Head
         ctx.beginPath();
-        ctx.arc(tX, groundY - tHeightPx - 3, 3, 0, Math.PI * 2);
+        ctx.arc(x, groundY - hPx + headR, headR, 0, Math.PI * 2);
         ctx.fill();
+
+      } else if (type === "seated") {
+        // Seated Person with Chair
+        const s = hPx / 1.3;
+        // Chair legs & back
+        ctx.strokeStyle = "#94a3b8";
+        ctx.lineWidth = 2;
+        ctx.strokeRect(x - 6, groundY - 14, 12, 14);
+        ctx.beginPath();
+        ctx.moveTo(x - 6, groundY - 14);
+        ctx.lineTo(x - 6, groundY - 26);
+        ctx.stroke();
+
+        // Seated body
+        ctx.fillStyle = "#ffaa00";
+        ctx.fillRect(x - 5, groundY - 24, 7, 12); // torso
+        ctx.fillRect(x - 5, groundY - 14, 12, 4); // thighs
+        ctx.fillRect(x + 5, groundY - 14, 4, 14); // lower legs
+        ctx.beginPath();
+        ctx.arc(x - 2, groundY - 28, 4, 0, Math.PI * 2); // head
+        ctx.fill();
+
+      } else if (type === "car" || type === "suv") {
+        // Car / SUV Side Silhouette
+        const carL = Math.max(26, wPx * 2.2);
+        const carH = hPx;
+        const wheelR = Math.max(3, carH * 0.22);
+
+        // Body chassis
+        ctx.beginPath();
+        ctx.moveTo(x - carL / 2, groundY - wheelR);
+        ctx.lineTo(x - carL / 2, groundY - carH * 0.5);
+        ctx.lineTo(x - carL * 0.25, groundY - carH * 0.55);
+        ctx.lineTo(x - carL * 0.1, groundY - carH); // windshield to roof
+        ctx.lineTo(x + carL * 0.25, groundY - carH); // roof
+        ctx.lineTo(x + carL * 0.4, groundY - carH * 0.5); // rear window
+        ctx.lineTo(x + carL / 2, groundY - carH * 0.45);
+        ctx.lineTo(x + carL / 2, groundY - wheelR);
+        ctx.closePath();
+        ctx.fill();
+
+        // Wheels
+        ctx.fillStyle = "#1e293b";
+        ctx.beginPath();
+        ctx.arc(x - carL * 0.3, groundY - wheelR, wheelR, 0, Math.PI * 2);
+        ctx.arc(x + carL * 0.3, groundY - wheelR, wheelR, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = "#ffffff";
+        ctx.stroke();
+
+      } else if (type === "truck") {
+        // Commercial Truck Side Silhouette
+        const truckL = Math.max(40, wPx * 3.2);
+        const truckH = hPx;
+        const wheelR = Math.max(4, truckH * 0.16);
+
+        // Cargo box
+        ctx.fillRect(x - truckL / 2, groundY - truckH, truckL * 0.68, truckH - wheelR);
+        // Cab
+        ctx.fillRect(x + truckL * 0.2, groundY - truckH * 0.85, truckL * 0.3, truckH * 0.85 - wheelR);
+
+        // 3 Wheels
+        ctx.fillStyle = "#1e293b";
+        [ -truckL * 0.35, -truckL * 0.2, truckL * 0.35 ].forEach(wx => {
+          ctx.beginPath();
+          ctx.arc(x + wx, groundY - wheelR, wheelR, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.stroke();
+        });
+
+      } else {
+        // License plate on post
+        ctx.fillRect(x - 2, groundY - hPx, 4, hPx);
+        ctx.fillStyle = "#ffffff";
+        ctx.fillRect(x - 6, groundY - hPx - 6, 12, 6);
       }
 
-      ctx.fillStyle = "#ffaa00";
-      ctx.font = "bold 10px sans-serif";
-      ctx.fillText(`${formatDist(state.targetDist)}`, tX - 10, groundY - tHeightPx - 10);
+      ctx.restore();
     }
 
     /* ==========================================================================
-       5. SIMULATED CAMERA VIEWPORT (Pinhole Sensor Projection)
+       6. SIMULATED CAMERA SENSOR VIEWPORT & VECTOR TARGET ARTWORK
        ========================================================================== */
     function drawCamViewOnCanvas(canvas) {
       if (!canvas) return;
+      const dpr = window.devicePixelRatio || 1;
+      const cw = canvas.clientWidth || 640;
+      const ch = canvas.clientHeight || 360;
+      if (cw === 0 || ch === 0) return;
+
+      canvas.width = cw * dpr;
+      canvas.height = ch * dpr;
       const ctx = canvas.getContext("2d");
-      const cw = (canvas.width = canvas.clientWidth * window.devicePixelRatio || 640);
-      const ch = (canvas.height = canvas.clientHeight * window.devicePixelRatio || 360);
-      ctx.scale(window.devicePixelRatio || 1, window.devicePixelRatio || 1);
+      ctx.scale(dpr, dpr);
+      ctx.clearRect(0, 0, cw, ch);
 
-      const width = canvas.clientWidth;
-      const height = canvas.clientHeight;
-      ctx.clearRect(0, 0, width, height);
+      const width = cw;
+      const height = ch;
 
-      // Camera aspect ratio letterbox/pillarbox
+      // Aspect ratio fit
       const camAspect = state.resW / state.resH;
       let frameW = width;
       let frameH = width / camAspect;
@@ -1699,26 +2528,29 @@
       const offsetX = (width - frameW) / 2;
       const offsetY = (height - frameH) / 2;
 
-      // Background Sky & Ground representation
       ctx.save();
       ctx.beginPath();
       ctx.rect(offsetX, offsetY, frameW, frameH);
       ctx.clip();
 
       // Horizon line calculation based on camera tilt
-      // Tilt = 0 => horizon at center (0.5 * frameH)
-      // Tilt > 0 (looking down) => horizon moves UP
       const vfovRad = degToRad(state.vfov);
       const tiltRad = degToRad(state.tilt);
       const horizonFraction = 0.5 - (Math.tan(tiltRad) / Math.tan(vfovRad / 2)) * 0.5;
       const horizonY = offsetY + horizonFraction * frameH;
 
-      // Draw Sky
-      ctx.fillStyle = "#0c1524";
+      // Sky gradient
+      const skyGrad = ctx.createLinearGradient(offsetX, offsetY, offsetX, Math.max(offsetY, horizonY));
+      skyGrad.addColorStop(0, "#080e18");
+      skyGrad.addColorStop(1, "#121b2b");
+      ctx.fillStyle = skyGrad;
       ctx.fillRect(offsetX, offsetY, frameW, Math.max(0, horizonY - offsetY));
 
-      // Draw Ground
-      ctx.fillStyle = "#161b22";
+      // Ground plane gradient
+      const groundGrad = ctx.createLinearGradient(offsetX, Math.max(offsetY, horizonY), offsetX, offsetY + frameH);
+      groundGrad.addColorStop(0, "#131822");
+      groundGrad.addColorStop(1, "#0a0d14");
+      ctx.fillStyle = groundGrad;
       ctx.fillRect(offsetX, Math.max(offsetY, horizonY), frameW, frameH - Math.max(0, horizonY - offsetY));
 
       // Horizon Line
@@ -1732,31 +2564,28 @@
         ctx.stroke();
         ctx.setLineDash([]);
 
-        ctx.fillStyle = "rgba(0, 210, 255, 0.6)";
-        ctx.font = "9px monospace";
-        ctx.fillText("HORIZON", offsetX + 10, horizonY - 4);
+        ctx.fillStyle = "rgba(0, 210, 255, 0.7)";
+        ctx.font = "bold 9px monospace";
+        ctx.fillText(`HORIZON (Tilt ${state.tilt}°)`, offsetX + 12, horizonY - 4);
       }
 
-      // Perspective Ground Perspective Grid Lines
-      ctx.strokeStyle = "rgba(255,255,255,0.05)";
+      // Perspective Ground Grid Lines converging to horizon
+      ctx.strokeStyle = "rgba(255, 255, 255, 0.05)";
       ctx.lineWidth = 1;
-      for (let x = -40; x <= 40; x += 10) {
-        // Perspective converging rays
-        const bottomX = offsetX + frameW / 2 + (x * frameW) / 40;
+      const horizonClampY = Math.max(offsetY, Math.min(offsetY + frameH, horizonY));
+      for (let x = -50; x <= 50; x += 10) {
+        const bottomX = offsetX + frameW / 2 + (x * frameW) / 35;
         ctx.beginPath();
-        ctx.moveTo(offsetX + frameW / 2, Math.max(offsetY, horizonY));
+        ctx.moveTo(offsetX + frameW / 2, horizonClampY);
         ctx.lineTo(bottomX, offsetY + frameH);
         ctx.stroke();
       }
 
-      // Target Object 2D Projection onto sensor plane
-      // Target position relative to camera optical center:
-      // Vertical angle to target:
-      const targetElevRad = Math.atan2(state.mountH, state.targetDist); // angle below horizontal
-      const targetAngleFromCenter = targetElevRad - tiltRad; // angle from camera optical center
+      // Target Object 2D Projection
+      const targetElevRad = Math.atan2(state.mountH, state.targetDist);
+      const targetAngleFromCenter = targetElevRad - tiltRad;
       const targetYFrac = 0.5 + (Math.tan(targetAngleFromCenter) / Math.tan(vfovRad / 2)) * 0.5;
 
-      // Lateral angle to target:
       const hfovRad = degToRad(state.hfov);
       const targetAzimRad = Math.atan2(state.targetOffset, state.targetDist) - degToRad(state.pan);
       const targetXFrac = 0.5 + (Math.tan(targetAzimRad) / Math.tan(hfovRad / 2)) * 0.5;
@@ -1764,16 +2593,15 @@
       const targetScreenX = offsetX + targetXFrac * frameW;
       const targetScreenGroundY = offsetY + targetYFrac * frameH;
 
-      // Projected size in viewport
+      // Projected size in screen pixels
       const targetPixHScreen = (state.targetPixH / state.resH) * frameH;
-      const targetPixWScreen = Math.max(6, targetPixHScreen * 0.4);
+      const targetPixWScreen = (state.targetPixW / state.resW) * frameW;
 
-      // Check if target is inside camera field of view
       const isTargetInView =
-        targetScreenX >= offsetX - 20 &&
-        targetScreenX <= offsetX + frameW + 20 &&
+        targetScreenX >= offsetX - 50 &&
+        targetScreenX <= offsetX + frameW + 50 &&
         targetScreenGroundY >= offsetY &&
-        targetScreenGroundY <= offsetY + frameH + 50;
+        targetScreenGroundY <= offsetY + frameH + 80;
 
       if (isTargetInView) {
         const topY = targetScreenGroundY - targetPixHScreen;
@@ -1781,58 +2609,391 @@
 
         // DORI Color Bounding Box
         let boxColor = "#ef4444";
-        if (state.ppm >= 250) boxColor = "#8b5cf6";
-        else if (state.ppm >= 125) boxColor = "#10b981";
-        else if (state.ppm >= 63) boxColor = "#f59e0b";
-        else if (state.ppm >= 25) boxColor = "#ef4444";
+        if (state.ppm >= 250) boxColor = "var(--dori-ident)";
+        else if (state.ppm >= 125) boxColor = "var(--dori-recog)";
+        else if (state.ppm >= 63) boxColor = "var(--dori-observe)";
+        else if (state.ppm >= 25) boxColor = "var(--dori-detect)";
 
-        // Target Box & Silhouette
+        // Draw Detailed Vector Artwork for Target in Viewfinder
+        drawTargetVectorArtwork(ctx, targetScreenX, targetScreenGroundY, targetPixWScreen, targetPixHScreen, state.targetType, state.ppm);
+
+        // Technical Reticle Bounding Corners around Target
         ctx.strokeStyle = boxColor;
         ctx.lineWidth = 1.8;
-        ctx.strokeRect(leftX, topY, targetPixWScreen, targetPixHScreen);
-
-        ctx.fillStyle = "rgba(255, 170, 0, 0.4)";
-        ctx.fillRect(leftX, topY, targetPixWScreen, targetPixHScreen);
-
-        // Target Head
-        ctx.fillStyle = "#ffaa00";
+        const bCorner = Math.min(12, Math.max(4, targetPixWScreen * 0.25));
+        
+        // Top-left
         ctx.beginPath();
-        ctx.arc(targetScreenX, topY + targetPixWScreen / 2, Math.max(2, targetPixWScreen / 3), 0, Math.PI * 2);
-        ctx.fill();
+        ctx.moveTo(leftX, topY + bCorner); ctx.lineTo(leftX, topY); ctx.lineTo(leftX + bCorner, topY);
+        // Top-right
+        ctx.moveTo(leftX + targetPixWScreen - bCorner, topY); ctx.lineTo(leftX + targetPixWScreen, topY); ctx.lineTo(leftX + targetPixWScreen, topY + bCorner);
+        // Bottom-left
+        ctx.moveTo(leftX, targetScreenGroundY - bCorner); ctx.lineTo(leftX, targetScreenGroundY); ctx.lineTo(leftX + bCorner, targetScreenGroundY);
+        // Bottom-right
+        ctx.moveTo(leftX + targetPixWScreen - bCorner, targetScreenGroundY); ctx.lineTo(leftX + targetPixWScreen, targetScreenGroundY); ctx.lineTo(leftX + targetPixWScreen, targetScreenGroundY - bCorner);
+        ctx.stroke();
 
-        // Overlay Badge
-        ctx.fillStyle = boxColor;
-        ctx.fillRect(leftX, Math.max(offsetY + 4, topY - 20), Math.max(90, targetPixWScreen), 16);
+        // Target Center Reticle
+        ctx.strokeStyle = boxColor;
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        const midY = topY + targetPixHScreen / 2;
+        ctx.moveTo(targetScreenX - 4, midY); ctx.lineTo(targetScreenX + 4, midY);
+        ctx.moveTo(targetScreenX, midY - 4); ctx.lineTo(targetScreenX, midY + 4);
+        ctx.stroke();
+
+        // Target Overlay Tag
+        const badgeText = `${TARGET_PRESETS[state.targetType]?.name || "Target"} • ${Math.round(state.ppm)} px/m [${state.doriLevel}]`;
+        ctx.font = "bold 9px monospace";
+        const badgeWidth = ctx.measureText(badgeText).width + 12;
+        const badgeY = Math.max(offsetY + 4, topY - 18);
+        const badgeX = Math.max(offsetX + 4, Math.min(offsetX + frameW - badgeWidth - 4, leftX));
+
+        ctx.fillStyle = "rgba(15, 23, 42, 0.88)";
+        ctx.fillRect(badgeX, badgeY, badgeWidth, 16);
+        ctx.strokeStyle = boxColor;
+        ctx.lineWidth = 1;
+        ctx.strokeRect(badgeX, badgeY, badgeWidth, 16);
 
         ctx.fillStyle = "#ffffff";
-        ctx.font = "bold 9px monospace";
-        ctx.fillText(
-          `${Math.round(state.ppm)} px/m • ${state.doriLevel.slice(0, 5)}`,
-          leftX + 4,
-          Math.max(offsetY + 15, topY - 8)
-        );
+        ctx.fillText(badgeText, badgeX + 6, badgeY + 11);
       }
+
+      // Optical Center Crosshair
+      ctx.strokeStyle = "rgba(0, 210, 255, 0.5)";
+      ctx.lineWidth = 1;
+      const cx = offsetX + frameW / 2;
+      const cy = offsetY + frameH / 2;
+      ctx.beginPath();
+      ctx.moveTo(cx - 16, cy); ctx.lineTo(cx + 16, cy);
+      ctx.moveTo(cx, cy - 16); ctx.lineTo(cx, cy + 16);
+      ctx.stroke();
 
       ctx.restore();
 
-      // Outer Viewport Frame Border
-      ctx.strokeStyle = "#2d3748";
+      // Viewport Border Frame
+      ctx.strokeStyle = "#232d40";
       ctx.lineWidth = 2;
       ctx.strokeRect(offsetX, offsetY, frameW, frameH);
 
-      // Sensor Overlay Info
-      ctx.fillStyle = "#94a3b8";
-      ctx.font = "10px monospace";
-      ctx.fillText(
-        `FOV: ${state.hfov.toFixed(1)}°H × ${state.vfov.toFixed(1)}°V | f=${state.focalMm.toFixed(1)}mm | Tilt: ${state.tilt}°`,
-        offsetX + 10,
-        offsetY + frameH - 10
-      );
+      // Render Magnifier Loupe if on Tab 4
+      renderTargetLoupe();
+    }
+
+    /* Helper: Draw High-Detail Vector Illustrations for Target Objects in Camera Viewport */
+    function drawTargetVectorArtwork(ctx, cx, groundY, w, h, type, ppm) {
+      ctx.save();
+      const topY = groundY - h;
+      const wActual = Math.max(6, w);
+      const hActual = Math.max(10, h);
+
+      // If PPM is below detection threshold, simulate blocky/pixelated appearance
+      if (ppm < 25) {
+        ctx.fillStyle = "rgba(255, 170, 0, 0.6)";
+        ctx.fillRect(cx - wActual / 2, topY, wActual, hActual);
+        ctx.restore();
+        return;
+      }
+
+      if (type === "human") {
+        // Detailed Frontal Pedestrian Illustration
+        const s = hActual / 100;
+        const headR = Math.max(2, 8 * s);
+
+        // Shoes
+        ctx.fillStyle = "#0f172a";
+        ctx.fillRect(cx - 7 * s, groundY - 4 * s, 6 * s, 4 * s);
+        ctx.fillRect(cx + 1 * s, groundY - 4 * s, 6 * s, 4 * s);
+
+        // Legs / Trousers
+        ctx.fillStyle = "#1e293b";
+        ctx.fillRect(cx - 6 * s, groundY - 46 * s, 5 * s, 42 * s);
+        ctx.fillRect(cx + 1 * s, groundY - 46 * s, 5 * s, 42 * s);
+
+        // Torso / Jacket
+        ctx.fillStyle = "#0284c7";
+        ctx.fillRect(cx - 12 * s, groundY - 78 * s, 24 * s, 34 * s);
+
+        // Hi-Vis safety reflective bands
+        ctx.fillStyle = "#f59e0b";
+        ctx.fillRect(cx - 12 * s, groundY - 72 * s, 24 * s, 8 * s);
+        ctx.fillStyle = "#ffffff";
+        ctx.fillRect(cx - 12 * s, groundY - 69 * s, 24 * s, 3 * s);
+
+        // Arms
+        ctx.fillStyle = "#0284c7";
+        ctx.fillRect(cx - 16 * s, groundY - 76 * s, 4 * s, 32 * s);
+        ctx.fillRect(cx + 12 * s, groundY - 76 * s, 4 * s, 32 * s);
+
+        // Hands
+        ctx.fillStyle = "#f6c89f";
+        ctx.fillRect(cx - 16 * s, groundY - 44 * s, 4 * s, 6 * s);
+        ctx.fillRect(cx + 12 * s, groundY - 44 * s, 4 * s, 6 * s);
+
+        // Neck
+        ctx.fillRect(cx - 3 * s, groundY - 84 * s, 6 * s, 6 * s);
+
+        // Head
+        ctx.beginPath();
+        ctx.arc(cx, groundY - 90 * s, headR, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Facial features if high resolution (>=125 ppm)
+        if (ppm >= 125) {
+          ctx.fillStyle = "#0f172a";
+          // Hair/Cap
+          ctx.beginPath();
+          ctx.arc(cx, groundY - 92 * s, headR, Math.PI, 0);
+          ctx.fill();
+          // Eyes
+          ctx.fillRect(cx - 3 * s, groundY - 90 * s, 2 * s, 2 * s);
+          ctx.fillRect(cx + 1 * s, groundY - 90 * s, 2 * s, 2 * s);
+        }
+
+      } else if (type === "seated") {
+        // Seated Person with Bench/Chair
+        const s = hActual / 80;
+
+        // Chair legs & frame
+        ctx.strokeStyle = "#64748b";
+        ctx.lineWidth = Math.max(1, 2 * s);
+        ctx.strokeRect(cx - 14 * s, groundY - 30 * s, 28 * s, 30 * s);
+
+        // Legs
+        ctx.fillStyle = "#1e3a8a";
+        ctx.fillRect(cx - 8 * s, groundY - 26 * s, 6 * s, 26 * s);
+        ctx.fillRect(cx + 2 * s, groundY - 26 * s, 6 * s, 26 * s);
+
+        // Torso
+        ctx.fillStyle = "#0284c7";
+        ctx.fillRect(cx - 10 * s, groundY - 58 * s, 20 * s, 32 * s);
+
+        // Head
+        ctx.fillStyle = "#f6c89f";
+        ctx.beginPath();
+        ctx.arc(cx, groundY - 68 * s, 8 * s, 0, Math.PI * 2);
+        ctx.fill();
+
+      } else if (type === "car") {
+        // Frontal Perspective Sedan Car
+        const s = wActual / 90;
+
+        // Tires
+        ctx.fillStyle = "#0f172a";
+        ctx.fillRect(cx - 42 * s, groundY - 14 * s, 10 * s, 14 * s);
+        ctx.fillRect(cx + 32 * s, groundY - 14 * s, 10 * s, 14 * s);
+
+        // Lower bumper / chassis
+        ctx.fillStyle = "#1d4ed8";
+        ctx.beginPath();
+        ctx.roundRect ? ctx.roundRect(cx - 44 * s, groundY - 32 * s, 88 * s, 24 * s, 6 * s) : ctx.rect(cx - 44 * s, groundY - 32 * s, 88 * s, 24 * s);
+        ctx.fill();
+
+        // Radiator Grille
+        ctx.fillStyle = "#0f172a";
+        ctx.fillRect(cx - 24 * s, groundY - 26 * s, 48 * s, 14 * s);
+
+        // Front Headlights
+        ctx.fillStyle = "#ffffff";
+        ctx.fillRect(cx - 38 * s, groundY - 30 * s, 12 * s, 6 * s);
+        ctx.fillRect(cx + 26 * s, groundY - 30 * s, 12 * s, 6 * s);
+
+        // Windshield and Greenhouse Cabin
+        ctx.fillStyle = "#0a1120";
+        ctx.beginPath();
+        ctx.moveTo(cx - 36 * s, groundY - 32 * s);
+        ctx.lineTo(cx - 28 * s, groundY - 62 * s);
+        ctx.lineTo(cx + 28 * s, groundY - 62 * s);
+        ctx.lineTo(cx + 36 * s, groundY - 32 * s);
+        ctx.closePath();
+        ctx.fill();
+
+        // Roof
+        ctx.fillStyle = "#1d4ed8";
+        ctx.fillRect(cx - 28 * s, groundY - 66 * s, 56 * s, 5 * s);
+
+        // License Plate on Front Bumper
+        ctx.fillStyle = "#ffffff";
+        ctx.fillRect(cx - 14 * s, groundY - 18 * s, 28 * s, 7 * s);
+        if (ppm >= 125) {
+          ctx.fillStyle = "#1e293b";
+          ctx.font = `bold ${Math.max(4, Math.round(5 * s))}px monospace`;
+          ctx.fillText("DINION", cx - 11 * s, groundY - 13 * s);
+        }
+
+      } else if (type === "suv") {
+        // Frontal Perspective SUV / Van
+        const s = wActual / 95;
+
+        // Large Tires
+        ctx.fillStyle = "#0f172a";
+        ctx.fillRect(cx - 45 * s, groundY - 18 * s, 12 * s, 18 * s);
+        ctx.fillRect(cx + 33 * s, groundY - 18 * s, 12 * s, 18 * s);
+
+        // Elevated Chassis
+        ctx.fillStyle = "#b45309";
+        ctx.fillRect(cx - 46 * s, groundY - 42 * s, 92 * s, 30 * s);
+
+        // Large High Windshield
+        ctx.fillStyle = "#0b121e";
+        ctx.fillRect(cx - 38 * s, groundY - 78 * s, 76 * s, 36 * s);
+
+        // Roof Rack Rails
+        ctx.fillStyle = "#1e293b";
+        ctx.fillRect(cx - 36 * s, groundY - 82 * s, 72 * s, 4 * s);
+
+        // Heavy Headlights
+        ctx.fillStyle = "#ffffff";
+        ctx.fillRect(cx - 42 * s, groundY - 40 * s, 14 * s, 10 * s);
+        ctx.fillRect(cx + 28 * s, groundY - 40 * s, 14 * s, 10 * s);
+
+        // Chrome/Dark Grille
+        ctx.fillStyle = "#1e293b";
+        ctx.fillRect(cx - 26 * s, groundY - 38 * s, 52 * s, 16 * s);
+
+      } else if (type === "truck") {
+        // Heavy Transport Truck Frontal
+        const s = wActual / 100;
+
+        // Heavy dual front wheels
+        ctx.fillStyle = "#0f172a";
+        ctx.fillRect(cx - 48 * s, groundY - 20 * s, 12 * s, 20 * s);
+        ctx.fillRect(cx + 36 * s, groundY - 20 * s, 12 * s, 20 * s);
+
+        // Front bumper
+        ctx.fillStyle = "#334155";
+        ctx.fillRect(cx - 50 * s, groundY - 24 * s, 100 * s, 12 * s);
+
+        // Massive Radiator Grille
+        ctx.fillStyle = "#cbd5e1";
+        ctx.fillRect(cx - 32 * s, groundY - 58 * s, 64 * s, 34 * s);
+
+        // Main Cab
+        ctx.fillStyle = "#b91c1c";
+        ctx.fillRect(cx - 48 * s, groundY - 110 * s, 96 * s, 54 * s);
+
+        // Panoramic Windshield
+        ctx.fillStyle = "#080e18";
+        ctx.fillRect(cx - 44 * s, groundY - 105 * s, 88 * s, 36 * s);
+
+        // Cab Roof / Air Deflector
+        ctx.fillStyle = "#cbd5e1";
+        ctx.fillRect(cx - 48 * s, groundY - 128 * s, 96 * s, 18 * s);
+
+      } else if (type === "plate") {
+        // License Plate Frontal
+        ctx.fillStyle = "#ffffff";
+        ctx.fillRect(cx - wActual / 2, groundY - hActual, wActual, hActual);
+        ctx.strokeStyle = "#000000";
+        ctx.lineWidth = 1.5;
+        ctx.strokeRect(cx - wActual / 2, groundY - hActual, wActual, hActual);
+
+        // Blue EU band on left
+        ctx.fillStyle = "#1d4ed8";
+        ctx.fillRect(cx - wActual / 2, groundY - hActual, wActual * 0.16, hActual);
+
+        // License Alphanumeric Text
+        if (ppm >= 100) {
+          ctx.fillStyle = "#000000";
+          ctx.font = `bold ${Math.max(6, Math.round(hActual * 0.65))}px monospace`;
+          ctx.fillText("DINION 7100", cx - wActual * 0.28, groundY - hActual * 0.28);
+        }
+
+      } else {
+        // Custom calibration target
+        ctx.fillStyle = "#f59e0b";
+        ctx.fillRect(cx - wActual / 2, topY, wActual, hActual);
+      }
+
+      ctx.restore();
+    }
+
+    /* Helper: Render Target 1:1 Loupe Crop */
+    function renderTargetLoupe() {
+      if (!els.loupeCanvas) return;
+      const lcv = els.loupeCanvas;
+      const lctx = lcv.getContext("2d");
+      const lw = (lcv.width = 180);
+      const lh = (lcv.height = 180);
+      lctx.clearRect(0, 0, lw, lh);
+
+      // Draw background dark grid
+      lctx.fillStyle = "#070a10";
+      lctx.fillRect(0, 0, lw, lh);
+
+      // Draw simulated sensor pixel grid
+      const gridPx = Math.max(2, Math.min(18, 180 / Math.max(10, state.targetPixH)));
+      lctx.strokeStyle = "rgba(255, 255, 255, 0.04)";
+      lctx.lineWidth = 1;
+      for (let x = 0; x < lw; x += gridPx) {
+        lctx.beginPath(); lctx.moveTo(x, 0); lctx.lineTo(x, lh); lctx.stroke();
+      }
+      for (let y = 0; y < lh; y += gridPx) {
+        lctx.beginPath(); lctx.moveTo(0, y); lctx.lineTo(lw, y); lctx.stroke();
+      }
+
+      // Draw magnified vector target in center of loupe
+      const targetLoupeH = Math.min(140, Math.max(30, state.targetPixH * 1.5));
+      const targetLoupeW = Math.min(140, Math.max(20, state.targetPixW * 1.5));
+      const targetGroundY = lh / 2 + targetLoupeH / 2;
+
+      drawTargetVectorArtwork(lctx, lw / 2, targetGroundY, targetLoupeW, targetLoupeH, state.targetType, state.ppm);
+
+      // Crosshairs in loupe
+      lctx.strokeStyle = "rgba(0, 210, 255, 0.3)";
+      lctx.beginPath();
+      lctx.moveTo(lw / 2, 0); lctx.lineTo(lw / 2, lh);
+      lctx.moveTo(0, lh / 2); lctx.lineTo(lw, lh / 2);
+      lctx.stroke();
     }
 
     /* ==========================================================================
-       6. THREE.JS 3D INTERACTIVE SCENE & FRUSTUM VISUALIZER
-       ========================================================================= */
+       7. THREE.JS 3D INTERACTIVE SCENE, FRUSTUM & MEASUREMENTS
+       ========================================================================== */
+
+    // Helper: Dynamic Billboard Text Sprite in Three.js for CAD-grade measurement labels
+    function createTextSprite(text, { color = "#ffffff", bgColor = "rgba(13, 18, 28, 0.9)", borderColor = "#00d2ff", fontSize = 28 } = {}) {
+      const canvas = document.createElement("canvas");
+      const ctx = canvas.getContext("2d");
+      ctx.font = `bold ${fontSize}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, monospace`;
+      const metrics = ctx.measureText(text);
+      const textW = metrics.width;
+      const textH = fontSize * 1.25;
+      const padX = 14;
+      const padY = 8;
+      const w = textW + padX * 2;
+      const h = textH + padY * 2;
+
+      canvas.width = Math.ceil(w * 2);
+      canvas.height = Math.ceil(h * 2);
+      ctx.scale(2, 2);
+
+      // Background pill
+      ctx.fillStyle = bgColor;
+      ctx.strokeStyle = borderColor;
+      ctx.lineWidth = 2;
+      const r = 6;
+      ctx.beginPath();
+      ctx.roundRect ? ctx.roundRect(1, 1, w - 2, h - 2, r) : ctx.rect(1, 1, w - 2, h - 2);
+      ctx.fill();
+      ctx.stroke();
+
+      // Text
+      ctx.fillStyle = color;
+      ctx.font = `bold ${fontSize}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, monospace`;
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText(text, w / 2, h / 2 + 1);
+
+      const texture = new THREE.CanvasTexture(canvas);
+      texture.minFilter = THREE.LinearFilter;
+      const spriteMat = new THREE.SpriteMaterial({ map: texture, transparent: true, depthTest: false });
+      const sprite = new THREE.Sprite(spriteMat);
+      const worldScale = 0.038 * (h / 30);
+      sprite.scale.set((w / h) * worldScale * 3.2, worldScale * 3.2, 1);
+      return sprite;
+    }
+
     class Visualizer3D {
       constructor(container) {
         this.container = container;
@@ -1840,10 +3001,7 @@
         this.camera = null;
         this.renderer = null;
         this.controls = null;
-        this.frustumGroup = null;
-        this.targetMesh = null;
-        this.poleMesh = null;
-        this.groundFootprintMesh = null;
+        this.dynamicGroup = null;
         this.initialized = false;
         this.init();
       }
@@ -1853,44 +3011,47 @@
         const width = this.container.clientWidth || 600;
         const height = this.container.clientHeight || 400;
 
-        // Scene
+        // 3D Scene
         this.scene = new THREE.Scene();
-        this.scene.background = new THREE.Color(0x090c10);
+        this.scene.background = new THREE.Color(0x07090e);
 
-        // Camera
-        this.camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 1000);
-        this.camera.position.set(-30, 25, 45);
+        // Perspective Camera
+        this.camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 1200);
+        this.camera.position.set(-28, 22, 38);
 
-        // Renderer
-        this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        // WebGL Renderer
+        this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, preserveDrawingBuffer: true });
         this.renderer.setSize(width, height);
         this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        this.renderer.shadowMap.enabled = true;
         this.container.appendChild(this.renderer.domElement);
 
-        // Controls
+        // OrbitControls
         if (window.THREE.OrbitControls) {
           this.controls = new THREE.OrbitControls(this.camera, this.renderer.domElement);
           this.controls.enableDamping = true;
           this.controls.dampingFactor = 0.08;
-          this.controls.target.set(0, 0, 20);
+          this.controls.maxPolarAngle = Math.PI / 2 + 0.05; // don't go below ground
+          this.controls.target.set(0, 2, 22);
         }
 
-        // Lighting
-        const ambient = new THREE.AmbientLight(0xffffff, 0.75);
+        // Ambient & Directional Lighting
+        const ambient = new THREE.AmbientLight(0xffffff, 0.7);
         this.scene.add(ambient);
 
-        const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
-        dirLight.position.set(20, 40, 20);
+        const dirLight = new THREE.DirectionalLight(0xffffff, 0.9);
+        dirLight.position.set(30, 60, 30);
+        dirLight.castShadow = true;
         this.scene.add(dirLight);
 
-        // Ground Grid (Z is forward distance, X is lateral, Y is elevation)
-        const gridHelper = new THREE.GridHelper(200, 40, 0x00d2ff, 0x1f2937);
+        // Metric Ground Grid
+        const gridHelper = new THREE.GridHelper(240, 48, 0x00d2ff, 0x1e2738);
         gridHelper.position.set(0, 0, 50);
         this.scene.add(gridHelper);
 
-        // Groups
-        this.frustumGroup = new THREE.Group();
-        this.scene.add(this.frustumGroup);
+        // Dynamic meshes group
+        this.dynamicGroup = new THREE.Group();
+        this.scene.add(this.dynamicGroup);
 
         this.initialized = true;
         this.animate = this.animate.bind(this);
@@ -1918,10 +3079,10 @@
       updateScene() {
         if (!this.initialized) return;
 
-        // Clear previous dynamic meshes
-        while (this.frustumGroup.children.length > 0) {
-          const obj = this.frustumGroup.children[0];
-          this.frustumGroup.remove(obj);
+        // Clear dynamic elements
+        while (this.dynamicGroup.children.length > 0) {
+          const obj = this.dynamicGroup.children[0];
+          this.dynamicGroup.remove(obj);
           if (obj.geometry) obj.geometry.dispose();
           if (obj.material) {
             if (Array.isArray(obj.material)) obj.material.forEach(m => m.dispose());
@@ -1929,136 +3090,572 @@
           }
         }
 
-        const { mountH, tilt, pan, hfov, vfov, targetDist, targetHeight, targetOffset } = state;
+        const { mountH, tilt, pan, hfov, vfov, targetDist, targetHeight, targetWidth, targetDepth, targetOffset } = state;
+        const camPos = new THREE.Vector3(0, mountH, 0);
 
-        // 1. Camera Pole & Housing
-        const poleGeo = new THREE.CylinderGeometry(0.15, 0.2, mountH, 16);
-        const poleMat = new THREE.MeshStandardMaterial({ color: 0x64748b, metalness: 0.5 });
-        const pole = new THREE.Mesh(poleGeo, poleMat);
+        // 1. Camera Pole & Flange
+        const poleMat = new THREE.MeshStandardMaterial({ color: 0x64748b, metalness: 0.6, roughness: 0.4 });
+        const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.16, mountH, 20), poleMat);
         pole.position.set(0, mountH / 2, 0);
-        this.frustumGroup.add(pole);
+        this.dynamicGroup.add(pole);
 
-        // Camera Head Box
-        const camBoxGeo = new THREE.BoxGeometry(0.6, 0.4, 1.0);
-        const camBoxMat = new THREE.MeshStandardMaterial({ color: 0x00d2ff });
-        const camHead = new THREE.Mesh(camBoxGeo, camBoxMat);
-        camHead.position.set(0, mountH, 0);
-        camHead.rotation.order = 'YXZ';
-        camHead.rotation.y = -degToRad(pan);
-        camHead.rotation.x = degToRad(tilt);
-        this.frustumGroup.add(camHead);
+        // Base flange
+        const baseFlange = new THREE.Mesh(new THREE.CylinderGeometry(0.35, 0.35, 0.1, 16), poleMat);
+        baseFlange.position.set(0, 0.05, 0);
+        this.dynamicGroup.add(baseFlange);
 
-        // 2. 3D Volumetric FOV Pyramid with DORI segments
+        // Realistic CCTV Security Camera Model
+        const camModel = this.buildCameraModel();
+        camModel.position.set(0, mountH, 0);
+        camModel.rotation.order = 'YXZ';
+        camModel.rotation.y = -degToRad(pan);
+        camModel.rotation.x = degToRad(tilt);
+        this.dynamicGroup.add(camModel);
+
+        // 2. Optical Geometry & Ground Footprint Calculation
         const halfHRad = degToRad(hfov / 2);
         const halfVRad = degToRad(vfov / 2);
-
-        // Build frustum wireframe / volume
-        const maxFrustDist = Math.min(Math.max(40, state.doriRanges.detect), 120);
-        const wAtDist = maxFrustDist * Math.tan(halfHRad);
-        const hAtDist = maxFrustDist * Math.tan(halfVRad);
-
-        // Local frustum corners in camera space:
-        // +Z is forward along optical axis, +Y is up, +X is right
-        const corners = [
-          new THREE.Vector3(-wAtDist,  hAtDist, maxFrustDist),
-          new THREE.Vector3( wAtDist,  hAtDist, maxFrustDist),
-          new THREE.Vector3( wAtDist, -hAtDist, maxFrustDist),
-          new THREE.Vector3(-wAtDist, -hAtDist, maxFrustDist)
-        ];
-
-        // Transform corners to World Coordinates using camera position and rotation
-        const camPos = new THREE.Vector3(0, mountH, 0);
         const euler = new THREE.Euler(degToRad(tilt), -degToRad(pan), 0, 'YXZ');
-        const worldCorners = corners.map(c => c.clone().applyEuler(euler).add(camPos));
 
-        // Frustum Wireframe Lines
-        const lineMat = new THREE.LineBasicMaterial({ color: 0x00d2ff, opacity: 0.6, transparent: true });
-        const linePoints = [
-          // 4 rays from camera apex
-          camPos, worldCorners[0],
-          camPos, worldCorners[1],
-          camPos, worldCorners[2],
-          camPos, worldCorners[3],
-          // Outer rectangle
-          worldCorners[0], worldCorners[1],
-          worldCorners[1], worldCorners[2],
-          worldCorners[2], worldCorners[3],
-          worldCorners[3], worldCorners[0]
+        // Local corner ray vectors (+Z forward, +X right, +Y up)
+        const localRays = [
+          new THREE.Vector3(-Math.tan(halfHRad), -Math.tan(halfVRad), 1.0).normalize(), // Bottom-Left
+          new THREE.Vector3( Math.tan(halfHRad), -Math.tan(halfVRad), 1.0).normalize(), // Bottom-Right
+          new THREE.Vector3( Math.tan(halfHRad),  Math.tan(halfVRad), 1.0).normalize(), // Top-Right
+          new THREE.Vector3(-Math.tan(halfHRad),  Math.tan(halfVRad), 1.0).normalize()  // Top-Left
         ];
-        const lineGeo = new THREE.BufferGeometry().setFromPoints(linePoints);
-        const lines = new THREE.LineSegments(lineGeo, lineMat);
-        this.frustumGroup.add(lines);
 
-        // Translucent Frustum Volume
-        const volGeo = new THREE.BufferGeometry();
-        const vertices = [];
-        // 4 side faces
-        const faces = [
-          [camPos, worldCorners[0], worldCorners[1]],
-          [camPos, worldCorners[1], worldCorners[2]],
-          [camPos, worldCorners[2], worldCorners[3]],
-          [camPos, worldCorners[3], worldCorners[0]]
-        ];
-        faces.forEach(f => {
-          vertices.push(f[0].x, f[0].y, f[0].z);
-          vertices.push(f[1].x, f[1].y, f[1].z);
-          vertices.push(f[2].x, f[2].y, f[2].z);
+        // Transform rays to world directions
+        const worldRays = localRays.map(r => r.clone().applyEuler(euler));
+
+        // Calculate Ground Footprint (Y = 0) intersection coordinates
+        const maxPlaneDist = Math.max(80, targetDist * 1.5, state.doriRanges.detect * 1.1, 60);
+
+        const groundCorners = worldRays.map(r => {
+          // If ray points towards the ground (Y < -0.001)
+          if (r.y < -0.001) {
+            const t = -mountH / r.y;
+            return new THREE.Vector3(r.x * t, 0.02, r.z * t);
+          } else {
+            // Ray points at or above horizon -> project to maximum bounding ground distance
+            const horizDist = Math.sqrt(r.x * r.x + r.z * r.z);
+            const t = maxPlaneDist / (horizDist || 1);
+            return new THREE.Vector3(r.x * t, 0.02, r.z * t);
+          }
         });
-        volGeo.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
-        const volMat = new THREE.MeshBasicMaterial({
+
+        // Ground Footprint Polygon Mesh
+        const footprintGeo = new THREE.BufferGeometry();
+        const fpVerts = [
+          groundCorners[0].x, groundCorners[0].y, groundCorners[0].z,
+          groundCorners[1].x, groundCorners[1].y, groundCorners[1].z,
+          groundCorners[2].x, groundCorners[2].y, groundCorners[2].z,
+
+          groundCorners[0].x, groundCorners[0].y, groundCorners[0].z,
+          groundCorners[2].x, groundCorners[2].y, groundCorners[2].z,
+          groundCorners[3].x, groundCorners[3].y, groundCorners[3].z
+        ];
+        footprintGeo.setAttribute('position', new THREE.Float32BufferAttribute(fpVerts, 3));
+        const footprintMat = new THREE.MeshBasicMaterial({
           color: 0x00d2ff,
           transparent: true,
-          opacity: 0.1,
+          opacity: 0.18,
           side: THREE.DoubleSide
         });
-        const volMesh = new THREE.Mesh(volGeo, volMat);
-        this.frustumGroup.add(volMesh);
+        const footprintMesh = new THREE.Mesh(footprintGeo, footprintMat);
+        this.dynamicGroup.add(footprintMesh);
 
-        // 3. 3D Target Object Marker
-        const tZ = targetDist * Math.cos(degToRad(pan)) + targetOffset * Math.sin(degToRad(pan));
-        const tX = targetDist * Math.sin(degToRad(pan)) + targetOffset * Math.cos(degToRad(pan));
+        // Ground Footprint Glowing Border Lines
+        const fpLinePoints = [
+          groundCorners[0], groundCorners[1],
+          groundCorners[1], groundCorners[2],
+          groundCorners[2], groundCorners[3],
+          groundCorners[3], groundCorners[0]
+        ];
+        const fpLineGeo = new THREE.BufferGeometry().setFromPoints(fpLinePoints);
+        const fpLineMat = new THREE.LineBasicMaterial({ color: 0x00d2ff, opacity: 0.8, transparent: true, linewidth: 2 });
+        this.dynamicGroup.add(new THREE.LineSegments(fpLineGeo, fpLineMat));
 
-        const targetGroup = new THREE.Group();
-        targetGroup.position.set(tX, 0, tZ);
+        // 3. 3D Volumetric Frustum Guide Rays
+        const frustumRays = [
+          camPos, groundCorners[0],
+          camPos, groundCorners[1],
+          camPos, groundCorners[2],
+          camPos, groundCorners[3]
+        ];
+        const frustumRayGeo = new THREE.BufferGeometry().setFromPoints(frustumRays);
+        const frustumRayMat = new THREE.LineBasicMaterial({ color: 0x00d2ff, opacity: 0.6, transparent: true });
+        this.dynamicGroup.add(new THREE.LineSegments(frustumRayGeo, frustumRayMat));
 
-        // Target Body Box / Cylinder
-        const bodyH = targetHeight * 0.75;
-        const bodyGeo = new THREE.CylinderGeometry(0.3, 0.35, bodyH, 12);
-        const bodyMat = new THREE.MeshStandardMaterial({ color: 0xffaa00, roughness: 0.3 });
-        const bodyMesh = new THREE.Mesh(bodyGeo, bodyMat);
-        bodyMesh.position.set(0, bodyH / 2, 0);
-        targetGroup.add(bodyMesh);
+        // Translucent Frustum Volumetric Side Faces
+        const sideFacesGeo = new THREE.BufferGeometry();
+        const sideVerts = [];
+        const sides = [
+          [camPos, groundCorners[0], groundCorners[1]],
+          [camPos, groundCorners[1], groundCorners[2]],
+          [camPos, groundCorners[2], groundCorners[3]],
+          [camPos, groundCorners[3], groundCorners[0]]
+        ];
+        sides.forEach(s => {
+          sideVerts.push(s[0].x, s[0].y, s[0].z);
+          sideVerts.push(s[1].x, s[1].y, s[1].z);
+          sideVerts.push(s[2].x, s[2].y, s[2].z);
+        });
+        sideFacesGeo.setAttribute('position', new THREE.Float32BufferAttribute(sideVerts, 3));
+        const sideFacesMat = new THREE.MeshBasicMaterial({
+          color: 0x00d2ff,
+          transparent: true,
+          opacity: 0.06,
+          side: THREE.DoubleSide
+        });
+        this.dynamicGroup.add(new THREE.Mesh(sideFacesGeo, sideFacesMat));
 
-        // Target Head Sphere
-        const headGeo = new THREE.SphereGeometry(0.25, 12, 12);
-        const headMesh = new THREE.Mesh(headGeo, bodyMat);
-        headMesh.position.set(0, bodyH + 0.25, 0);
-        targetGroup.add(headMesh);
+        // 4. DORI Polygonal Zones directly projected onto the ground
+        this.buildDoriGroundBands(euler, halfHRad);
 
-        // Target Ground Disc
-        const discGeo = new THREE.RingGeometry(0.1, 1.2, 24);
-        const discMat = new THREE.MeshBasicMaterial({ color: 0xffaa00, side: THREE.DoubleSide });
-        const discMesh = new THREE.Mesh(discGeo, discMat);
-        discMesh.rotation.x = -Math.PI / 2;
-        discMesh.position.y = 0.05;
-        targetGroup.add(discMesh);
+        // 5. 3D Procedural Target Model
+        const panRad = degToRad(pan);
+        const tZ = targetDist * Math.cos(panRad) + targetOffset * Math.sin(panRad);
+        const tX = targetDist * Math.sin(panRad) + targetOffset * Math.cos(panRad);
 
-        this.frustumGroup.add(targetGroup);
+        const targetModelGroup = this.buildTargetModel(state.targetType, targetHeight, targetWidth, targetDepth);
+        targetModelGroup.position.set(tX, 0, tZ);
+        targetModelGroup.rotation.y = -panRad; // Face towards camera
+        this.dynamicGroup.add(targetModelGroup);
+
+        // 6. CAD 3D Measurement Dimension Lines & Billboard Badges
+        this.buildMeasurements3D(camPos, tX, tZ, mountH, targetDist, targetHeight);
+      }
+
+      /* Realistic CCTV Camera Mesh Generator */
+      buildCameraModel() {
+        const group = new THREE.Group();
+
+        // Mounting wall/pole bracket
+        const bracketMat = new THREE.MeshStandardMaterial({ color: 0x334155, metalness: 0.7, roughness: 0.3 });
+        const bracketArm = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.06, 0.7, 12), bracketMat);
+        bracketArm.rotation.x = Math.PI / 2;
+        bracketArm.position.set(0, 0, 0.35);
+        group.add(bracketArm);
+
+        // Pan/Tilt Swivel Joint
+        const swivel = new THREE.Mesh(new THREE.SphereGeometry(0.12, 16, 16), bracketMat);
+        swivel.position.set(0, 0, 0.7);
+        group.add(swivel);
+
+        // Bullet Camera Housing
+        const bodyMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, metalness: 0.5, roughness: 0.4 });
+        const body = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.18, 0.9, 20), bodyMat);
+        body.rotation.x = Math.PI / 2;
+        body.position.set(0, 0, 1.15);
+        group.add(body);
+
+        // Front Aluminum Bezel
+        const bezelMat = new THREE.MeshStandardMaterial({ color: 0x94a3b8, metalness: 0.8, roughness: 0.2 });
+        const bezel = new THREE.Mesh(new THREE.CylinderGeometry(0.19, 0.19, 0.08, 20), bezelMat);
+        bezel.rotation.x = Math.PI / 2;
+        bezel.position.set(0, 0, 1.62);
+        group.add(bezel);
+
+        // Front Optical Glass Lens Element
+        const lensMat = new THREE.MeshStandardMaterial({ color: 0x050810, metalness: 0.9, roughness: 0.1 });
+        const lens = new THREE.Mesh(new THREE.CircleGeometry(0.16, 20), lensMat);
+        lens.position.set(0, 0, 1.661);
+        group.add(lens);
+
+        // Blue Iris Glow Ring
+        const irisMat = new THREE.MeshBasicMaterial({ color: 0x00d2ff, side: THREE.DoubleSide });
+        const iris = new THREE.Mesh(new THREE.RingGeometry(0.06, 0.09, 20), irisMat);
+        iris.position.set(0, 0, 1.662);
+        group.add(iris);
+
+        // Sunshield Visor Canopy
+        const visorMat = new THREE.MeshStandardMaterial({ color: 0x475569, roughness: 0.5 });
+        const visor = new THREE.Mesh(new THREE.CylinderGeometry(0.21, 0.21, 0.95, 20, 1, false, -Math.PI / 2, Math.PI), visorMat);
+        visor.rotation.x = Math.PI / 2;
+        visor.position.set(0, 0.03, 1.25);
+        group.add(visor);
+
+        // Green Power LED
+        const led = new THREE.Mesh(new THREE.SphereGeometry(0.025, 8, 8), new THREE.MeshBasicMaterial({ color: 0x10b981 }));
+        led.position.set(0.13, 0.13, 1.58);
+        group.add(led);
+
+        return group;
+      }
+
+      /* Procedural 3D Target Model Generator */
+      buildTargetModel(type, height, width, depth) {
+        const group = new THREE.Group();
+
+        if (type === "human") {
+          // Standing Human Mannequin
+          const s = height / 1.70;
+          const bodyMat = new THREE.MeshStandardMaterial({ color: 0x0284c7, roughness: 0.6 });
+          const pantsMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.8 });
+          const skinMat = new THREE.MeshStandardMaterial({ color: 0xf6c89f, roughness: 0.5 });
+          const shoeMat = new THREE.MeshStandardMaterial({ color: 0x0f172a });
+
+          // Shoes
+          const leftShoe = new THREE.Mesh(new THREE.BoxGeometry(0.13 * s, 0.08 * s, 0.24 * s), shoeMat);
+          leftShoe.position.set(-0.11 * s, 0.04 * s, 0.03 * s);
+          group.add(leftShoe);
+          const rightShoe = leftShoe.clone();
+          rightShoe.position.x = 0.11 * s;
+          group.add(rightShoe);
+
+          // Legs
+          const legGeo = new THREE.CylinderGeometry(0.075 * s, 0.065 * s, 0.78 * s, 12);
+          const leftLeg = new THREE.Mesh(legGeo, pantsMat);
+          leftLeg.position.set(-0.11 * s, 0.45 * s, 0);
+          group.add(leftLeg);
+          const rightLeg = leftLeg.clone();
+          rightLeg.position.x = 0.11 * s;
+          group.add(rightLeg);
+
+          // Torso with Hi-Vis vest
+          const torso = new THREE.Mesh(new THREE.BoxGeometry(0.38 * s, 0.52 * s, 0.22 * s), bodyMat);
+          torso.position.set(0, 1.08 * s, 0);
+          group.add(torso);
+
+          const vest = new THREE.Mesh(new THREE.BoxGeometry(0.39 * s, 0.25 * s, 0.23 * s), new THREE.MeshStandardMaterial({ color: 0xf59e0b }));
+          vest.position.set(0, 1.12 * s, 0);
+          group.add(vest);
+
+          // Arms
+          const armGeo = new THREE.CylinderGeometry(0.05 * s, 0.045 * s, 0.55 * s, 10);
+          const leftArm = new THREE.Mesh(armGeo, bodyMat);
+          leftArm.position.set(-0.25 * s, 1.02 * s, 0);
+          group.add(leftArm);
+          const rightArm = leftArm.clone();
+          rightArm.position.x = 0.25 * s;
+          group.add(rightArm);
+
+          // Head & Cap
+          const head = new THREE.Mesh(new THREE.SphereGeometry(0.13 * s, 16, 16), skinMat);
+          head.position.set(0, 1.54 * s, 0);
+          group.add(head);
+
+          const cap = new THREE.Mesh(new THREE.SphereGeometry(0.135 * s, 16, 16, 0, Math.PI * 2, 0, Math.PI / 2), new THREE.MeshStandardMaterial({ color: 0x0f172a }));
+          cap.position.set(0, 1.55 * s, 0);
+          group.add(cap);
+
+        } else if (type === "seated") {
+          // Seated Person with Chair
+          const s = height / 1.30;
+          const chairMat = new THREE.MeshStandardMaterial({ color: 0x475569 });
+          const clothesMat = new THREE.MeshStandardMaterial({ color: 0x1e3a8a });
+          const skinMat = new THREE.MeshStandardMaterial({ color: 0xf6c89f });
+
+          // Chair seat & back
+          const seat = new THREE.Mesh(new THREE.BoxGeometry(0.5 * s, 0.05 * s, 0.5 * s), chairMat);
+          seat.position.set(0, 0.45 * s, 0);
+          group.add(seat);
+
+          const backrest = new THREE.Mesh(new THREE.BoxGeometry(0.5 * s, 0.45 * s, 0.05 * s), chairMat);
+          backrest.position.set(0, 0.72 * s, -0.22 * s);
+          group.add(backrest);
+
+          // Seated Human
+          const thighs = new THREE.Mesh(new THREE.BoxGeometry(0.36 * s, 0.12 * s, 0.42 * s), clothesMat);
+          thighs.position.set(0, 0.53 * s, 0.1 * s);
+          group.add(thighs);
+
+          const torso = new THREE.Mesh(new THREE.BoxGeometry(0.36 * s, 0.48 * s, 0.2 * s), clothesMat);
+          torso.position.set(0, 0.85 * s, -0.1 * s);
+          group.add(torso);
+
+          const head = new THREE.Mesh(new THREE.SphereGeometry(0.12 * s, 16, 16), skinMat);
+          head.position.set(0, 1.20 * s, -0.1 * s);
+          group.add(head);
+
+        } else if (type === "car") {
+          // 3D Sedan Car
+          const sH = height / 1.48;
+          const sW = (width || 1.80) / 1.80;
+          const sL = (depth || 4.60) / 4.60;
+
+          const bodyMat = new THREE.MeshStandardMaterial({ color: 0x2563eb, metalness: 0.6, roughness: 0.3 });
+          const glassMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.1, metalness: 0.9, opacity: 0.85, transparent: true });
+          const tireMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.9 });
+          const rimMat = new THREE.MeshStandardMaterial({ color: 0xd1d5db, metalness: 0.8, roughness: 0.2 });
+
+          // Chassis
+          const chassis = new THREE.Mesh(new THREE.BoxGeometry(1.8 * sW, 0.55 * sH, 4.4 * sL), bodyMat);
+          chassis.position.set(0, 0.48 * sH, 0);
+          group.add(chassis);
+
+          // Cabin
+          const cabin = new THREE.Mesh(new THREE.BoxGeometry(1.6 * sW, 0.52 * sH, 2.3 * sL), bodyMat);
+          cabin.position.set(0, 0.98 * sH, -0.2 * sL);
+          group.add(cabin);
+
+          // 4 Wheels
+          const tireGeo = new THREE.CylinderGeometry(0.33 * sH, 0.33 * sH, 0.25 * sW, 16);
+          tireGeo.rotateZ(Math.PI / 2);
+          [
+            [-0.92 * sW, 0.33 * sH, 1.35 * sL], [0.92 * sW, 0.33 * sH, 1.35 * sL],
+            [-0.92 * sW, 0.33 * sH, -1.35 * sL], [0.92 * sW, 0.33 * sH, -1.35 * sL]
+          ].forEach(([wx, wy, wz]) => {
+            const tire = new THREE.Mesh(tireGeo, tireMat);
+            tire.position.set(wx, wy, wz);
+            group.add(tire);
+          });
+
+          // Headlights
+          [-0.65 * sW, 0.65 * sW].forEach(hx => {
+            const hl = new THREE.Mesh(new THREE.BoxGeometry(0.28 * sW, 0.12 * sH, 0.05), new THREE.MeshBasicMaterial({ color: 0xffffff }));
+            hl.position.set(hx, 0.58 * sH, 2.22 * sL);
+            group.add(hl);
+          });
+
+        } else if (type === "suv") {
+          // 3D Full-Size SUV
+          const sH = height / 1.80;
+          const sW = (width || 1.95) / 1.95;
+          const sL = (depth || 4.90) / 4.90;
+
+          const bodyMat = new THREE.MeshStandardMaterial({ color: 0xd97706, metalness: 0.5, roughness: 0.4 });
+          const chassis = new THREE.Mesh(new THREE.BoxGeometry(1.95 * sW, 0.75 * sH, 4.7 * sL), bodyMat);
+          chassis.position.set(0, 0.68 * sH, 0);
+          group.add(chassis);
+
+          const cabin = new THREE.Mesh(new THREE.BoxGeometry(1.8 * sW, 0.65 * sH, 3.1 * sL), bodyMat);
+          cabin.position.set(0, 1.35 * sH, -0.4 * sL);
+          group.add(cabin);
+
+        } else if (type === "truck") {
+          // Heavy Commercial Box Truck
+          const sH = height / 3.20;
+          const sW = (width || 2.50) / 2.50;
+          const sL = (depth || 8.50) / 8.50;
+
+          const cabMat = new THREE.MeshStandardMaterial({ color: 0xdc2626 });
+          const boxMat = new THREE.MeshStandardMaterial({ color: 0xe2e8f0 });
+
+          // Front cab
+          const cab = new THREE.Mesh(new THREE.BoxGeometry(2.45 * sW, 2.1 * sH, 2.3 * sL), cabMat);
+          cab.position.set(0, 1.75 * sH, 2.7 * sL);
+          group.add(cab);
+
+          // Cargo box
+          const cargo = new THREE.Mesh(new THREE.BoxGeometry(2.5 * sW, 2.4 * sH, 5.8 * sL), boxMat);
+          cargo.position.set(0, 1.95 * sH, -1.3 * sL);
+          group.add(cargo);
+
+        } else if (type === "plate") {
+          // License Plate on Stanchion
+          const postMat = new THREE.MeshStandardMaterial({ color: 0x475569 });
+          const post = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 0.75, 12), postMat);
+          post.position.set(0, 0.375, 0);
+          group.add(post);
+
+          const plate = new THREE.Mesh(new THREE.BoxGeometry(0.52, 0.15, 0.02), new THREE.MeshBasicMaterial({ color: 0xffffff }));
+          plate.position.set(0, 0.75, 0.03);
+          group.add(plate);
+
+        } else {
+          // Custom Target Block
+          const box = new THREE.Mesh(new THREE.BoxGeometry(width || 0.5, height, depth || 0.5), new THREE.MeshStandardMaterial({ color: 0xf59e0b }));
+          box.position.set(0, height / 2, 0);
+          group.add(box);
+        }
+
+        // Circular Target Base Landing Disc on ground
+        const disc = new THREE.Mesh(
+          new THREE.RingGeometry(0.1, Math.max(0.9, (width || 0.5) * 1.2), 24),
+          new THREE.MeshBasicMaterial({ color: 0xffaa00, side: THREE.DoubleSide })
+        );
+        disc.rotation.x = -Math.PI / 2;
+        disc.position.y = 0.04;
+        group.add(disc);
+
+        return group;
+      }
+
+      /* Build DORI Colored Bands directly projected on the ground */
+      buildDoriGroundBands(euler, halfHRad) {
+        const bands = [
+          { rMin: 0, rMax: state.doriRanges.ident, color: 0x9333ea, opacity: 0.28, label: "IDENT" },
+          { rMin: state.doriRanges.ident, rMax: state.doriRanges.recog, color: 0x10b981, opacity: 0.22, label: "RECOG" },
+          { rMin: state.doriRanges.recog, rMax: state.doriRanges.observe, color: 0xf59e0b, opacity: 0.18, label: "OBSERVE" },
+          { rMin: state.doriRanges.observe, rMax: state.doriRanges.detect, color: 0xef4444, opacity: 0.14, label: "DETECT" }
+        ];
+
+        const panRad = degToRad(state.pan);
+
+        bands.forEach(b => {
+          if (!isFinite(b.rMax) || b.rMax <= b.rMin) return;
+          const r1 = Math.max(state.blindSpot, b.rMin);
+          const r2 = Math.min(120, b.rMax);
+          if (r2 <= r1) return;
+
+          // Build trapezoidal band on ground
+          const w1 = r1 * Math.tan(halfHRad);
+          const w2 = r2 * Math.tan(halfHRad);
+
+          const localPts = [
+            new THREE.Vector3(-w1, 0, r1),
+            new THREE.Vector3( w1, 0, r1),
+            new THREE.Vector3( w2, 0, r2),
+            new THREE.Vector3(-w2, 0, r2)
+          ];
+
+          // Rotate by pan azimuth
+          const rotY = new THREE.Euler(0, -panRad, 0);
+          const worldPts = localPts.map(p => p.clone().applyEuler(rotY));
+
+          const bandGeo = new THREE.BufferGeometry();
+          const verts = [
+            worldPts[0].x, 0.025, worldPts[0].z,
+            worldPts[1].x, 0.025, worldPts[1].z,
+            worldPts[2].x, 0.025, worldPts[2].z,
+
+            worldPts[0].x, 0.025, worldPts[0].z,
+            worldPts[2].x, 0.025, worldPts[2].z,
+            worldPts[3].x, 0.025, worldPts[3].z
+          ];
+          bandGeo.setAttribute('position', new THREE.Float32BufferAttribute(verts, 3));
+          const bandMesh = new THREE.Mesh(bandGeo, new THREE.MeshBasicMaterial({
+            color: b.color,
+            transparent: true,
+            opacity: b.opacity,
+            side: THREE.DoubleSide
+          }));
+          this.dynamicGroup.add(bandMesh);
+
+          // Boundary line across the far edge of the band
+          const edgePoints = [
+            new THREE.Vector3(worldPts[2].x, 0.03, worldPts[2].z),
+            new THREE.Vector3(worldPts[3].x, 0.03, worldPts[3].z)
+          ];
+          const edgeGeo = new THREE.BufferGeometry().setFromPoints(edgePoints);
+          const edgeLine = new THREE.Line(edgeGeo, new THREE.LineBasicMaterial({ color: b.color, linewidth: 2 }));
+          this.dynamicGroup.add(edgeLine);
+
+          // Billboard badge on the boundary line
+          const badgePos = new THREE.Vector3((worldPts[2].x + worldPts[3].x) / 2, 0.5, (worldPts[2].z + worldPts[3].z) / 2);
+          const sprite = createTextSprite(`${b.label} • ${formatDist(b.rMax)}`, {
+            borderColor: `#${b.color.toString(16).padStart(6, '0')}`,
+            fontSize: 24
+          });
+          sprite.position.copy(badgePos);
+          this.dynamicGroup.add(sprite);
+        });
+      }
+
+      /* Build CAD 3D Measurement Lines & Labels */
+      buildMeasurements3D(camPos, tX, tZ, mountH, targetDist, targetHeight) {
+        // A. Mounting Height Vertical Dimension Line
+        const dimX = -1.4;
+        const heightPoints = [
+          new THREE.Vector3(dimX, 0, 0),
+          new THREE.Vector3(dimX, mountH, 0),
+          // top/bottom extension ticks
+          new THREE.Vector3(dimX - 0.4, 0, 0), new THREE.Vector3(dimX + 0.4, 0, 0),
+          new THREE.Vector3(dimX - 0.4, mountH, 0), new THREE.Vector3(dimX + 0.4, mountH, 0)
+        ];
+        const hLineGeo = new THREE.BufferGeometry().setFromPoints(heightPoints);
+        const hLine = new THREE.LineSegments(hLineGeo, new THREE.LineBasicMaterial({ color: 0x00d2ff, linewidth: 1.5 }));
+        this.dynamicGroup.add(hLine);
+
+        const hSprite = createTextSprite(`Mount H: ${formatDist(mountH)}`, { borderColor: "#00d2ff" });
+        hSprite.position.set(dimX - 1.2, mountH / 2, 0);
+        this.dynamicGroup.add(hSprite);
+
+        // B. Near Blind Spot Measurement Line on ground
+        if (state.blindSpot > 0 && isFinite(state.blindSpot)) {
+          const panRad = degToRad(state.pan);
+          const bZ = state.blindSpot * Math.cos(panRad);
+          const bX = state.blindSpot * Math.sin(panRad);
+
+          // Red hazard zone on ground
+          const hazardMesh = new THREE.Mesh(
+            new THREE.RingGeometry(0.2, state.blindSpot, 16, 1, panRad - Math.PI / 4, Math.PI / 2),
+            new THREE.MeshBasicMaterial({ color: 0xef4444, side: THREE.DoubleSide, transparent: true, opacity: 0.2 })
+          );
+          hazardMesh.rotation.x = -Math.PI / 2;
+          hazardMesh.position.y = 0.015;
+          this.dynamicGroup.add(hazardMesh);
+
+          const bSprite = createTextSprite(`Blind Spot: ${formatDist(state.blindSpot)}`, { borderColor: "#ef4444", color: "#ef4444" });
+          bSprite.position.set(bX / 2, 0.6, bZ / 2);
+          this.dynamicGroup.add(bSprite);
+        }
+
+        // C. Target Ground Distance Line
+        const distPoints = [
+          new THREE.Vector3(0, 0.03, 0),
+          new THREE.Vector3(tX, 0.03, tZ)
+        ];
+        const distGeo = new THREE.BufferGeometry().setFromPoints(distPoints);
+        const distLine = new THREE.Line(distGeo, new THREE.LineDashedMaterial({ color: 0xffaa00, dashSize: 0.6, gapSize: 0.4 }));
+        distLine.computeLineDistances();
+        this.dynamicGroup.add(distLine);
+
+        const distSprite = createTextSprite(`Target Dist: ${formatDist(targetDist)}`, { borderColor: "#ffaa00", color: "#ffaa00" });
+        distSprite.position.set(tX / 2, 0.8, tZ / 2);
+        this.dynamicGroup.add(distSprite);
+
+        // D. Direct Line of Sight (LOS) Ray
+        const losPoints = [
+          camPos,
+          new THREE.Vector3(tX, targetHeight / 2, tZ)
+        ];
+        const losGeo = new THREE.BufferGeometry().setFromPoints(losPoints);
+        const losLine = new THREE.Line(losGeo, new THREE.LineDashedMaterial({ color: 0xffaa00, dashSize: 0.8, gapSize: 0.5 }));
+        losLine.computeLineDistances();
+        this.dynamicGroup.add(losLine);
+
+        const losSprite = createTextSprite(`LOS: ${formatDist(state.losDist)}`, { borderColor: "#ffaa00", color: "#ffaa00" });
+        losSprite.position.set(tX / 2, (camPos.y + targetHeight / 2) / 2, tZ / 2);
+        this.dynamicGroup.add(losSprite);
+
+        // E. Field Width at Target Bar
+        const halfHRad = degToRad(state.hfov / 2);
+        const halfSceneW = state.fieldWAtDist / 2;
+        const panRad = degToRad(state.pan);
+        const normalRad = panRad + Math.PI / 2;
+
+        const wPt1 = new THREE.Vector3(
+          tX - Math.sin(normalRad) * halfSceneW,
+          0.05,
+          tZ - Math.cos(normalRad) * halfSceneW
+        );
+        const wPt2 = new THREE.Vector3(
+          tX + Math.sin(normalRad) * halfSceneW,
+          0.05,
+          tZ + Math.cos(normalRad) * halfSceneW
+        );
+
+        const wBarPoints = [
+          wPt1, wPt2,
+          // End ticks
+          new THREE.Vector3(wPt1.x, 0.05, wPt1.z - 0.4), new THREE.Vector3(wPt1.x, 0.05, wPt1.z + 0.4),
+          new THREE.Vector3(wPt2.x, 0.05, wPt2.z - 0.4), new THREE.Vector3(wPt2.x, 0.05, wPt2.z + 0.4)
+        ];
+        const wBarGeo = new THREE.BufferGeometry().setFromPoints(wBarPoints);
+        const wBarLine = new THREE.LineSegments(wBarGeo, new THREE.LineBasicMaterial({ color: 0x00d2ff, linewidth: 2 }));
+        this.dynamicGroup.add(wBarLine);
+
+        const wSprite = createTextSprite(`Field Width: ${formatDist(state.fieldWAtDist)}`, { borderColor: "#00d2ff" });
+        wSprite.position.set(tX, 1.2, tZ);
+        this.dynamicGroup.add(wSprite);
       }
 
       setPresetView(type) {
         if (!this.camera || !this.controls) return;
-        const targetZ = state.targetDist * 0.7;
-        this.controls.target.set(0, 0, targetZ);
+        const targetZ = state.targetDist * 0.65;
+        this.controls.target.set(0, 2, targetZ);
 
         if (type === "iso") {
-          this.camera.position.set(-30, 25, targetZ + 30);
+          this.camera.position.set(-28, 22, targetZ + 25);
         } else if (type === "top") {
-          this.camera.position.set(0, 80, targetZ);
+          this.camera.position.set(0, Math.max(65, state.targetDist * 1.5), targetZ);
         } else if (type === "side") {
-          this.camera.position.set(-70, state.mountH + 5, targetZ);
+          this.camera.position.set(-65, state.mountH + 4, targetZ);
         } else if (type === "cam") {
-          // Camera perspective POV
+          // Camera POV looking through lens
           this.camera.position.set(0, state.mountH, 0.5);
           const fwdZ = targetZ + 15;
           this.controls.target.set(
@@ -2075,7 +3672,7 @@
     let visualizer3dFull = null;
 
     /* ==========================================================================
-       7. UI SYNCHRONIZATION & RENDER PIPELINE
+       8. UI SYNCHRONIZATION & RENDER PIPELINE
        ========================================================================== */
     function syncInputsToState() {
       state.cameraName = els.cameraName.value;
@@ -2096,12 +3693,18 @@
       state.targetHeight = parseFloat(els.targetHeightM.value) || 1.70;
       state.targetDist = parseFloat(els.targetDist.value) || 25.0;
       state.targetOffset = parseFloat(els.targetOffset.value) || 0.0;
+
+      // Sync preset geometry dimensions if available
+      if (TARGET_PRESETS[state.targetType]) {
+        state.targetWidth = TARGET_PRESETS[state.targetType].width;
+        state.targetDepth = TARGET_PRESETS[state.targetType].depth;
+      }
     }
 
     function renderAll() {
       calculateMetrics();
 
-      // Update Slider Label Badges
+      // Update Slider Labels
       els.focalVal.textContent = `${state.focalMm.toFixed(1)} mm`;
       els.hfovVal.textContent = `${state.hfov.toFixed(1)}°`;
       els.vfovVal.value = `${state.vfov.toFixed(1)}°`;
@@ -2128,8 +3731,31 @@
       if (visualizer3dFull) visualizer3dFull.updateScene();
     }
 
+    /* Helper: Snapshot / Download Canvas Image */
+    function exportCanvasSnapshot(canvasOrId, filenamePrefix = "camera-fov-plan") {
+      let canvas = typeof canvasOrId === "string" ? document.getElementById(canvasOrId) : canvasOrId;
+      if (!canvas) return;
+
+      // For Three.js WebGL canvas
+      if (canvasOrId === "wrapper3dMulti" && visualizer3dMulti) {
+        canvas = visualizer3dMulti.renderer.domElement;
+      } else if (canvasOrId === "wrapper3dFull" && visualizer3dFull) {
+        canvas = visualizer3dFull.renderer.domElement;
+      }
+
+      try {
+        const link = document.createElement("a");
+        link.download = `${filenamePrefix}-${new Date().toISOString().slice(0, 10)}.png`;
+        link.href = canvas.toDataURL("image/png");
+        link.click();
+        showToast("Snapshot image saved successfully!");
+      } catch (err) {
+        alert("Unable to export snapshot: " + err.message);
+      }
+    }
+
     /* ==========================================================================
-       8. EVENT HANDLERS & REACTIVE CONTROLS
+       9. EVENT HANDLERS & REACTIVE CONTROLS
        ========================================================================== */
 
     // Bidirectional Lens: When Focal Length Slider Moves
@@ -2243,9 +3869,29 @@
       });
     });
 
-    // Target Presets
+    // Target Visual Cards Click Handlers
+    const targetCards = document.querySelectorAll(".target-card");
+    targetCards.forEach(card => {
+      card.addEventListener("click", () => {
+        targetCards.forEach(c => c.classList.remove("active"));
+        card.classList.add("active");
+        const t = card.getAttribute("data-target");
+        els.targetType.value = t;
+        if (TARGET_PRESETS[t]) {
+          els.targetHeightM.value = TARGET_PRESETS[t].height;
+        }
+        syncInputsToState();
+        renderAll();
+      });
+    });
+
+    // Target Dropdown change
     els.targetType.addEventListener("change", () => {
       const t = els.targetType.value;
+      targetCards.forEach(c => {
+        if (c.getAttribute("data-target") === t) c.classList.add("active");
+        else c.classList.remove("active");
+      });
       if (TARGET_PRESETS[t]) {
         els.targetHeightM.value = TARGET_PRESETS[t].height;
       }
@@ -2253,7 +3899,7 @@
       renderAll();
     });
 
-    // Standard Sliders
+    // Standard Inputs
     [
       els.cameraName, els.mountHeight, els.tiltAngle, els.panAngle,
       els.targetHeightM, els.targetDist, els.targetOffset
@@ -2284,7 +3930,6 @@
         const targetEl = document.getElementById(targetId);
         if (targetEl) targetEl.classList.add("active");
 
-        // Trigger canvas & 3D resize after tab transition
         setTimeout(() => {
           if (visualizer3dMulti) visualizer3dMulti.resize();
           if (visualizer3dFull) visualizer3dFull.resize();
@@ -2293,14 +3938,31 @@
       });
     });
 
-    // 3D View Preset Buttons
+    // 3D View Preset Buttons - Multi View Card
+    document.getElementById("btnMultiIso").addEventListener("click", () => visualizer3dMulti.setPresetView("iso"));
+    document.getElementById("btnMultiTop").addEventListener("click", () => visualizer3dMulti.setPresetView("top"));
+    document.getElementById("btnMultiSide").addEventListener("click", () => visualizer3dMulti.setPresetView("side"));
+    document.getElementById("btnMultiCam").addEventListener("click", () => visualizer3dMulti.setPresetView("cam"));
+    document.getElementById("btnMultiReset").addEventListener("click", () => visualizer3dMulti.setPresetView("iso"));
+
+    // 3D View Preset Buttons - Full 3D Tab
     document.getElementById("btnViewIso").addEventListener("click", () => visualizer3dFull.setPresetView("iso"));
     document.getElementById("btnViewTop").addEventListener("click", () => visualizer3dFull.setPresetView("top"));
     document.getElementById("btnViewSide").addEventListener("click", () => visualizer3dFull.setPresetView("side"));
     document.getElementById("btnViewCamPov").addEventListener("click", () => visualizer3dFull.setPresetView("cam"));
     document.getElementById("btnReset3d").addEventListener("click", () => visualizer3dFull.setPresetView("iso"));
 
-    // Resize Handler
+    // Snapshot Buttons
+    document.getElementById("snap3dMulti").addEventListener("click", () => exportCanvasSnapshot("wrapper3dMulti", "3d-frustum"));
+    document.getElementById("snap3dFull").addEventListener("click", () => exportCanvasSnapshot("wrapper3dFull", "3d-frustum-full"));
+    document.getElementById("snapCamMulti").addEventListener("click", () => exportCanvasSnapshot(els.camMulti, "camera-viewfinder"));
+    document.getElementById("snapCamFull").addEventListener("click", () => exportCanvasSnapshot(els.camFull, "camera-viewfinder-full"));
+    document.getElementById("snapTopMulti").addEventListener("click", () => exportCanvasSnapshot(els.topMulti, "top-down-plan"));
+    document.getElementById("snapTopFull").addEventListener("click", () => exportCanvasSnapshot(els.topFull, "top-down-plan-full"));
+    document.getElementById("snapSideMulti").addEventListener("click", () => exportCanvasSnapshot(els.sideMulti, "side-elevation"));
+    document.getElementById("snapSideFull").addEventListener("click", () => exportCanvasSnapshot(els.sideFull, "side-elevation-full"));
+
+    // Window Resize Handler
     window.addEventListener("resize", () => {
       if (visualizer3dMulti) visualizer3dMulti.resize();
       if (visualizer3dFull) visualizer3dFull.resize();
@@ -2308,7 +3970,7 @@
     });
 
     /* ==========================================================================
-       9. JSON EXPORT & IMPORT ENGINE
+       10. JSON EXPORT & IMPORT ENGINE
        ========================================================================== */
     function showToast(msg) {
       els.toast.textContent = msg;
@@ -2318,7 +3980,9 @@
 
     function exportConfigurationJson() {
       syncInputsToState();
-      const exportData = {
+      calculateMetrics();
+
+      const configData = {
         schema: "wii-cctv-fov-planner/v1",
         exportedAt: new Date().toISOString(),
         camera: {
@@ -2356,44 +4020,40 @@
         metrics: {
           pixelsPerMeter: Math.round(state.ppm),
           doriClassification: state.doriLevel,
-          groundWidthM: parseFloat(state.targetWidth.toFixed(2)),
-          blindSpotNearCutoffM: isFinite(state.blindSpot) ? parseFloat(state.blindSpot.toFixed(2)) : null,
-          farCutoffM: isFinite(state.farCutoff) ? parseFloat(state.farCutoff.toFixed(2)) : null,
+          groundWidthM: Number(state.fieldWAtDist.toFixed(2)),
+          blindSpotNearCutoffM: Number(state.blindSpot.toFixed(2)),
+          farCutoffM: isFinite(state.farCutoff) ? Number(state.farCutoff.toFixed(2)) : "infinity",
           doriRangesM: {
-            identification: parseFloat(state.doriRanges.ident.toFixed(1)),
-            recognition: parseFloat(state.doriRanges.recog.toFixed(1)),
-            observation: parseFloat(state.doriRanges.observe.toFixed(1)),
-            detection: parseFloat(state.doriRanges.detect.toFixed(1))
+            identification: Number(state.doriRanges.ident.toFixed(2)),
+            recognition: Number(state.doriRanges.recog.toFixed(2)),
+            observation: Number(state.doriRanges.observe.toFixed(2)),
+            detection: Number(state.doriRanges.detect.toFixed(2))
           }
         }
       };
 
-      const jsonStr = JSON.stringify(exportData, null, 2);
-      const blob = new Blob([jsonStr], { type: "application/json" });
+      const jsonString = JSON.stringify(configData, null, 2);
+      const blob = new Blob([jsonString], { type: "application/json" });
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
-      const safeName = (state.cameraName || "camera").replace(/[^a-z0-9]/gi, "_").toLowerCase();
       a.href = url;
-      a.download = `cctv-fov-${safeName}-${Date.now()}.json`;
+      const sanitizedName = (state.cameraName || "cctv-camera").toLowerCase().replace(/[^a-z0-9]/g, "-");
+      a.download = `${sanitizedName}-fov-config.json`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
-      showToast("Configuration exported as JSON file!");
+      showToast("Configuration exported as JSON!");
     }
 
     function importConfigurationJson(jsonText) {
       try {
-        const data = typeof jsonText === "string" ? JSON.parse(jsonText) : jsonText;
-
+        const data = JSON.parse(jsonText);
         if (data.camera) {
           if (data.camera.label) els.cameraName.value = data.camera.label;
           if (data.camera.preset && els.cameraPreset.querySelector(`option[value="${data.camera.preset}"]`)) {
             els.cameraPreset.value = data.camera.preset;
-          } else {
-            els.cameraPreset.value = "custom";
           }
-
           if (data.camera.sensor) {
             if (data.camera.sensor.format) els.sensorFormat.value = data.camera.sensor.format;
             if (data.camera.sensor.widthMm) els.sensorWidthMm.value = data.camera.sensor.widthMm;
@@ -2425,6 +4085,10 @@
         if (data.target) {
           if (data.target.type && els.targetType.querySelector(`option[value="${data.target.type}"]`)) {
             els.targetType.value = data.target.type;
+            targetCards.forEach(c => {
+              if (c.getAttribute("data-target") === data.target.type) c.classList.add("active");
+              else c.classList.remove("active");
+            });
           }
           if (data.target.heightM !== undefined) els.targetHeightM.value = data.target.heightM;
           if (data.target.groundDistanceM !== undefined) els.targetDist.value = data.target.groundDistanceM;
@@ -2440,7 +4104,6 @@
     }
 
     els.btnExportJson.addEventListener("click", exportConfigurationJson);
-
     els.btnImportJson.addEventListener("click", () => els.jsonFileInput.click());
 
     els.jsonFileInput.addEventListener("change", (e) => {
@@ -2474,7 +4137,7 @@
     });
 
     /* ==========================================================================
-       10. LOCALSTORAGE SAVED PRESETS
+       11. LOCALSTORAGE SAVED PRESETS
        ========================================================================== */
     const STORAGE_KEY = "wii_cctv_saved_configs";
 
@@ -2558,7 +4221,13 @@
           if (item.mounting.pan !== undefined) els.panAngle.value = item.mounting.pan;
         }
         if (item.target) {
-          if (item.target.type) els.targetType.value = item.target.type;
+          if (item.target.type) {
+            els.targetType.value = item.target.type;
+            targetCards.forEach(c => {
+              if (c.getAttribute("data-target") === item.target.type) c.classList.add("active");
+              else c.classList.remove("active");
+            });
+          }
           if (item.target.height !== undefined) els.targetHeightM.value = item.target.height;
           if (item.target.dist !== undefined) els.targetDist.value = item.target.dist;
           if (item.target.offset !== undefined) els.targetOffset.value = item.target.offset;
@@ -2583,7 +4252,7 @@
     });
 
     /* ==========================================================================
-       11. INITIALIZATION ON PAGE LOAD
+       12. INITIALIZATION ON PAGE LOAD
        ========================================================================== */
     window.addEventListener("DOMContentLoaded", () => {
       // Initialize 3D Scenes

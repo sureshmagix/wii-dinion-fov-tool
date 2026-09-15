@@ -19,10 +19,20 @@ Hosted via GitHub Pages:
 
 - **Multi-Angle & 3D Frustum Visualizations**:
   - **Combined Multi-View**: Synchronized quad-panel view displaying 3D spatial frustum, simulated camera viewfinder, 2D top-down ground plan, and 2D side elevation profile simultaneously.
-  - **Interactive 3D Frustum (WebGL / Three.js)**: Orbit, pan, and zoom around a 3D metric scene with camera pole, tilted/panned camera body, translucent DORI volumetric FOV pyramid, metric ground grid, and 3D target models. One-click preset angles: 3D Isometric, Top View, Side View, and Camera POV.
-  - **2D Plan View (Top-Down Azimuth Footprint)**: Radial distance range rings, concentric DORI coverage zones, and target position with lateral offset.
-  - **2D Side Profile (Elevation & Blind Spot)**: Optical axis tilt angle, upper/lower ray trajectories, near ground cutoff / dead zone boundary directly under the pole, and target silhouette.
-  - **Simulated Camera Viewfinder**: Realistic sensor viewport with horizon line, crosshairs, and projected target bounding box with live pixel dimension readout and DORI badge.
+  - **Interactive 3D Frustum & Ground Footprint (WebGL / Three.js)**:
+    - Orbit, pan, and zoom around a 3D metric scene with detailed CCTV security camera housing, mast pole, and mounting plate.
+    - True mathematical ground intersection footprint polygon ($Y = 0$) with glowing borders.
+    - Concentric DORI colored coverage zones (Identification, Recognition, Observation, Detection) mapped directly on the ground plane.
+    - CAD-grade 3D measurement dimension lines with camera-facing billboard badges: Mount Height ($h$), Blind Spot near cutoff under the pole, Target Ground Distance ($D$), Direct Line-of-Sight (LOS) hypotenuse ray, and Field Width ($W_{\text{scene}}$) bar.
+    - Procedural 3D target models: Standing Person (1.70m), Seated Person with chair (1.30m), Sedan Car (1.48m), Full-size SUV / Van (1.80m), Heavy Commercial Truck / Bus (3.20m), License Plate (0.15m), and Custom Target with circular landing pad.
+    - 1-click camera angle presets: 3D Isometric, Top View, Side View, and Camera POV looking through the lens.
+  - **2D Plan View (Top-Down Azimuth Footprint)**: Radial distance range rings, concentric DORI coverage sectors, camera pan heading arc, blind spot radius, field width measurement bar, and architectural blueprint symbols for pedestrian, seated, car, SUV, truck, and plate.
+  - **2D Side Profile (Elevation & Blind Spot)**: Optical axis tilt angle arc, upper/lower ray trajectories, shaded hazard dead zone directly under the pole, direct LOS ray, and accurate target side silhouettes with metric height dimension line.
+  - **Simulated Camera Viewfinder & Inspector**:
+    - Pinhole sensor viewport with live CCTV OSD (timecode, camera tag, optical specs, horizon line, crosshair reticle).
+    - Authentic scalable vector artwork matching selected target object (person in clothing/vest, seated human, sedan car, SUV, truck, or license plate) scaled by distance perspective.
+    - Target detail loupe with simulated 1:1 sensor pixel grid and EN 62676-4 compliance checklist.
+    - Reticle corner brackets `[  ]` and floating HUD tag showing pixel dimensions and DORI level.
 
 - **EN 62676-4 / IEC 62676-4 DORI Compliance**:
   - Live Pixels-Per-Meter ($\text{PPM}$) and Pixels-Per-Foot ($\text{PPF}$) density estimation at target distance.
@@ -33,9 +43,11 @@ Hosted via GitHub Pages:
     - **Detection ($\ge 25\text{ PPM}$)**
     - **Monitoring ($< 25\text{ PPM}$)**
   - Maximum effective range table for every DORI threshold.
+  - Real-time target compliance assessment panel.
 
-- **Configuration Import / Export (JSON)**:
-  - **Export JSON**: One-click download of `.json` configuration file containing all camera optics, sensor specs, mounting parameters, and target distances.
+- **Configuration Import / Export & Reporting**:
+  - **1-Click Snapshot Export**: High-resolution PNG image download of 3D frustum, viewfinder, plan, or elevation views for security submittals and engineering reports.
+  - **Export JSON**: Download `.json` configuration file containing all camera optics, sensor specs, mounting parameters, and target dimensions.
   - **Import JSON**: File picker or instant drag-and-drop `.json` file anywhere onto the web page.
   - **Browser Preset Storage**: Save, load, and delete custom named site setups directly in `localStorage`.
   - **Metric & Imperial**: Seamless 1-click toggle between Meters ($\text{m}$) and Feet ($\text{ft}$).
